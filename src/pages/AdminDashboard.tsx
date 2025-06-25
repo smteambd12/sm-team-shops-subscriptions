@@ -98,7 +98,13 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
-      setOrders(data || []);
+      // Type assertion to handle the database response
+      const typedOrders = (data || []).map(order => ({
+        ...order,
+        status: order.status as OrderStatus || 'pending'
+      })) as ExtendedOrder[];
+
+      setOrders(typedOrders);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast({

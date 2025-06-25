@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, CheckCircle, Star, Users, Zap, Shield, Award, Sparkles, Globe, Smartphone, BookOpen, TrendingUp, Clock, Heart } from 'lucide-react';
+import { ArrowDown, CheckCircle, Star, Users, Zap, Shield, Award, Sparkles, Globe, Smartphone, BookOpen, TrendingUp, Clock, Heart, ShoppingCart } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import { products } from '../data/products';
 

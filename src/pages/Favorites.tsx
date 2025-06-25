@@ -99,7 +99,7 @@ const Favorites = () => {
   };
 
   const handleAddToCart = (product: Product, packageId: string) => {
-    addToCart(product.id, packageId, 1);
+    addToCart(product.id, packageId);
     toast({
       title: "কার্টে যোগ করা হয়েছে",
       description: `${product.name} কার্টে যোগ করা হয়েছে।`,
