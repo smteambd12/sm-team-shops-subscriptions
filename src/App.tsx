@@ -16,6 +16,8 @@ import Categories from "./pages/Categories";
 import Auth from "./pages/Auth";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
+import Favorites from "./pages/Favorites";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +41,8 @@ const App = () => (
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/categories/:category" element={<Categories />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

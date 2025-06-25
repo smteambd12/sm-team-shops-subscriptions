@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -32,6 +33,7 @@ interface Order {
   promo_code?: string;
   discount_amount: number;
   status: string;
+  admin_message?: string;
   created_at: string;
   order_items: OrderItem[];
 }
@@ -255,6 +257,16 @@ const Orders = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Admin Message */}
+                {order.admin_message && (
+                  <Alert className="mb-6 border-blue-200 bg-blue-50">
+                    <MessageSquare className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>অ্যাডমিন মেসেজ:</strong> {order.admin_message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold mb-2">গ্রাহকের তথ্য</h4>

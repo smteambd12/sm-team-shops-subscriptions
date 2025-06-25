@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -53,8 +95,47 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          admin_message: string | null
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          old_status: string | null
+          order_id: string
+        }
+        Insert: {
+          admin_message?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+          order_id: string
+        }
+        Update: {
+          admin_message?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
+          admin_message: string | null
           created_at: string | null
           customer_address: string
           customer_email: string
@@ -71,6 +152,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_message?: string | null
           created_at?: string | null
           customer_address: string
           customer_email: string
@@ -87,6 +169,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_message?: string | null
           created_at?: string | null
           customer_address?: string
           customer_email?: string
