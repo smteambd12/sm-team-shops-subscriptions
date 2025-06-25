@@ -26,7 +26,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ total, appliedPromo }) => {
   const [customerEmail, setCustomerEmail] = useState(user?.email || '');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  const [selectedPayment, setSelectedPayment] = useState(paymentMethods[0].name);
+  const [selectedPayment, setSelectedPayment] = useState<string>(paymentMethods[0].name);
   const [transactionId, setTransactionId] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -206,12 +206,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ total, appliedPromo }) => {
 
           {/* Transaction ID */}
           <div>
-            <Label htmlFor="transactionId">ট্রানজেকশন আইডি *</Label>
+            <Label htmlFor="transactionId">ট্রানজেক্শন আইডি *</Label>
             <Input
               id="transactionId"
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="পেমেন্ট করার পর ট্রানজেকশন আইডি লিখুন"
+              placeholder="পেমেন্ট করার পর ট্রানজেক্শন আইডি লিখুন"
               required
             />
           </div>
