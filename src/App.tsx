@@ -13,6 +13,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Categories from "./pages/Categories";
+import Auth from "./pages/Auth";
+import Orders from "./pages/Orders";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,9 +33,12 @@ const App = () => (
               <main>
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/auth" element={<Auth />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/cart" element={<Cart />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="/categories/:category" element={<Categories />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

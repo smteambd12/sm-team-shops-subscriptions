@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
+import { Search, User, Heart, ShoppingCart, Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,11 +13,29 @@ const Header = () => {
   const { user, logout } = useAuth();
   const { getCartItemsCount } = useCart();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "লগআউট সফল",
+        description: "আপনি সফলভাবে লগআউট হয়েছেন।",
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "ত্রুটি",
+        description: "লগআউট করতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
     }
   };
 
@@ -66,18 +86,27 @@ const Header = () => {
               <div className="relative group">
                 <button className="flex items-center space-x-2 p-2 text-gray-700 hover:text-purple-600 transition-colors">
                   <User size={24} />
-                  <span className="hidden md:inline">{user.name}</span>
+                  <span className="hidden md:inline">{user.email?.split('@')[0]}</span>
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <Link to="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">প্রোফাইল</Link>
                   <Link to="/orders" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">অর্ডার হিস্টোরি</Link>
-                  <button onClick={logout} className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100">লগআউট</button>
+                  <button 
+                    onClick={handleLogout} 
+                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                  >
+                    <LogOut size={16} />
+                    লগআউট
+                  </button>
                 </div>
               </div>
             ) : (
-              <Link to="/login" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
+              <Button
+                onClick={() => navigate('/auth')}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg transition-all duration-200"
+              >
                 লগইন
-              </Link>
+              </Button>
             )}
 
             {/* Mobile Menu Button */}
@@ -116,6 +145,12 @@ const Header = () => {
                 <Link to="/categories/mobile" className="block py-2 text-gray-800 hover:text-purple-600">মোবাইল অ্যাপস</Link>
                 <Link to="/categories/tutorial" className="block py-2 text-gray-800 hover:text-purple-600">টিউটোরিয়াল</Link>
                 <Link to="/contact" className="block py-2 text-gray-800 hover:text-purple-600">যোগাযোগ</Link>
+                {user && (
+                  <>
+                    <Link to="/profile" className="block py-2 text-gray-800 hover:text-purple-600">প্রোফাইল</Link>
+                    <Link to="/orders" className="block py-2 text-gray-800 hover:text-purple-600">অর্ডার হিস্টোরি</Link>
+                  </>
+                )}
               </nav>
             </div>
           </div>

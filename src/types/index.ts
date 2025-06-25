@@ -31,24 +31,44 @@ export interface User {
   avatar?: string;
 }
 
+export interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  phone: string | null;
+  address: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Order {
   id: string;
-  userId: string;
-  items: OrderItem[];
-  total: number;
-  status: 'pending' | 'completed' | 'cancelled';
-  paymentMethod: 'bkash' | 'nagad' | 'rocket';
-  transactionId?: string;
-  promoCode?: string;
-  discount?: number;
-  createdAt: Date;
+  user_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_address: string;
+  total_amount: number;
+  payment_method: string;
+  transaction_id?: string;
+  promo_code?: string;
+  discount_amount: number;
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface OrderItem {
-  productId: string;
-  packageId: string;
-  quantity: number;
+  id: string;
+  order_id: string;
+  product_id: string;
+  product_name: string;
+  package_id: string;
+  package_duration: string;
   price: number;
+  quantity: number;
+  created_at: string;
 }
 
 export interface PaymentMethod {
