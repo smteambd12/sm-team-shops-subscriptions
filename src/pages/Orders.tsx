@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -87,6 +87,7 @@ const Orders = () => {
           *,
           order_items (*)
         `)
+        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (ordersError) {
@@ -106,11 +107,44 @@ const Orders = () => {
     }
   };
 
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setOrders(prev => prev.map(order => 
+        order.id === orderId 
+          ? { ...order, status: newStatus }
+          : order
+      ));
+
+      const statusText = newStatus === 'confirmed' ? 'কনফার্ম' : 'বাতিল';
+      toast({
+        title: "সফল",
+        description: `অর্ডার ${statusText} করা হয়েছে।`,
+      });
+
+    } catch (error: any) {
+      console.error('Error updating order status:', error);
+      toast({
+        title: "ত্রুটি",
+        description: "অর্ডার স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { label: 'অপেক্ষমান', variant: 'secondary' as const, icon: Clock },
       confirmed: { label: 'নিশ্চিত', variant: 'default' as const, icon: CheckCircle },
-      processing: { label: 'প্রক্রিয়াধীন', variant: 'default' as const, icon: Package },
+      processing: { label: 'প্রক্রিয়াধীন', variant: 'default' as const, icon: RefreshCw },
       shipped: { label: 'পাঠানো হয়েছে', variant: 'default' as const, icon: Package },
       delivered: { label: 'ডেলিভার হয়েছে', variant: 'default' as const, icon: CheckCircle },
       cancelled: { label: 'বাতিল', variant: 'destructive' as const, icon: XCircle },
@@ -183,12 +217,38 @@ const Orders = () => {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
                       })}
                     </CardDescription>
                   </div>
                   <div className="text-right">
-                    {getStatusBadge(order.status)}
-                    <p className="text-lg font-semibold mt-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      {getStatusBadge(order.status)}
+                      {order.status === 'pending' && (
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateOrderStatus(order.id, 'confirmed')}
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                          >
+                            <CheckCircle size={14} />
+                            কনফার্ম
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                          >
+                            <XCircle size={14} />
+                            বাতিল
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-lg font-semibold">
                       ৳{order.total_amount.toLocaleString()}
                     </p>
                   </div>
