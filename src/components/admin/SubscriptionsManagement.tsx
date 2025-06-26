@@ -56,12 +56,21 @@ const SubscriptionsManagement = () => {
         .from('user_subscriptions')
         .select(`
           *,
-          profiles:profiles(full_name, phone)
+          profiles:user_id(full_name, phone)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubscriptions((data || []) as UserSubscription[]);
+      
+      // Process the data to ensure proper type compatibility
+      const processedData = (data || []).map(item => ({
+        ...item,
+        profiles: item.profiles && typeof item.profiles === 'object' && !Array.isArray(item.profiles) 
+          ? item.profiles 
+          : null
+      })) as UserSubscription[];
+      
+      setSubscriptions(processedData);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       toast({
