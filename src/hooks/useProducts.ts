@@ -7,7 +7,7 @@ interface DatabaseProduct {
   id: string;
   name: string;
   description: string | null;
-  category: 'web' | 'mobile' | 'tutorial';
+  category: string; // Changed from union type to string
   image: string | null;
   features: string[] | null;
   is_active: boolean;
@@ -47,11 +47,11 @@ export const useProducts = () => {
       if (error) throw error;
 
       // Transform database data to match our Product interface
-      const transformedProducts: Product[] = (data || []).map((product: DatabaseProduct) => ({
+      const transformedProducts: Product[] = (data || []).map((product) => ({
         id: product.id,
         name: product.name,
         description: product.description || '',
-        category: product.category,
+        category: product.category as 'web' | 'mobile' | 'tutorial', // Type assertion for category
         image: product.image || '',
         features: product.features || [],
         packages: (product.packages || [])

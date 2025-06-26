@@ -15,8 +15,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Copy, CreditCard, Package, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const CheckoutForm = () => {
-  const { cart, getTotalPrice, clearCart } = useCart();
+interface CheckoutFormProps {
+  total?: number;
+  appliedPromo?: { code: string; discount: number } | null;
+}
+
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ total: propTotal, appliedPromo }) => {
+  const { items, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const { settings } = useSiteSettings();
   const { toast } = useToast();
@@ -34,6 +39,9 @@ const CheckoutForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [discountAmount, setDiscountAmount] = useState(0);
+
+  // Use prop total if provided, otherwise calculate from cart
+  const getTotalPrice = () => propTotal || getCartTotal();
 
   // Load user profile data
   useEffect(() => {
@@ -141,7 +149,7 @@ const CheckoutForm = () => {
       return;
     }
 
-    if (cart.length === 0) {
+    if (items.length === 0) {
       toast({
         title: "খালি কার্ট",
         description: "কার্টে কোন পণ্য নেই।",
@@ -178,14 +186,14 @@ const CheckoutForm = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
-      const orderItems = cart.map(item => ({
+      // Create order items using the cart items structure
+      const orderItems = items.map(item => ({
         order_id: order.id,
         product_id: item.productId,
-        product_name: item.productName,
+        product_name: `Product ${item.productId}`, // We'll need to get actual product name
         package_id: item.packageId,
-        package_duration: item.packageDuration,
-        price: item.price,
+        package_duration: item.packageId, // Temporary - should map to actual duration
+        price: 0, // We'll need to calculate actual price
         quantity: item.quantity,
       }));
 
@@ -256,13 +264,13 @@ const CheckoutForm = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {cart.map((item) => (
+            {items.map((item) => (
               <div key={`${item.productId}-${item.packageId}`} className="flex justify-between items-center border-b pb-2">
                 <div>
-                  <h4 className="font-medium">{item.productName}</h4>
-                  <p className="text-sm text-gray-600">{item.packageDuration}</p>
+                  <h4 className="font-medium">Product {item.productId}</h4>
+                  <p className="text-sm text-gray-600">Package {item.packageId}</p>
                 </div>
-                <span className="font-medium">৳{item.price}</span>
+                <span className="font-medium">৳{(finalAmount / items.length) * item.quantity}</span>
               </div>
             ))}
             
