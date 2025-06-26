@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User as UserIcon, Mail, Phone, MapPin, Save } from 'lucide-react';
+import UserSubscriptions from '@/components/UserSubscriptions';
 
 interface Profile {
   id: string;
@@ -157,7 +158,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"
@@ -171,98 +172,102 @@ const Profile = () => {
         <h1 className="text-3xl font-bold">আমার প্রোফাইল</h1>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserIcon className="h-5 w-5" />
-            প্রোফাইল তথ্য
-          </CardTitle>
-          <CardDescription>
-            আপনার ব্যক্তিগত তথ্য আপডেট করুন
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSave} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                ইমেইল ঠিকানা
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={user?.email || ''}
-                disabled
-                className="bg-gray-50"
-              />
-              <p className="text-sm text-gray-500">ইমেইল পরিবর্তন করা যাবে না</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="flex items-center gap-2">
-                <UserIcon className="h-4 w-4" />
-                পূর্ণ নাম
-              </Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="আপনার পূর্ণ নাম"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                ফোন নম্বর
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="আপনার ফোন নম্বর"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                ঠিকানা
-              </Label>
-              <Textarea
-                id="address"
-                placeholder="আপনার সম্পূর্ণ ঠিকানা"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-              disabled={saving}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {saving ? 'সংরক্ষণ করা হচ্ছে...' : 'প্রোফাইল সংরক্ষণ করুন'}
-            </Button>
-          </form>
-
-          {profile && (
-            <div className="mt-6 pt-6 border-t">
-              <h3 className="font-semibold mb-2">অ্যাকাউন্ট তথ্য</h3>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p>অ্যাকাউন্ট তৈরি: {new Date(profile.created_at).toLocaleDateString('bn-BD')}</p>
-                <p>শেষ আপডেট: {new Date(profile.updated_at).toLocaleDateString('bn-BD')}</p>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserIcon className="h-5 w-5" />
+              প্রোফাইল তথ্য
+            </CardTitle>
+            <CardDescription>
+              আপনার ব্যক্তিগত তথ্য আপডেট করুন
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSave} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  ইমেইল ঠিকানা
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="bg-gray-50"
+                />
+                <p className="text-sm text-gray-500">ইমেইল পরিবর্তন করা যাবে না</p>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="flex items-center gap-2">
+                  <UserIcon className="h-4 w-4" />
+                  পূর্ণ নাম
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="আপনার পূর্ণ নাম"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  ফোন নম্বর
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="আপনার ফোন নম্বর"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  ঠিকানা
+                </Label>
+                <Textarea
+                  id="address"
+                  placeholder="আপনার সম্পূর্ণ ঠিকানা"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                disabled={saving}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {saving ? 'সংরক্ষণ করা হচ্ছে...' : 'প্রোফাইল সংরক্ষণ করুন'}
+              </Button>
+            </form>
+
+            {profile && (
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="font-semibold mb-2">অ্যাকাউন্ট তথ্য</h3>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>অ্যাকাউন্ট তৈরি: {new Date(profile.created_at).toLocaleDateString('bn-BD')}</p>
+                  <p>শেষ আপডেট: {new Date(profile.updated_at).toLocaleDateString('bn-BD')}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {user && <UserSubscriptions user={user} />}
+      </div>
     </div>
   );
 };

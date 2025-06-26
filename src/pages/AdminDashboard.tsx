@@ -17,13 +17,15 @@ import {
   Gift, 
   CreditCard,
   MessageSquare,
-  ArrowLeft
+  ArrowLeft,
+  Calendar
 } from 'lucide-react';
 import ProductsManagement from '@/components/admin/ProductsManagement';
 import OrdersManagement from '@/components/admin/OrdersManagement';
 import PromoCodes from '@/components/admin/PromoCodes';
 import SiteSettings from '@/components/admin/SiteSettings';
 import AdminStats from '@/components/admin/AdminStats';
+import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -119,7 +121,7 @@ const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="stats" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <BarChart3 size={16} />
             পরিসংখ্যান
@@ -131,6 +133,10 @@ const AdminDashboard = () => {
           <TabsTrigger value="orders" className="flex items-center gap-2">
             <ShoppingCart size={16} />
             অর্ডার পরিচালনা
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+            <Calendar size={16} />
+            সাবস্ক্রিপশন
           </TabsTrigger>
           <TabsTrigger value="promo" className="flex items-center gap-2">
             <Gift size={16} />
@@ -152,6 +158,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="orders">
           <OrdersManagement />
+        </TabsContent>
+
+        <TabsContent value="subscriptions">
+          <SubscriptionsManagement />
         </TabsContent>
 
         <TabsContent value="promo">
