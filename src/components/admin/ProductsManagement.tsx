@@ -69,7 +69,11 @@ const ProductsManagement = () => {
       // Type assertion to ensure compatibility with our Product interface
       const typedProducts = (data || []).map(product => ({
         ...product,
-        category: product.category as 'web' | 'mobile' | 'tutorial'
+        category: product.category as 'web' | 'mobile' | 'tutorial',
+        packages: product.packages?.map((pkg: any) => ({
+          ...pkg,
+          duration: pkg.duration as '1month' | '3month' | '6month' | 'lifetime'
+        })) || []
       }));
       
       setProducts(typedProducts);
