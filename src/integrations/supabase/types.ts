@@ -436,7 +436,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_promo_usage: {
+        Args: { promo_code: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
