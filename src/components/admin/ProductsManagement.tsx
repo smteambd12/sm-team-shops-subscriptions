@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,7 +65,14 @@ const ProductsManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProducts(data || []);
+      
+      // Type assertion to ensure compatibility with our Product interface
+      const typedProducts = (data || []).map(product => ({
+        ...product,
+        category: product.category as 'web' | 'mobile' | 'tutorial'
+      }));
+      
+      setProducts(typedProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({
