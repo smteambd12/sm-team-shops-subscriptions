@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,9 +32,7 @@ const AdminStats = () => {
     totalUsers: 0,
     pendingOrders: 0,
     confirmedOrders: 0,
-    cancelledOrders:
-
-,
+    cancelledOrders: 0,
     recentOrders: []
   });
   const [loading, setLoading] = useState(true);
