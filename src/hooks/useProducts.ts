@@ -7,7 +7,7 @@ interface DatabaseProduct {
   id: string;
   name: string;
   description: string | null;
-  category: string; // Changed from union type to string
+  category: string;
   image: string | null;
   features: string[] | null;
   is_active: boolean;
@@ -16,7 +16,7 @@ interface DatabaseProduct {
 
 interface DatabasePackage {
   id: string;
-  duration: string; // Changed to string since it comes from database
+  duration: string;
   price: number;
   original_price: number | null;
   discount: number | null;
@@ -45,6 +45,10 @@ export const useProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('Fetching products...');
+      
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -54,27 +58,33 @@ export const useProducts = () => {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('Products fetch result:', { data, error });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
 
       // Transform database data to match our Product interface
       const transformedProducts: Product[] = (data || []).map((product) => ({
         id: product.id,
         name: product.name,
         description: product.description || '',
-        category: product.category as 'web' | 'mobile' | 'tutorial', // Type assertion for category
+        category: product.category as 'web' | 'mobile' | 'tutorial',
         image: product.image || '',
         features: product.features || [],
         packages: (product.packages || [])
           .filter(pkg => pkg.is_active)
           .map(pkg => ({
             id: pkg.id,
-            duration: validateDuration(pkg.duration), // Use validation function
+            duration: validateDuration(pkg.duration),
             price: pkg.price,
             originalPrice: pkg.original_price || undefined,
             discount: pkg.discount || undefined,
           }))
       }));
 
+      console.log('Transformed products:', transformedProducts);
       setProducts(transformedProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
