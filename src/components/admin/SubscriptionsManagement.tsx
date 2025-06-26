@@ -25,9 +25,9 @@ interface UserSubscription {
   created_at: string;
   updated_at: string;
   profiles?: {
-    full_name: string;
-    phone: string;
-  };
+    full_name: string | null;
+    phone: string | null;
+  } | null;
 }
 
 const SubscriptionsManagement = () => {
@@ -61,7 +61,7 @@ const SubscriptionsManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubscriptions(data || []);
+      setSubscriptions((data || []) as UserSubscription[]);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       toast({
