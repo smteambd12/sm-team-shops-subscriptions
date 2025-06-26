@@ -54,34 +54,43 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string | null
+          discount_percentage: number | null
           id: string
           order_id: string
+          original_price: number | null
           package_duration: string
           package_id: string
           price: number
           product_id: string
+          product_image: string | null
           product_name: string
           quantity: number
         }
         Insert: {
           created_at?: string | null
+          discount_percentage?: number | null
           id?: string
           order_id: string
+          original_price?: number | null
           package_duration: string
           package_id: string
           price: number
           product_id: string
+          product_image?: string | null
           product_name: string
           quantity?: number
         }
         Update: {
           created_at?: string | null
+          discount_percentage?: number | null
           id?: string
           order_id?: string
+          original_price?: number | null
           package_duration?: string
           package_id?: string
           price?: number
           product_id?: string
+          product_image?: string | null
           product_name?: string
           quantity?: number
         }
@@ -187,6 +196,83 @@ export type Database = {
         }
         Relationships: []
       }
+      product_packages: {
+        Row: {
+          created_at: string | null
+          discount: number | null
+          duration: string
+          id: string
+          is_active: boolean | null
+          original_price: number | null
+          price: number
+          product_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount?: number | null
+          duration: string
+          id: string
+          is_active?: boolean | null
+          original_price?: number | null
+          price: number
+          product_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discount?: number | null
+          duration?: string
+          id?: string
+          is_active?: boolean | null
+          original_price?: number | null
+          price?: number
+          product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_packages_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          features: string[] | null
+          id: string
+          image: string | null
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id: string
+          image?: string | null
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -219,6 +305,131 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          min_order_amount: number | null
+          updated_at: string | null
+          used_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          min_order_amount?: number | null
+          updated_at?: string | null
+          used_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          min_order_amount?: number | null
+          updated_at?: string | null
+          used_count?: number | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_type: string | null
+          setting_value: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_type?: string | null
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_type?: string | null
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          order_id: string | null
+          package_duration: string
+          price: number
+          product_id: string | null
+          product_name: string
+          starts_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          order_id?: string | null
+          package_duration: string
+          price: number
+          product_id?: string | null
+          product_name: string
+          starts_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          order_id?: string | null
+          package_duration?: string
+          price?: number
+          product_id?: string | null
+          product_name?: string
+          starts_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
