@@ -203,11 +203,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ total: propTotal, appliedPr
 
       if (itemsError) throw itemsError;
 
-      // Update promo code usage if used
+      // Update promo code usage if used - fix the RPC call with proper typing
       if (formData.promoCode && discountAmount > 0) {
-        await supabase.rpc('increment_promo_usage', {
+        const { error: rpcError } = await supabase.rpc('increment_promo_usage', {
           promo_code: formData.promoCode.toUpperCase()
         });
+        
+        if (rpcError) {
+          console.error('Error updating promo code usage:', rpcError);
+        }
       }
 
       toast({
