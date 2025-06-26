@@ -16,7 +16,7 @@ interface DatabaseProduct {
 
 interface DatabasePackage {
   id: string;
-  duration: '1month' | '3month' | '6month' | 'lifetime';
+  duration: string; // Changed to string since it comes from database
   price: number;
   original_price: number | null;
   discount: number | null;
@@ -31,6 +31,16 @@ export const useProducts = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Helper function to validate and convert duration
+  const validateDuration = (duration: string): '1month' | '3month' | '6month' | 'lifetime' => {
+    const validDurations = ['1month', '3month', '6month', 'lifetime'];
+    if (validDurations.includes(duration)) {
+      return duration as '1month' | '3month' | '6month' | 'lifetime';
+    }
+    // Default fallback
+    return '1month';
+  };
 
   const fetchProducts = async () => {
     try {
@@ -58,7 +68,7 @@ export const useProducts = () => {
           .filter(pkg => pkg.is_active)
           .map(pkg => ({
             id: pkg.id,
-            duration: pkg.duration,
+            duration: validateDuration(pkg.duration), // Use validation function
             price: pkg.price,
             originalPrice: pkg.original_price || undefined,
             discount: pkg.discount || undefined,

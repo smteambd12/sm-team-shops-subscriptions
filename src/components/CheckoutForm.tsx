@@ -366,9 +366,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ total: propTotal, appliedPr
                 <Label>পেমেন্ট মেথড *</Label>
                 <Select 
                   value={formData.paymentMethod} 
-                  onValueChange={(value: 'bkash' | 'nagad' | 'rocket') => 
-                    setFormData({ ...formData, paymentMethod: value })
-                  }
+                  onValueChange={(value: string) => {
+                    // Validate the value before setting
+                    if (value === 'bkash' || value === 'nagad' || value === 'rocket') {
+                      setFormData({ ...formData, paymentMethod: value });
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
