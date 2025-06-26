@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { ArrowDown, CheckCircle, Star, Users, Zap, Shield, Award, Sparkles, Globe, Smartphone, BookOpen, TrendingUp, Clock, Heart, ShoppingCart } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import { products } from '../data/products';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Home = () => {
+  const { user } = useAuth();
   const webProducts = products.filter(p => p.category === 'web').slice(0, 3);
   const mobileProducts = products.filter(p => p.category === 'mobile').slice(0, 3);
   const tutorialProducts = products.filter(p => p.category === 'tutorial').slice(0, 2);
@@ -252,52 +254,54 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Enhanced CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white relative overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <Star className="text-yellow-400 animate-spin" size={60} />
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full animate-ping"></div>
+      {/* Enhanced CTA Section - Hide for logged in users */}
+      {!user && (
+        <section className="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white relative overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse"></div>
+          </div>
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <Star className="text-yellow-400 animate-spin" size={60} />
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full animate-ping"></div>
+                </div>
+              </div>
+              
+              <h2 className="text-4xl md:text-6xl font-bold mb-6">এখনই শুরু করুন</h2>
+              <p className="text-xl md:text-2xl mb-12 text-purple-100 leading-relaxed">
+                হাজারো কাস্টমার আমাদের সেবা নিয়ে সন্তুষ্ট। আপনিও যোগ দিন আজই এবং উপভোগ করুন 
+                <span className="text-yellow-400 font-bold">বিশেষ ছাড়ের</span> সুবিধা!
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Link 
+                  to="/register"
+                  className="group bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-12 py-5 rounded-full font-bold text-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:rotate-2"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <Sparkles className="group-hover:animate-bounce" size={24} />
+                    ফ্রি রেজিস্ট্রেশন করুন
+                  </span>
+                </Link>
+                
+                <Link 
+                  to="/categories/web"
+                  className="group border-3 border-white text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-white hover:text-purple-600 transition-all duration-300 transform hover:scale-105"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <ShoppingCart className="group-hover:animate-bounce" size={24} />
+                    শপিং করুন
+                  </span>
+                </Link>
               </div>
             </div>
-            
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">এখনই শুরু করুন</h2>
-            <p className="text-xl md:text-2xl mb-12 text-purple-100 leading-relaxed">
-              হাজারো কাস্টমার আমাদের সেবা নিয়ে সন্তুষ্ট। আপনিও যোগ দিন আজই এবং উপভোগ করুন 
-              <span className="text-yellow-400 font-bold">বিশেষ ছাড়ের</span> সুবিধা!
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link 
-                to="/register"
-                className="group bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-12 py-5 rounded-full font-bold text-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:rotate-2"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <Sparkles className="group-hover:animate-bounce" size={24} />
-                  ফ্রি রেজিস্ট্রেশন করুন
-                </span>
-              </Link>
-              
-              <Link 
-                to="/categories/web"
-                className="group border-3 border-white text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-white hover:text-purple-600 transition-all duration-300 transform hover:scale-105"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <ShoppingCart className="group-hover:animate-bounce" size={24} />
-                  শপিং করুন
-                </span>
-              </Link>
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 };

@@ -84,38 +84,6 @@ const Orders = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
-
-      if (error) throw error;
-
-      // Update local state
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
-          ? { ...order, status: newStatus }
-          : order
-      ));
-
-      const statusText = newStatus === 'confirmed' ? 'কনফার্ম' : 'বাতিল';
-      toast({
-        title: "সফল",
-        description: `অর্ডার ${statusText} করা হয়েছে।`,
-      });
-
-    } catch (error: any) {
-      console.error('Error updating order status:', error);
-      toast({
-        title: "ত্রুটি",
-        description: "অর্ডার স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে।",
-        variant: "destructive",
-      });
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { label: 'অপেক্ষমান', variant: 'secondary' as const, icon: Clock },
@@ -201,28 +169,6 @@ const Orders = () => {
                   <div className="text-right">
                     <div className="flex items-center gap-2 mb-2">
                       {getStatusBadge(order.status)}
-                      {order.status === 'pending' && (
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateOrderStatus(order.id, 'confirmed')}
-                            className="text-green-600 border-green-600 hover:bg-green-50"
-                          >
-                            <CheckCircle size={14} />
-                            কনফার্ম
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                            className="text-red-600 border-red-600 hover:bg-red-50"
-                          >
-                            <XCircle size={14} />
-                            বাতিল
-                          </Button>
-                        </div>
-                      )}
                     </div>
                     <p className="text-lg font-semibold">
                       ৳{order.total_amount.toLocaleString()}
