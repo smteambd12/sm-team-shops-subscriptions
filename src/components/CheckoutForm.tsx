@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,11 @@ const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [paymentNumbers, setPaymentNumbers] = useState({
+    bkash_number: '01XXXXXXXXX',
+    nagad_number: '01XXXXXXXXX',
+    rocket_number: '01XXXXXXXXX'
+  });
 
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.full_name || '',
@@ -33,26 +38,50 @@ const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
     note: ''
   });
 
+  useEffect(() => {
+    fetchPaymentNumbers();
+  }, []);
+
+  const fetchPaymentNumbers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['bkash_number', 'nagad_number', 'rocket_number']);
+
+      if (error) throw error;
+
+      const settings = data.reduce((acc, setting) => {
+        acc[setting.setting_key] = setting.setting_value || '01XXXXXXXXX';
+        return acc;
+      }, {} as any);
+
+      setPaymentNumbers(settings);
+    } catch (error) {
+      console.error('Error fetching payment numbers:', error);
+    }
+  };
+
   const paymentMethods = [
     {
       id: 'bkash',
       name: 'bKash',
       icon: <Smartphone className="w-5 h-5" />,
-      number: '01XXXXXXXXX',
+      number: paymentNumbers.bkash_number,
       color: 'text-pink-600'
     },
     {
       id: 'nagad',
       name: 'Nagad',
       icon: <Wallet className="w-5 h-5" />,
-      number: '01XXXXXXXXX',
+      number: paymentNumbers.nagad_number,
       color: 'text-orange-600'
     },
     {
       id: 'rocket',
       name: 'Rocket',
       icon: <CreditCard className="w-5 h-5" />,
-      number: '01XXXXXXXXX',
+      number: paymentNumbers.rocket_number,
       color: 'text-purple-600'
     }
   ];
@@ -85,14 +114,13 @@ const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
 
       // অর্ডার আইটেম যোগ করুন
       const orderItems = items.map(item => {
-        // এখানে প্রোডাক্ট তথ্য খুঁজে নিতে হবে
         return {
           order_id: order.id,
           product_id: item.productId,
-          product_name: item.productId, // এটি পরে প্রোডাক্ট নাম দিয়ে প্রতিস্থাপিত হবে
+          product_name: item.productId,
           package_id: item.packageId,
-          package_duration: item.packageId, // এটিও পরে সঠিক ডেটা দিয়ে প্রতিস্থাপিত হবে
-          price: 0, // এটি পরে সঠিক দাম দিয়ে প্রতিস্থাপিত হবে
+          package_duration: item.packageId,
+          price: 0,
           quantity: item.quantity,
         };
       });
@@ -109,7 +137,6 @@ const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
       });
 
       clearCart();
-      // অর্ডার সাকসেস পেজে রিডিরেক্ট করুন
       
     } catch (error) {
       console.error('Checkout error:', error);
