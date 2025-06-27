@@ -1,129 +1,178 @@
 
 import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Smartphone, Wallet } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { usePromoCode } from '@/hooks/usePromoCode';
+import PromoCodeInput from './PromoCodeInput';
+import { 
+  CreditCard, 
+  Phone, 
+  Wallet,
+  ShoppingCart,
+  User,
+  MapPin,
+  Mail,
+  MessageSquare
+} from 'lucide-react';
 
-interface CheckoutFormProps {
-  total: number;
-  appliedPromo?: { code: string; discount: number } | null;
-}
-
-const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
-  const { items, clearCart } = useCart();
+const CheckoutForm = () => {
+  const { cart, clearCart, getTotalPrice } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [paymentNumbers, setPaymentNumbers] = useState({
-    bkash_number: '01XXXXXXXXX',
-    nagad_number: '01XXXXXXXXX',
-    rocket_number: '01XXXXXXXXX'
-  });
+  const { settings } = useSiteSettings();
+  const { appliedPromo, incrementPromoUsage } = usePromoCode();
 
-  const [formData, setFormData] = useState({
-    name: user?.user_metadata?.full_name || '',
-    email: user?.email || '',
-    phone: user?.user_metadata?.phone || '',
-    address: '',
-    paymentMethod: 'bkash',
-    transactionId: '',
-    note: ''
+  const [loading, setLoading] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
   });
+  const [paymentMethod, setPaymentMethod] = useState('bkash');
+  const [transactionId, setTransactionId] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [appliedPromoCode, setAppliedPromoCode] = useState('');
+
+  const subtotal = getTotalPrice();
+  const finalTotal = Math.max(0, subtotal - promoDiscount);
 
   useEffect(() => {
-    fetchPaymentNumbers();
-  }, []);
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
 
-  const fetchPaymentNumbers = async () => {
+  const fetchUserProfile = async () => {
+    if (!user) return;
+
     try {
       const { data, error } = await supabase
-        .from('site_settings')
-        .select('setting_key, setting_value')
-        .in('setting_key', ['bkash_number', 'nagad_number', 'rocket_number']);
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
 
-      const settings = data.reduce((acc, setting) => {
-        acc[setting.setting_key] = setting.setting_value || '01XXXXXXXXX';
-        return acc;
-      }, {} as any);
-
-      setPaymentNumbers(settings);
+      if (data) {
+        setCustomerInfo({
+          name: data.full_name || '',
+          email: user.email || '',
+          phone: data.phone || '',
+          address: data.address || ''
+        });
+      } else {
+        setCustomerInfo(prev => ({
+          ...prev,
+          email: user.email || ''
+        }));
+      }
     } catch (error) {
-      console.error('Error fetching payment numbers:', error);
+      console.error('Error fetching user profile:', error);
     }
   };
 
-  const paymentMethods = [
-    {
-      id: 'bkash',
-      name: 'bKash',
-      icon: <Smartphone className="w-5 h-5" />,
-      number: paymentNumbers.bkash_number,
-      color: 'text-pink-600'
-    },
-    {
-      id: 'nagad',
-      name: 'Nagad',
-      icon: <Wallet className="w-5 h-5" />,
-      number: paymentNumbers.nagad_number,
-      color: 'text-orange-600'
-    },
-    {
-      id: 'rocket',
-      name: 'Rocket',
-      icon: <CreditCard className="w-5 h-5" />,
-      number: paymentNumbers.rocket_number,
-      color: 'text-purple-600'
-    }
-  ];
+  const handlePromoApplied = (code: string, discountAmount: number) => {
+    setAppliedPromoCode(code);
+    setPromoDiscount(discountAmount);
+  };
+
+  const handlePromoRemoved = () => {
+    setAppliedPromoCode('');
+    setPromoDiscount(0);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    if (!user) {
+      toast({
+        title: "লগইন প্রয়োজন",
+        description: "অর্ডার করতে প্রথমে লগইন করুন।",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (cart.length === 0) {
+      toast({
+        title: "কার্ট খালি",
+        description: "অর্ডার করতে কার্টে পণ্য যোগ করুন।",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!customerInfo.name || !customerInfo.email || !customerInfo.phone || !customerInfo.address) {
+      toast({
+        title: "তথ্য অসম্পূর্ণ",
+        description: "সব তথ্য পূরণ করুন।",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!transactionId.trim()) {
+      toast({
+        title: "ট্রানজেকশন ID প্রয়োজন",
+        description: "পেমেন্টের ট্রানজেকশন ID দিন।",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // প্রথমে অর্ডার তৈরি করুন
-      const { data: order, error: orderError } = await supabase
+      setLoading(true);
+
+      // Create order
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          user_id: user?.id,
-          customer_name: formData.name,
-          customer_email: formData.email,
-          customer_phone: formData.phone,
-          customer_address: formData.address,
-          total_amount: total,
-          payment_method: formData.paymentMethod,
-          transaction_id: formData.transactionId,
-          promo_code: appliedPromo?.code,
-          discount_amount: appliedPromo?.discount || 0,
-          status: 'pending'
-        })
+        .insert([
+          {
+            user_id: user.id,
+            customer_name: customerInfo.name,
+            customer_email: customerInfo.email,
+            customer_phone: customerInfo.phone,
+            customer_address: customerInfo.address,
+            total_amount: finalTotal,
+            payment_method: paymentMethod,
+            transaction_id: transactionId,
+            promo_code: appliedPromoCode || null,
+            discount_amount: promoDiscount,
+            status: 'pending'
+          }
+        ])
         .select()
         .single();
 
       if (orderError) throw orderError;
 
-      // অর্ডার আইটেম যোগ করুন
-      const orderItems = items.map(item => {
-        return {
-          order_id: order.id,
-          product_id: item.productId,
-          product_name: item.productId,
-          package_id: item.packageId,
-          package_duration: item.packageId,
-          price: 0,
-          quantity: item.quantity,
-        };
-      });
+      // Create order items
+      const orderItems = cart.map(item => ({
+        order_id: orderData.id,
+        product_id: item.product.id,
+        product_name: item.product.name,
+        product_image: item.product.image,
+        package_id: item.selectedPackage.id,
+        package_duration: item.selectedPackage.duration,
+        price: item.selectedPackage.price,
+        original_price: item.selectedPackage.originalPrice || item.selectedPackage.price,
+        discount_percentage: item.selectedPackage.discount || 0,
+        quantity: item.quantity
+      }));
 
       const { error: itemsError } = await supabase
         .from('order_items')
@@ -131,18 +180,28 @@ const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
 
       if (itemsError) throw itemsError;
 
+      // Increment promo code usage if applied
+      if (appliedPromoCode) {
+        await incrementPromoUsage(appliedPromoCode);
+      }
+
       toast({
         title: "অর্ডার সফল!",
-        description: "আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে।",
+        description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই আমরা যোগাযোগ করব।",
       });
 
+      // Clear cart and form
       clearCart();
-      
+      setCustomerInfo({ name: '', email: '', phone: '', address: '' });
+      setTransactionId('');
+      setAppliedPromoCode('');
+      setPromoDiscount(0);
+
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error('Error creating order:', error);
       toast({
-        title: "ত্রুটি",
-        description: "অর্ডার প্রক্রিয়াকরণে সমস্যা হয়েছে।",
+        title: "অর্ডার ত্রুটি",
+        description: "অর্ডার করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
         variant: "destructive",
       });
     } finally {
@@ -150,148 +209,225 @@ const CheckoutForm = ({ total, appliedPromo }: CheckoutFormProps) => {
     }
   };
 
-  const selectedPaymentMethod = paymentMethods.find(method => method.id === formData.paymentMethod);
+  const getPaymentNumber = () => {
+    switch (paymentMethod) {
+      case 'bkash': return settings.bkash_number;
+      case 'nagad': return settings.nagad_number;
+      case 'rocket': return settings.rocket_number;
+      default: return '';
+    }
+  };
+
+  const getPaymentMethodName = () => {
+    switch (paymentMethod) {
+      case 'bkash': return 'bKash';
+      case 'nagad': return 'Nagad';
+      case 'rocket': return 'Rocket';
+      default: return '';
+    }
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="text-center py-12">
+            <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">কার্ট খালি</h3>
+            <p className="text-gray-600">কোন পণ্য নেই। প্রথমে পণ্য যোগ করুন।</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>চেকআউট তথ্য</CardTitle>
-        <CardDescription>
-          আপনার অর্ডার সম্পূর্ণ করতে নিচের তথ্যগুলো পূরণ করুন
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Personal Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">ব্যক্তিগত তথ্য</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">পূর্ণ নাম *</Label>
-                <Input
-                  id="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="আপনার পূর্ণ নাম"
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">ফোন নম্বর *</Label>
-                <Input
-                  id="phone"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="01XXXXXXXXX"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="email">ইমেইল *</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="your@email.com"
-              />
-            </div>
-            <div>
-              <Label htmlFor="address">ঠিকানা *</Label>
-              <Textarea
-                id="address"
-                required
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="আপনার সম্পূর্ণ ঠিকানা লিখুন"
-                rows={3}
-              />
-            </div>
-          </div>
-
-          {/* Payment Method */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">পেমেন্ট পদ্ধতি</h3>
-            <RadioGroup
-              value={formData.paymentMethod}
-              onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
-            >
-              {paymentMethods.map((method) => (
-                <div key={method.id} className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
-                  <RadioGroupItem value={method.id} id={method.id} />
-                  <Label htmlFor={method.id} className="flex items-center space-x-3 cursor-pointer flex-1">
-                    <div className={method.color}>
-                      {method.icon}
-                    </div>
-                    <div>
-                      <div className="font-medium">{method.name}</div>
-                      <div className="text-sm text-gray-600">{method.number}</div>
-                    </div>
-                  </Label>
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Order Summary */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                অর্ডার সামারি
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {cart.map((item) => (
+                <div key={`${item.product.id}-${item.selectedPackage.id}`} className="flex justify-between items-center p-3 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">{item.product.name}</h4>
+                    <p className="text-sm text-gray-600">
+                      {item.selectedPackage.duration} × {item.quantity}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">৳{(item.selectedPackage.price * item.quantity).toLocaleString()}</p>
+                    {item.selectedPackage.discount > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {item.selectedPackage.discount}% ছাড়
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               ))}
-            </RadioGroup>
-          </div>
+              
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span>সাবটোটাল:</span>
+                  <span>৳{subtotal.toLocaleString()}</span>
+                </div>
+                {promoDiscount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>প্রোমো ছাড়:</span>
+                    <span>-৳{promoDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <span>মোট:</span>
+                  <span>৳{finalTotal.toLocaleString()}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Payment Instructions */}
-          {selectedPaymentMethod && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">
-                {selectedPaymentMethod.name} পেমেন্ট নির্দেশনা:
-              </h4>
-              <ol className="text-sm text-blue-700 space-y-1">
-                <li>১. {selectedPaymentMethod.number} নম্বরে ৳{total} টাকা পাঠান</li>
-                <li>২. ট্রানজেকশন আইডি নিচের বক্সে লিখুন</li>
-                <li>৩. অর্ডার সাবমিট করুন</li>
-              </ol>
-            </div>
-          )}
+          {/* Promo Code */}
+          <PromoCodeInput
+            orderAmount={subtotal}
+            onPromoApplied={handlePromoApplied}
+            onPromoRemoved={handlePromoRemoved}
+          />
+        </div>
 
-          {/* Transaction ID */}
-          <div>
-            <Label htmlFor="transactionId">ট্রানজেকশন আইডি *</Label>
-            <Input
-              id="transactionId"
-              required
-              value={formData.transactionId}
-              onChange={(e) => setFormData({ ...formData, transactionId: e.target.value })}
-              placeholder="পেমেন্টের ট্রানজেকশন আইডি লিখুন"
-            />
-          </div>
+        {/* Checkout Form */}
+        <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Customer Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  গ্রাহকের তথ্য
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="name">পূর্ণ নাম *</Label>
+                  <Input
+                    id="name"
+                    value={customerInfo.name}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    ইমেইল *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={customerInfo.email}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone" className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    ফোন নম্বর *
+                  </Label>
+                  <Input
+                    id="phone"
+                    value={customerInfo.phone}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                    placeholder="01XXXXXXXXX"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    ঠিকানা *
+                  </Label>
+                  <Textarea
+                    id="address"
+                    value={customerInfo.address}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
+                    placeholder="সম্পূর্ণ ঠিকানা লিখুন"
+                    required
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Additional Note */}
-          <div>
-            <Label htmlFor="note">অতিরিক্ত নোট (ঐচ্ছিক)</Label>
-            <Textarea
-              id="note"
-              value={formData.note}
-              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-              placeholder="কোন বিশেষ নির্দেশনা থাকলে লিখুন"
-              rows={3}
-            />
-          </div>
+            {/* Payment Method */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  পেমেন্ট মাধ্যম
+                </CardTitle>
+                <CardDescription>
+                  {getPaymentNumber() ? (
+                    <span className="font-medium text-primary">
+                      {getPaymentMethodName()} নম্বর: {getPaymentNumber()}
+                    </span>
+                  ) : (
+                    'পেমেন্ট মাধ্যম নির্বাচন করুন'
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="bkash" id="bkash" />
+                    <Label htmlFor="bkash" className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4 text-pink-600" />
+                      bKash
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="nagad" id="nagad" />
+                    <Label htmlFor="nagad" className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-orange-600" />
+                      Nagad
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="rocket" id="rocket" />
+                    <Label htmlFor="rocket" className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-purple-600" />
+                      Rocket
+                    </Label>
+                  </div>
+                </RadioGroup>
 
-          {/* Order Total */}
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center text-xl font-bold">
-              <span>মোট পরিশোধ:</span>
-              <span className="text-green-600">৳{total}</span>
-            </div>
-          </div>
+                <div>
+                  <Label htmlFor="transactionId">ট্রানজেকশন ID *</Label>
+                  <Input
+                    id="transactionId"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    placeholder="পেমেন্টের ট্রানজেকশন ID"
+                    required
+                  />
+                  <p className="text-sm text-gray-600 mt-1">
+                    {getPaymentNumber()} নম্বরে ৳{finalTotal.toLocaleString()} টাকা পাঠানোর পর ট্রানজেকশন ID দিন।
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 text-lg font-semibold"
-            disabled={loading}
-          >
-            {loading ? 'প্রক্রিয়াকরণ হচ্ছে...' : 'অর্ডার নিশ্চিত করুন'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'অর্ডার করা হচ্ছে...' : `৳${finalTotal.toLocaleString()} - অর্ডার করুন`}
+            </Button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 

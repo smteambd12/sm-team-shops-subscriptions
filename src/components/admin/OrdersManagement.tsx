@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -106,10 +105,35 @@ const OrdersManagement = () => {
           admin_message: adminMessage || null
         }]);
 
-      toast({
-        title: "সফল",
-        description: "অর্ডার স্ট্যাটাস আপডেট হয়েছে।",
-      });
+      // If status is confirmed, create user subscriptions
+      if (newStatus === 'confirmed' && selectedOrder.status !== 'confirmed') {
+        try {
+          const { error: subscriptionError } = await supabase.rpc('create_subscription_from_order', {
+            order_uuid: selectedOrder.id
+          });
+
+          if (subscriptionError) {
+            console.error('Error creating subscriptions:', subscriptionError);
+            toast({
+              title: "সতর্কতা",
+              description: "অর্ডার নিশ্চিত হয়েছে কিন্তু সাবস্ক্রিপশন তৈরিতে সমস্যা হয়েছে।",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "সফল",
+              description: "অর্ডার নিশ্চিত হয়েছে এবং সাবস্ক্রিপশন তৈরি হয়েছে।",
+            });
+          }
+        } catch (error) {
+          console.error('Error in subscription creation:', error);
+        }
+      } else {
+        toast({
+          title: "সফল",
+          description: "অর্ডার স্ট্যাটাস আপডেট হয়েছে।",
+        });
+      }
 
       setShowStatusDialog(false);
       setSelectedOrder(null);

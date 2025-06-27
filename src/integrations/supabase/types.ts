@@ -436,9 +436,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_subscription_from_order: {
+        Args: { order_uuid: string }
+        Returns: undefined
+      }
       increment_promo_usage: {
         Args: { promo_code: string }
         Returns: undefined
+      }
+      validate_promo_code: {
+        Args: { code_text: string; order_amount: number }
+        Returns: Json
       }
     }
     Enums: {
