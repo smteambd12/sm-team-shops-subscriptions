@@ -266,7 +266,7 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {user && <UserSubscriptions user={user} />}
+        {user && <UserSubscriptions />}
       </div>
     </div>
   );
