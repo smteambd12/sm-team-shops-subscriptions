@@ -1,8 +1,57 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+
+interface FooterSettings {
+  company_name?: string;
+  company_description?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  youtube_url?: string;
+  phone_number?: string;
+  email?: string;
+  address?: string;
+  working_hours?: string;
+}
 
 const Footer = () => {
+  const [settings, setSettings] = useState<FooterSettings>({});
+
+  useEffect(() => {
+    fetchFooterSettings();
+  }, []);
+
+  const fetchFooterSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', [
+          'company_name',
+          'company_description', 
+          'facebook_url',
+          'instagram_url',
+          'youtube_url',
+          'phone_number',
+          'email',
+          'address',
+          'working_hours'
+        ]);
+
+      if (error) throw error;
+
+      const settingsObj: FooterSettings = {};
+      data?.forEach(item => {
+        settingsObj[item.setting_key as keyof FooterSettings] = item.setting_value;
+      });
+      
+      setSettings(settingsObj);
+    } catch (error) {
+      console.error('Error fetching footer settings:', error);
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -10,15 +59,21 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
-              SM TEAM SHOPS
+              {settings.company_name || 'SM TEAM SHOPS'}
             </h3>
             <p className="text-gray-400 mb-4">
-              সেরা দামে সব ধরনের ওয়েব ও মোবাইল অ্যাপ সাবস্ক্রিপশন পেতে আমাদের সাথে থাকুন।
+              {settings.company_description || 'সেরা দামে সব ধরনের ওয়েব ও মোবাইল অ্যাপ সাবস্ক্রিপশন পেতে আমাদের সাথে থাকুন।'}
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">ফেসবুক</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">ইনস্টাগ্রাম</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">ইউটিউব</a>
+              {settings.facebook_url && (
+                <a href={settings.facebook_url} className="text-gray-400 hover:text-white transition-colors">ফেসবুক</a>
+              )}
+              {settings.instagram_url && (
+                <a href={settings.instagram_url} className="text-gray-400 hover:text-white transition-colors">ইনস্টাগ্রাম</a>
+              )}
+              {settings.youtube_url && (
+                <a href={settings.youtube_url} className="text-gray-400 hover:text-white transition-colors">ইউটিউব</a>
+              )}
             </div>
           </div>
 
@@ -48,17 +103,17 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">যোগাযোগের তথ্য</h4>
             <div className="space-y-2 text-gray-400">
-              <p>📞 +৮৮০ ১৭১২৩৪৫৬৭৮</p>
-              <p>📧 support@smteamshops.com</p>
-              <p>📍 ঢাকা, বাংলাদেশ</p>
-              <p>🕐 সকাল ৯টা - রাত ৯টা</p>
+              <p>📞 {settings.phone_number || '+৮৮০ ১৭১২৩৪৫৬৭৮'}</p>
+              <p>📧 {settings.email || 'support@smteamshops.com'}</p>
+              <p>📍 {settings.address || 'ঢাকা, বাংলাদেশ'}</p>
+              <p>🕐 {settings.working_hours || 'সকাল ৯টা - রাত ৯টা'}</p>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © ২০২৪ SM TEAM SHOPS. সকল অধিকার সংরক্ষিত। | 
+            © ২০২৪ {settings.company_name || 'SM TEAM SHOPS'}. সকল অধিকার সংরক্ষিত। | 
             <Link to="/privacy" className="hover:text-white ml-2">গোপনীয়তা নীতি</Link> |
             <Link to="/terms" className="hover:text-white ml-2">শর্তাবলী</Link>
           </p>

@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Gift, Copy } from 'lucide-react';
+import { Plus, Edit, Trash2, Gift, Copy, Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PromoCode {
   id: string;
@@ -29,6 +30,7 @@ const PromoCodes = () => {
   const [loading, setLoading] = useState(true);
   const [editingPromo, setEditingPromo] = useState<PromoCode | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -217,117 +219,174 @@ const PromoCodes = () => {
           <p className="text-gray-600">ছাড়ের কোড তৈরি ও পরিচালনা করুন।</p>
         </div>
         
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button onClick={() => resetForm()}>
-              <Plus className="mr-2 h-4 w-4" />
-              নতুন প্রোমো কোড
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingPromo ? 'প্রোমো কোড সম্পাদনা' : 'নতুন প্রোমো কোড'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="code">প্রোমো কোড</Label>
-                <div className="flex gap-2">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowGuide(true)}>
+            <Info className="mr-2 h-4 w-4" />
+            গাইড
+          </Button>
+          
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button onClick={() => resetForm()}>
+                <Plus className="mr-2 h-4 w-4" />
+                নতুন প্রোমো কোড
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPromo ? 'প্রোমো কোড সম্পাদনা' : 'নতুন প্রোমো কোড'}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="code">প্রোমো কোড</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="code"
+                      value={formData.code}
+                      onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                      placeholder="SAVE20"
+                      required
+                    />
+                    <Button type="button" variant="outline" onClick={generateRandomCode}>
+                      র‍্যান্ডম
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="discount_type">ছাড়ের ধরন</Label>
+                    <Select value={formData.discount_type} onValueChange={(value) => setFormData({ ...formData, discount_type: value as any })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">শতাংশ (%)</SelectItem>
+                        <SelectItem value="fixed">নির্দিষ্ট টাকা (৳)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="discount_value">ছাড়ের পরিমাণ</Label>
+                    <Input
+                      id="discount_value"
+                      type="number"
+                      value={formData.discount_value}
+                      onChange={(e) => setFormData({ ...formData, discount_value: parseFloat(e.target.value) })}
+                      placeholder={formData.discount_type === 'percentage' ? '20' : '100'}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="min_order_amount">ন্যূনতম অর্ডার (৳)</Label>
+                    <Input
+                      id="min_order_amount"
+                      type="number"
+                      value={formData.min_order_amount}
+                      onChange={(e) => setFormData({ ...formData, min_order_amount: parseFloat(e.target.value) })}
+                      placeholder="500"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max_uses">সর্বোচ্চ ব্যবহার (ঐচ্ছিক)</Label>
+                    <Input
+                      id="max_uses"
+                      type="number"
+                      value={formData.max_uses}
+                      onChange={(e) => setFormData({ ...formData, max_uses: e.target.value })}
+                      placeholder="100"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="expires_at">মেয়াদ শেষ (ঐচ্ছিক)</Label>
                   <Input
-                    id="code"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="SAVE20"
-                    required
+                    id="expires_at"
+                    type="date"
+                    value={formData.expires_at}
+                    onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
                   />
-                  <Button type="button" variant="outline" onClick={generateRandomCode}>
-                    র‍্যান্ডম
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                  <Label htmlFor="is_active">সক্রিয় কোড</Label>
+                </div>
+
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    বাতিল
+                  </Button>
+                  <Button type="submit">
+                    {editingPromo ? 'আপডেট করুন' : 'যোগ করুন'}
                   </Button>
                 </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="discount_type">ছাড়ের ধরন</Label>
-                  <Select value={formData.discount_type} onValueChange={(value) => setFormData({ ...formData, discount_type: value as any })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="percentage">শতাংশ (%)</SelectItem>
-                      <SelectItem value="fixed">নির্দিষ্ট টাকা (৳)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="discount_value">ছাড়ের পরিমাণ</Label>
-                  <Input
-                    id="discount_value"
-                    type="number"
-                    value={formData.discount_value}
-                    onChange={(e) => setFormData({ ...formData, discount_value: parseFloat(e.target.value) })}
-                    placeholder={formData.discount_type === 'percentage' ? '20' : '100'}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="min_order_amount">ন্যূনতম অর্ডার (৳)</Label>
-                  <Input
-                    id="min_order_amount"
-                    type="number"
-                    value={formData.min_order_amount}
-                    onChange={(e) => setFormData({ ...formData, min_order_amount: parseFloat(e.target.value) })}
-                    placeholder="500"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="max_uses">সর্বোচ্চ ব্যবহার (ঐচ্ছিক)</Label>
-                  <Input
-                    id="max_uses"
-                    type="number"
-                    value={formData.max_uses}
-                    onChange={(e) => setFormData({ ...formData, max_uses: e.target.value })}
-                    placeholder="100"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="expires_at">মেয়াদ শেষ (ঐচ্ছিক)</Label>
-                <Input
-                  id="expires_at"
-                  type="date"
-                  value={formData.expires_at}
-                  onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                />
-                <Label htmlFor="is_active">সক্রিয় কোড</Label>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  বাতিল
-                </Button>
-                <Button type="submit">
-                  {editingPromo ? 'আপডেট করুন' : 'যোগ করুন'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
+
+      {/* প্রোমো কোড গাইড */}
+      <Dialog open={showGuide} onOpenChange={setShowGuide}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>প্রোমো কোড ব্যবহারের গাইড</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                <strong>প্রোমো কোড কিভাবে এড করবেন:</strong>
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-3 text-sm">
+              <div className="bg-gray-50 p-3 rounded">
+                <h4 className="font-semibold mb-2">১. নতুন প্রোমো কোড তৈরি:</h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                  <li>"নতুন প্রোমো কোড" বাটনে ক্লিক করুন</li>
+                  <li>কোড নাম লিখুন (যেমন: SAVE20, WINTER50)</li>
+                  <li>ছাড়ের ধরন নির্বাচন করুন (শতাংশ বা নির্দিষ্ট টাকা)</li>
+                  <li>ছাড়ের পরিমাণ লিখুন</li>
+                </ul>
+              </div>
+              
+              <div className="bg-gray-50 p-3 rounded">
+                <h4 className="font-semibold mb-2">২. অতিরিক্ত সেটিংস:</h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                  <li>ন্যূনতম অর্ডার পরিমাণ নির্ধারণ করুন</li>
+                  <li>সর্বোচ্চ ব্যবহারের সংখ্যা সেট করুন (ঐচ্ছিক)</li>
+                  <li>মেয়াদ শেষের তারিখ নির্ধারণ করুন (ঐচ্ছিক)</li>
+                  <li>কোডটি সক্রিয়/নিষ্ক্রিয় করুন</li>
+                </ul>
+              </div>
+              
+              <div className="bg-green-50 p-3 rounded">
+                <h4 className="font-semibold mb-2">৩. উদাহরণ:</h4>
+                <p className="text-gray-700">
+                  কোড: <strong>SAVE20</strong><br/>
+                  ছাড়: <strong>20% ছাড়</strong><br/>
+                  ন্যূনতম অর্ডার: <strong>৫০০ টাকা</strong><br/>
+                  ব্যবহার সীমা: <strong>১০০ বার</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4">
         {promoCodes.map((promo) => (

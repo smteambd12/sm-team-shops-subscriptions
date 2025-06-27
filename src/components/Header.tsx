@@ -32,7 +32,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            ডিজিটাল স্টোর
+            এসএম টিম স্টোর
           </Link>
 
           {/* Desktop Navigation */}

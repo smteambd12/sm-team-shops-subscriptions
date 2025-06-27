@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Calendar, User, Package, Edit, Trash2 } from 'lucide-react';
+import { Search, Calendar, User, Package, Edit, Trash2, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface UserSubscription {
@@ -183,6 +183,18 @@ const SubscriptionsManagement = () => {
     return <Badge variant="default">সক্রিয়</Badge>;
   };
 
+  const getRemainingDays = (expiresAt: string) => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const timeDiff = expiry.getTime() - now.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    if (daysDiff < 0) return 'মেয়াদ শেষ';
+    if (daysDiff === 0) return 'আজই শেষ';
+    if (daysDiff === 1) return '১ দিন বাকি';
+    return `${daysDiff} দিন বাকি`;
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -209,7 +221,7 @@ const SubscriptionsManagement = () => {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <divClassName="flex gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
@@ -254,6 +266,10 @@ const SubscriptionsManagement = () => {
                 </div>
                 <div className="flex gap-2">
                   {getStatusBadge(subscription)}
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {getRemainingDays(subscription.expires_at)}
+                  </Badge>
                   <Button size="sm" variant="outline" onClick={() => handleEdit(subscription)}>
                     <Edit className="h-4 w-4" />
                   </Button>
