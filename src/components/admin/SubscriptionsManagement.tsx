@@ -170,7 +170,7 @@ const SubscriptionsManagement = () => {
 
   const getStatusBadge = (subscription: UserSubscription) => {
     const now = new Date();
-    const expiresAt = new Date(subscription.expires_At);
+    const expiresAt = new Date(subscription.expires_at);
     
     if (!subscription.is_active) {
       return <Badge variant="secondary">নিষ্ক্রিয়</Badge>;
