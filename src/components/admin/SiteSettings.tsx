@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, CreditCard, MessageSquare, Save } from 'lucide-react';
+import { Settings, CreditCard, MessageSquare, Search, Save } from 'lucide-react';
 
 interface Setting {
   setting_key: string;
@@ -25,6 +26,8 @@ const SiteSettings = () => {
     nagad_number: '',
     rocket_number: '',
     live_chat_number: '',
+    search_placeholder: '',
+    enable_advanced_search: false,
   });
 
   useEffect(() => {
@@ -37,7 +40,14 @@ const SiteSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .in('setting_key', ['bkash_number', 'nagad_number', 'rocket_number', 'live_chat_number']);
+        .in('setting_key', [
+          'bkash_number', 
+          'nagad_number', 
+          'rocket_number', 
+          'live_chat_number',
+          'search_placeholder',
+          'enable_advanced_search'
+        ]);
 
       if (error) throw error;
 
@@ -51,6 +61,8 @@ const SiteSettings = () => {
         nagad_number: settingsMap.nagad_number || '',
         rocket_number: settingsMap.rocket_number || '',
         live_chat_number: settingsMap.live_chat_number || '',
+        search_placeholder: settingsMap.search_placeholder || 'প্রোডাক্ট খুঁজুন...',
+        enable_advanced_search: settingsMap.enable_advanced_search === 'true',
       });
 
       setSettings(data || []);
@@ -74,7 +86,7 @@ const SiteSettings = () => {
 
       const updates = Object.entries(formData).map(([key, value]) => ({
         setting_key: key,
-        setting_value: value,
+        setting_value: typeof value === 'boolean' ? value.toString() : value,
         updated_at: new Date().toISOString(),
       }));
 
@@ -107,7 +119,7 @@ const SiteSettings = () => {
   if (loading) {
     return (
       <div className="space-y-4">
-        {[1, 2].map((i) => (
+        {[1, 2, 3].map((i) => (
           <Card key={i}>
             <CardContent className="p-6">
               <div className="animate-pulse">
@@ -125,10 +137,41 @@ const SiteSettings = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold">সাইট সেটিংস</h2>
-        <p className="text-gray-600">পেমেন্ট নম্বর ও লাইভ চ্যাট নম্বর কনফিগার করুন।</p>
+        <p className="text-gray-600">পেমেন্ট নম্বর, লাইভ চ্যাট নম্বর ও সার্চ বক্স কনফিগার করুন।</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              সার্চ সেটিংস
+            </CardTitle>
+            <CardDescription>
+              সার্চ বক্সের প্লেসহোল্ডার টেক্সট ও অন্যান্য অপশন সেট করুন।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="search_placeholder">সার্চ প্লেসহোল্ডার টেক্সট</Label>
+              <Input
+                id="search_placeholder"
+                value={formData.search_placeholder}
+                onChange={(e) => setFormData({ ...formData, search_placeholder: e.target.value })}
+                placeholder="প্রোডাক্ট খুঁজুন..."
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="enable_advanced_search"
+                checked={formData.enable_advanced_search}
+                onCheckedChange={(checked) => setFormData({ ...formData, enable_advanced_search: checked })}
+              />
+              <Label htmlFor="enable_advanced_search">অ্যাডভান্সড সার্চ চালু করুন</Label>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

@@ -7,6 +7,8 @@ interface SiteSettings {
   nagad_number: string;
   rocket_number: string;
   live_chat_number: string;
+  search_placeholder: string;
+  enable_advanced_search: boolean;
 }
 
 export const useSiteSettings = () => {
@@ -15,6 +17,8 @@ export const useSiteSettings = () => {
     nagad_number: '',
     rocket_number: '',
     live_chat_number: '',
+    search_placeholder: 'প্রোডাক্ট খুঁজুন...',
+    enable_advanced_search: false,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +33,14 @@ export const useSiteSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('setting_key, setting_value')
-        .in('setting_key', ['bkash_number', 'nagad_number', 'rocket_number', 'live_chat_number']);
+        .in('setting_key', [
+          'bkash_number', 
+          'nagad_number', 
+          'rocket_number', 
+          'live_chat_number',
+          'search_placeholder',
+          'enable_advanced_search'
+        ]);
 
       if (error) throw error;
 
@@ -43,6 +54,8 @@ export const useSiteSettings = () => {
         nagad_number: settingsMap.nagad_number || '',
         rocket_number: settingsMap.rocket_number || '',
         live_chat_number: settingsMap.live_chat_number || '',
+        search_placeholder: settingsMap.search_placeholder || 'প্রোডাক্ট খুঁজুন...',
+        enable_advanced_search: settingsMap.enable_advanced_search === 'true',
       });
     } catch (error) {
       console.error('Error fetching settings:', error);
