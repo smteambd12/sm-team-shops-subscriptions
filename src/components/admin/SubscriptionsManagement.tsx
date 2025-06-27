@@ -170,7 +170,7 @@ const SubscriptionsManagement = () => {
 
   const getStatusBadge = (subscription: UserSubscription) => {
     const now = new Date();
-    const expiresAt = new Date(subscription.expires_at);
+    const expiresAt = new Date(subscription.expires_At);
     
     if (!subscription.is_active) {
       return <Badge variant="secondary">নিষ্ক্রিয়</Badge>;
@@ -221,7 +221,7 @@ const SubscriptionsManagement = () => {
         </div>
       </div>
 
-      <divClassName="flex gap-4">
+      <div className="flex gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
