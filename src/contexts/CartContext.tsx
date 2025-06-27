@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, Product, Package } from '../types';
-import { products } from '../data/products';
+import { CartItem } from '../types';
+import { useProducts } from '../hooks/useProducts';
 
 interface CartContextType {
   items: CartItem[];
@@ -25,6 +25,7 @@ export const useCart = () => {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const { products } = useProducts();
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');

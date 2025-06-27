@@ -4,12 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import { products, promoCodes } from '../data/products';
+import { useProducts } from '../hooks/useProducts';
 import { toast } from 'sonner';
 import CheckoutForm from '../components/CheckoutForm';
 
 const Cart = () => {
   const { items, updateQuantity, removeFromCart, getCartTotal } = useCart();
+  const { products, loading } = useProducts();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [promoCode, setPromoCode] = useState('');
@@ -21,13 +22,8 @@ const Cart = () => {
   const total = subtotal - promoDiscount;
 
   const handleApplyPromo = () => {
-    const validPromo = promoCodes.find(p => p.code === promoCode.toUpperCase());
-    if (validPromo) {
-      setAppliedPromo({code: validPromo.code, discount: validPromo.discount});
-      toast.success(`প্রোমো কোড প্রয়োগ হয়েছে! ${validPromo.description}`);
-    } else {
-      toast.error('প্রোমো কোড সঠিক নয়!');
-    }
+    // প্রোমো কোড যাচাইয়ের লজিক পরে যোগ করা হবে
+    toast.error('প্রোমো কোড ফিচার শীঘ্রই আসছে!');
   };
 
   const handleCheckout = () => {
@@ -48,6 +44,23 @@ const Cart = () => {
       default: return duration;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6 mx-auto"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -90,12 +103,15 @@ const Cart = () => {
                 const product = products.find(p => p.id === item.productId);
                 const pkg = product?.packages.find(p => p.id === item.packageId);
                 
-                if (!product || !pkg) return null;
+                if (!product || !pkg) {
+                  console.log('Product or package not found:', { productId: item.productId, packageId: item.packageId });
+                  return null;
+                }
 
                 return (
                   <div key={`${item.productId}-${item.packageId}`} className="flex items-center border-b border-gray-200 py-6 last:border-b-0">
                     <img
-                      src={product.image}
+                      src={product.image || 'https://via.placeholder.com/80x80'}
                       alt={product.name}
                       className="w-20 h-20 object-cover rounded-lg"
                     />
