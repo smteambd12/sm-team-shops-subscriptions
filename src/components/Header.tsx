@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Menu, X, Heart, Package, Calendar } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, X, Heart, Package, Calendar, BarChart3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -44,10 +44,16 @@ const Header = () => {
               ক্যাটেগরি
             </Link>
             {user && (
-              <Link to="/subscriptions" className="text-gray-700 hover:text-purple-600 transition-colors flex items-center space-x-1">
-                <Calendar size={16} />
-                <span>সাবস্ক্রিপশন</span>
-              </Link>
+              <>
+                <Link to="/dashboard" className="text-gray-700 hover:text-purple-600 transition-colors flex items-center space-x-1">
+                  <BarChart3 size={16} />
+                  <span>ড্যাশবোর্ড</span>
+                </Link>
+                <Link to="/subscriptions" className="text-gray-700 hover:text-purple-600 transition-colors flex items-center space-x-1">
+                  <Calendar size={16} />
+                  <span>সাবস্ক্রিপশন</span>
+                </Link>
+              </>
             )}
           </nav>
 
@@ -76,6 +82,12 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="cursor-pointer">
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      ড্যাশবোর্ড
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/profile" className="cursor-pointer">
                       প্রোফাইল
@@ -136,6 +148,13 @@ const Header = () => {
               </Link>
               {user && (
                 <>
+                  <Link
+                    to="/dashboard"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    ড্যাশবোর্ড
+                  </Link>
                   <Link
                     to="/subscriptions"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100"

@@ -11,18 +11,24 @@ interface PromoCodeInputProps {
   orderAmount: number;
   onPromoApplied: (code: string, discountAmount: number) => void;
   onPromoRemoved: () => void;
+  appliedPromo?: {code: string, discount: number} | null;
 }
 
 const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
   orderAmount,
   onPromoApplied,
-  onPromoRemoved
+  onPromoRemoved,
+  appliedPromo
 }) => {
   const [promoInput, setPromoInput] = useState('');
-  const { loading, appliedPromo, validatePromoCode, removePromoCode } = usePromoCode();
+  const { loading, validatePromoCode, removePromoCode } = usePromoCode();
 
   const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    
     const result = await validatePromoCode(promoInput, orderAmount);
+    console.log('Promo validation result:', result);
+    
     if (result?.valid) {
       onPromoApplied(result.code || promoInput, result.discount_amount || 0);
       setPromoInput('');
@@ -48,7 +54,7 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
               <div>
                 <p className="font-medium text-green-800">{appliedPromo.code}</p>
                 <p className="text-sm text-green-600">
-                  ৳{appliedPromo.discount_amount.toLocaleString()} ছাড় পেয়েছেন
+                  ৳{appliedPromo.discount.toLocaleString()} ছাড় পেয়েছেন
                 </p>
               </div>
               <Button

@@ -16,6 +16,8 @@ import Categories from "./pages/Categories";
 import Favorites from "./pages/Favorites";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserSubscriptions from "./components/UserSubscriptions";
+import OrderConfirmation from "./pages/OrderConfirmation";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,10 +38,12 @@ function App() {
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/favorites" element={<Favorites />} />
                     <Route path="/subscriptions" element={<UserSubscriptions />} />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

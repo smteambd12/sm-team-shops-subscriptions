@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { usePromoCode } from '@/hooks/usePromoCode';
 import PromoCodeInput from './PromoCodeInput';
 
 interface OrderSummaryProps {
@@ -19,14 +18,27 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   // Use local promo state if available, otherwise use prop
   const promoDiscount = localPromoDiscount || (appliedPromo ? appliedPromo.discount : 0);
-  const total = subtotal - promoDiscount;
+  const appliedPromoData = localAppliedPromoCode ? 
+    { code: localAppliedPromoCode, discount: localPromoDiscount } : 
+    appliedPromo;
+  
+  const total = Math.max(0, subtotal - promoDiscount);
+
+  console.log('OrderSummary state:', {
+    subtotal,
+    promoDiscount,
+    total,
+    appliedPromoData
+  });
 
   const handlePromoApplied = (code: string, discountAmount: number) => {
+    console.log('Promo applied:', { code, discountAmount });
     setLocalAppliedPromoCode(code);
     setLocalPromoDiscount(discountAmount);
   };
 
   const handlePromoRemoved = () => {
+    console.log('Promo removed');
     setLocalAppliedPromoCode('');
     setLocalPromoDiscount(0);
   };
@@ -41,6 +53,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           orderAmount={subtotal}
           onPromoApplied={handlePromoApplied}
           onPromoRemoved={handlePromoRemoved}
+          appliedPromo={appliedPromoData}
         />
       </div>
 

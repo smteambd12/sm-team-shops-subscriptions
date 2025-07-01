@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { usePromoCode } from '@/hooks/usePromoCode';
 import PromoCodeInput from './PromoCodeInput';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -87,11 +85,13 @@ const CheckoutForm = () => {
   };
 
   const handlePromoApplied = (code: string, discountAmount: number) => {
+    console.log('Promo applied in checkout:', { code, discountAmount });
     setAppliedPromoCode(code);
     setPromoDiscount(discountAmount);
   };
 
   const handlePromoRemoved = () => {
+    console.log('Promo removed in checkout');
     setAppliedPromoCode('');
     setPromoDiscount(0);
   };
@@ -195,12 +195,12 @@ const CheckoutForm = () => {
 
       toast({
         title: "অর্ডার সফল!",
-        description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই আমরা যোগাযোগ করব।",
+        description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে।",
       });
 
-      // Clear cart and redirect to profile
+      // Clear cart and redirect to order confirmation
       clearCart();
-      navigate('/profile');
+      navigate(`/order-confirmation/${orderData.id}`);
 
     } catch (error) {
       console.error('Error creating order:', error);
@@ -326,6 +326,7 @@ const CheckoutForm = () => {
             orderAmount={subtotal}
             onPromoApplied={handlePromoApplied}
             onPromoRemoved={handlePromoRemoved}
+            appliedPromo={appliedPromoCode ? {code: appliedPromoCode, discount: promoDiscount} : null}
           />
         </div>
 
