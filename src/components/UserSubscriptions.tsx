@@ -1,15 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Clock, Package, Refresh, Settings, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarDays, Clock, Package, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
-interface UserSubscription {
+interface Subscription {
   id: string;
+  product_id: string;
   product_name: string;
   package_duration: string;
   price: number;
@@ -17,21 +18,21 @@ interface UserSubscription {
   expires_at: string;
   is_active: boolean;
   auto_renew: boolean;
+  order_id: string;
 }
 
 const UserSubscriptions = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchUserSubscriptions();
+      fetchSubscriptions();
     }
   }, [user]);
 
-  const fetchUserSubscriptions = async () => {
+  const fetchSubscriptions = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -41,48 +42,13 @@ const UserSubscriptions = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
       setSubscriptions(data || []);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
-      toast({
-        title: "ত্রুটি",
-        description: "সাবস্ক্রিপশন লোড করতে সমস্যা হয়েছে।",
-        variant: "destructive",
-      });
+      toast.error('সাবস্ক্রিপশন লোড করতে সমস্যা হয়েছে');
     } finally {
       setLoading(false);
     }
-  };
-
-  const getDaysRemaining = (expiresAt: string) => {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diffTime = expiry.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const getStatusBadge = (subscription: UserSubscription) => {
-    const daysRemaining = getDaysRemaining(subscription.expires_at);
-    
-    if (!subscription.is_active) {
-      return <Badge variant="secondary">নিষ্ক্রিয়</Badge>;
-    }
-    
-    if (daysRemaining < 0) {
-      return <Badge variant="destructive">মেয়াদ শেষ</Badge>;
-    }
-    
-    if (daysRemaining <= 7) {
-      return <Badge variant="destructive">শীঘ্রই শেষ</Badge>;
-    }
-    
-    if (daysRemaining <= 30) {
-      return <Badge className="bg-yellow-500">সতর্কতা</Badge>;
-    }
-    
-    return <Badge variant="default">সক্রিয়</Badge>;
   };
 
   const getDurationText = (duration: string) => {
@@ -95,157 +61,193 @@ const UserSubscriptions = () => {
     }
   };
 
+  const getStatusBadge = (subscription: Subscription) => {
+    const now = new Date();
+    const expiresAt = new Date(subscription.expires_at);
+    const isExpired = now > expiresAt;
+    
+    if (!subscription.is_active || isExpired) {
+      return <Badge variant="destructive">মেয়াদ শেষ</Badge>;
+    }
+    
+    const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysLeft <= 7) {
+      return <Badge variant="outline" className="text-orange-600 border-orange-600">শীঘ্রই শেষ</Badge>;
+    }
+    
+    return <Badge variant="default" className="bg-green-600">সক্রিয়</Badge>;
+  };
+
+  const getRemainingDays = (expiresAt: string) => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, daysLeft);
+  };
+
+  const getProductImage = (productId: string) => {
+    // Default product images based on common services
+    const images: { [key: string]: string } = {
+      'netflix': '/lovable-uploads/4b4eb95d-25d0-46d7-8b98-706dba898e03.png',
+      'spotify': 'https://images.unsplash.com/photo-1611339555312-e607c8352fd7?w=100&h=100&fit=crop',
+      'youtube': 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&h=100&fit=crop',
+      'default': 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=100&h=100&fit=crop'
+    };
+    
+    return images[productId.toLowerCase()] || images.default;
+  };
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-600">সাবস্ক্রিপশন দেখতে লগইন করুন।</p>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-gray-600">সাবস্ক্রিপশন দেখতে প্রথমে লগইন করুন।</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-            ))}
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">আমার সাবস্ক্রিপশন</h1>
-            <p className="text-gray-600">আপনার সব সাবস্ক্রিপশন ও তাদের মেয়াদ দেখুন</p>
-          </div>
-          <Button onClick={fetchUserSubscriptions} variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            রিফ্রেশ
-          </Button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">আমার সাবস্ক্রিপশন</h1>
+          <p className="text-gray-600 mt-2">আপনার সক্রিয় সাবস্ক্রিপশনসমূহ দেখুন এবং পরিচালনা করুন</p>
         </div>
+        <Button onClick={fetchSubscriptions} variant="outline" className="flex items-center gap-2">
+          <Refresh className="h-4 w-4" />
+          রিফ্রেশ
+        </Button>
+      </div>
 
-        {subscriptions.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <Package size={60} className="text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">কোনো সাবস্ক্রিপশন নেই</h3>
-              <p className="text-gray-600">আপনার এখনো কোনো সাবস্ক্রিপশন নেই।</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-6">
-            {subscriptions.map((subscription) => {
-              const daysRemaining = getDaysRemaining(subscription.expires_at);
-              
-              return (
-                <Card key={subscription.id} className="relative overflow-hidden">
-                  {/* ATM Style Header */}
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
-                    <div className="flex justify-between items-center">
+      {subscriptions.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">কোন সাবস্ক্রিপশন নেই</h3>
+            <p className="text-gray-600 mb-6">আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
+            <Button asChild>
+              <a href="/">পণ্য দেখুন</a>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {subscriptions.map((subscription) => {
+            const remainingDays = getRemainingDays(subscription.expires_at);
+            const isExpired = remainingDays <= 0;
+            
+            return (
+              <Card key={subscription.id} className={`relative overflow-hidden transition-all duration-300 hover:shadow-lg ${isExpired ? 'opacity-75' : ''}`}>
+                <div className="absolute top-0 right-0 p-4">
+                  {getStatusBadge(subscription)}
+                </div>
+                
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <img
+                        src={getProductImage(subscription.product_id)}
+                        alt={subscription.product_name}
+                        className="w-16 h-16 rounded-lg object-cover border-2 border-gray-200"
+                      />
+                      {subscription.is_active && !isExpired && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{subscription.product_name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        {getDurationText(subscription.package_duration)}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-blue-500" />
                       <div>
-                        <h3 className="text-xl font-bold">{subscription.product_name}</h3>
-                        <p className="text-blue-100">প্যাকেজ: {getDurationText(subscription.package_duration)}</p>
+                        <p className="text-gray-600">শুরু</p>
+                        <p className="font-medium">
+                          {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
+                        </p>
                       </div>
-                      <div className="text-right">
-                        {getStatusBadge(subscription)}
-                        <div className="mt-2 text-sm text-blue-100">
-                          ৳{subscription.price}
-                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-red-500" />
+                      <div>
+                        <p className="text-gray-600">শেষ</p>
+                        <p className="font-medium">
+                          {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <CardContent className="p-6">
-                    <div className="grid md:grid-cols-3 gap-6">
-                      {/* Days Remaining - ATM Style Display */}
-                      <div className="text-center">
-                        <div className="bg-gradient-to-b from-gray-800 to-gray-900 text-green-400 p-4 rounded-lg border-2 border-gray-700 font-mono">
-                          <div className="text-2xl font-bold mb-1">
-                            {daysRemaining > 0 ? daysRemaining : 0}
-                          </div>
-                          <div className="text-sm">
-                            {daysRemaining > 0 ? 'দিন বাকি' : 'মেয়াদ শেষ'}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Subscription Details */}
-                      <div className="space-y-3">
-                        <div className="flex items-center text-sm">
-                          <CalendarDays className="mr-2 h-4 w-4 text-gray-500" />
-                          <span className="text-gray-600">শুরু:</span>
-                          <span className="ml-2 font-medium">
-                            {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <Clock className="mr-2 h-4 w-4 text-gray-500" />
-                          <span className="text-gray-600">শেষ:</span>
-                          <span className="ml-2 font-medium">
-                            {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Status Information */}
-                      <div className="space-y-3">
-                        <div className="text-sm">
-                          <span className="text-gray-600">অটো রিনিউ:</span>
-                          <span className="ml-2 font-medium">
-                            {subscription.auto_renew ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
-                          </span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-gray-600">স্ট্যাটাস:</span>
-                          <span className="ml-2">
-                            {subscription.is_active && daysRemaining > 0 ? (
-                              <span className="text-green-600 font-medium">চালু</span>
-                            ) : (
-                              <span className="text-red-600 font-medium">বন্ধ</span>
-                            )}
-                          </span>
-                        </div>
-                      </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">মূল্য</span>
+                      <span className="font-bold text-lg">৳{subscription.price.toLocaleString()}</span>
                     </div>
-
-                    {/* Progress Bar */}
-                    <div className="mt-6">
-                      <div className="flex justify-between text-sm text-gray-600 mb-2">
-                        <span>মেয়াদ অগ্রগতি</span>
-                        <span>
-                          {daysRemaining > 0 ? `${daysRemaining} দিন বাকি` : 'মেয়াদ শেষ'}
+                    {!isExpired && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">অবশিষ্ট দিন</span>
+                        <span className={`font-medium ${remainingDays <= 7 ? 'text-orange-600' : 'text-green-600'}`}>
+                          {remainingDays} দিন
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            daysRemaining <= 0 ? 'bg-red-500' :
-                            daysRemaining <= 7 ? 'bg-red-400' :
-                            daysRemaining <= 30 ? 'bg-yellow-400' :
-                            'bg-green-500'
-                          }`}
-                          style={{
-                            width: `${Math.max(0, Math.min(100, (daysRemaining / 30) * 100))}%`
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      disabled={isExpired}
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      পরিচালনা
+                    </Button>
+                    {subscription.package_duration !== 'lifetime' && (
+                      <Button 
+                        size="sm" 
+                        className="flex-1"
+                        disabled={isExpired}
+                      >
+                        রিনিউ করুন
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

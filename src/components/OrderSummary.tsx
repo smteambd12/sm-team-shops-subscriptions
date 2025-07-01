@@ -1,47 +1,24 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import PromoCodeInput from './PromoCodeInput';
 
 interface OrderSummaryProps {
   subtotal: number;
   appliedPromo: {code: string, discount: number} | null;
   onCheckout: () => void;
+  onPromoApplied: (code: string, discount: number) => void;
+  onPromoRemoved: () => void;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
   subtotal,
   appliedPromo,
-  onCheckout
+  onCheckout,
+  onPromoApplied,
+  onPromoRemoved
 }) => {
-  const [localPromoDiscount, setLocalPromoDiscount] = useState(0);
-  const [localAppliedPromoCode, setLocalAppliedPromoCode] = useState('');
-
-  // Use local promo state if available, otherwise use prop
-  const promoDiscount = localPromoDiscount || (appliedPromo ? appliedPromo.discount : 0);
-  const appliedPromoData = localAppliedPromoCode ? 
-    { code: localAppliedPromoCode, discount: localPromoDiscount } : 
-    appliedPromo;
-  
+  const promoDiscount = appliedPromo ? appliedPromo.discount : 0;
   const total = Math.max(0, subtotal - promoDiscount);
-
-  console.log('OrderSummary state:', {
-    subtotal,
-    promoDiscount,
-    total,
-    appliedPromoData
-  });
-
-  const handlePromoApplied = (code: string, discountAmount: number) => {
-    console.log('Promo applied:', { code, discountAmount });
-    setLocalAppliedPromoCode(code);
-    setLocalPromoDiscount(discountAmount);
-  };
-
-  const handlePromoRemoved = () => {
-    console.log('Promo removed');
-    setLocalAppliedPromoCode('');
-    setLocalPromoDiscount(0);
-  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 sticky top-4">
@@ -51,9 +28,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="mb-4 sm:mb-6">
         <PromoCodeInput
           orderAmount={subtotal}
-          onPromoApplied={handlePromoApplied}
-          onPromoRemoved={handlePromoRemoved}
-          appliedPromo={appliedPromoData}
+          onPromoApplied={onPromoApplied}
+          onPromoRemoved={onPromoRemoved}
+          appliedPromo={appliedPromo}
         />
       </div>
 

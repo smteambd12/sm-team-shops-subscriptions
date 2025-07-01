@@ -10,6 +10,7 @@ import Footer from "./components/Footer";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
 import Categories from "./pages/Categories";
@@ -37,6 +38,7 @@ function App() {
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/orders" element={<Orders />} />
