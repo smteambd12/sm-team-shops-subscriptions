@@ -20,6 +20,15 @@ const Cart = () => {
 
   const subtotal = getCartTotal();
 
+  // Debug logging
+  console.log('Cart Debug:', {
+    itemsCount: items.length,
+    items: items,
+    productsCount: products.length,
+    loading: loading,
+    subtotal: subtotal
+  });
+
   const handleCheckout = () => {
     if (!user) {
       toast.error('চেকআউট করতে প্রথমে লগইন করুন!');
@@ -83,24 +92,37 @@ const Cart = () => {
             <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">আপনার পণ্যসমূহ ({items.length})</h2>
               
-              {items.map((item) => {
-                const product = products.find(p => p.id === item.productId);
-                
-                if (!product) {
-                  console.log('Product not found:', { productId: item.productId, packageId: item.packageId });
-                  return null;
-                }
+              <div className="space-y-4">
+                {items.map((item) => {
+                  const product = products.find(p => p.id === item.productId);
+                  
+                  if (!product) {
+                    console.log('Product not found:', { productId: item.productId, packageId: item.packageId });
+                    // Show placeholder for missing product
+                    return (
+                      <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
+                        <p className="text-red-600">পণ্য লোড হচ্ছে... (ID: {item.productId})</p>
+                        <button
+                          onClick={() => removeFromCart(item.productId, item.packageId)}
+                          className="mt-2 text-red-500 hover:text-red-700 text-sm"
+                        >
+                          সরিয়ে দিন
+                        </button>
+                      </div>
+                    );
+                  }
 
-                return (
-                  <CartItem
-                    key={`${item.productId}-${item.packageId}`}
-                    item={item}
-                    product={product}
-                    onUpdateQuantity={updateQuantity}
-                    onRemoveFromCart={removeFromCart}
-                  />
-                );
-              })}
+                  return (
+                    <CartItem
+                      key={`${item.productId}-${item.packageId}`}
+                      item={item}
+                      product={product}
+                      onUpdateQuantity={updateQuantity}
+                      onRemoveFromCart={removeFromCart}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
 

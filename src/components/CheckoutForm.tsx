@@ -6,14 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProducts } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { usePromoCode } from '@/hooks/usePromoCode';
 import PromoCodeInput from './PromoCodeInput';
+import { useNavigate } from 'react-router-dom';
 import { 
   CreditCard, 
   Phone, 
@@ -21,8 +22,7 @@ import {
   ShoppingCart,
   User,
   MapPin,
-  Mail,
-  MessageSquare
+  Mail
 } from 'lucide-react';
 
 const CheckoutForm = () => {
@@ -30,7 +30,8 @@ const CheckoutForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { settings } = useSiteSettings();
-  const { appliedPromo, incrementPromoUsage } = usePromoCode();
+  const { products } = useProducts();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
@@ -160,20 +161,24 @@ const CheckoutForm = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items - Note: This will need to be updated based on your cart item structure
-      // Since the cart context uses productId/packageId, we'll need to fetch product details
-      const orderItems = items.map(item => ({
-        order_id: orderData.id,
-        product_id: item.productId,
-        product_name: 'Product Name', // You'll need to fetch this from products
-        product_image: '', // You'll need to fetch this from products
-        package_id: item.packageId,
-        package_duration: 'duration', // You'll need to fetch this from packages
-        price: 0, // You'll need to calculate this
-        original_price: 0, // You'll need to fetch this
-        discount_percentage: 0,
-        quantity: item.quantity
-      }));
+      // Create order items with product details
+      const orderItems = items.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        const pkg = product?.packages.find(p => p.id === item.packageId);
+        
+        return {
+          order_id: orderData.id,
+          product_id: item.productId,
+          product_name: product?.name || 'Unknown Product',
+          product_image: product?.image || '',
+          package_id: item.packageId,
+          package_duration: pkg?.duration || 'unknown',
+          price: pkg?.price || 0,
+          original_price: pkg?.originalPrice || pkg?.price || 0,
+          discount_percentage: pkg?.discount || 0,
+          quantity: item.quantity
+        };
+      });
 
       const { error: itemsError } = await supabase
         .from('order_items')
@@ -183,7 +188,9 @@ const CheckoutForm = () => {
 
       // Increment promo code usage if applied
       if (appliedPromoCode) {
-        await incrementPromoUsage(appliedPromoCode);
+        await supabase.rpc('increment_promo_usage', {
+          promo_code: appliedPromoCode
+        });
       }
 
       toast({
@@ -191,12 +198,9 @@ const CheckoutForm = () => {
         description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই আমরা যোগাযোগ করব।",
       });
 
-      // Clear cart and form
+      // Clear cart and redirect to profile
       clearCart();
-      setCustomerInfo({ name: '', email: '', phone: '', address: '' });
-      setTransactionId('');
-      setAppliedPromoCode('');
-      setPromoDiscount(0);
+      navigate('/profile');
 
     } catch (error) {
       console.error('Error creating order:', error);
@@ -255,19 +259,48 @@ const CheckoutForm = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {items.map((item) => (
-                <div key={`${item.productId}-${item.packageId}`} className="flex justify-between items-center p-3 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Product {item.productId}</h4>
-                    <p className="text-sm text-gray-600">
-                      Package {item.packageId} × {item.quantity}
-                    </p>
+              {items.map((item) => {
+                const product = products.find(p => p.id === item.productId);
+                const pkg = product?.packages.find(p => p.id === item.packageId);
+                
+                if (!product || !pkg) {
+                  return null;
+                }
+
+                const getDurationText = (duration: string) => {
+                  switch (duration) {
+                    case '1month': return '১ মাস';
+                    case '3month': return '৩ মাস';
+                    case '6month': return '৬ মাস';
+                    case 'lifetime': return 'লাইফটাইম';
+                    default: return duration;
+                  }
+                };
+
+                return (
+                  <div key={`${item.productId}-${item.packageId}`} className="flex justify-between items-center p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={product.image || 'https://via.placeholder.com/60x60'}
+                        alt={product.name}
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
+                      />
+                      <div>
+                        <h4 className="font-medium text-sm sm:text-base">{product.name}</h4>
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          {getDurationText(pkg.duration)} × {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-sm sm:text-base">৳{(pkg.price * item.quantity).toLocaleString()}</p>
+                      {pkg.originalPrice && pkg.originalPrice > pkg.price && (
+                        <p className="text-xs text-gray-500 line-through">৳{(pkg.originalPrice * item.quantity).toLocaleString()}</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">৳0</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between">
