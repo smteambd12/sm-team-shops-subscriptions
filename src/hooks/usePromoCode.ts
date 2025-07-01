@@ -31,7 +31,8 @@ export const usePromoCode = () => {
 
       if (error) throw error;
 
-      const result = data as PromoCodeResult;
+      // Properly cast the response to PromoCodeResult
+      const result = data as unknown as PromoCodeResult;
       
       if (result.valid) {
         setAppliedPromo({

@@ -215,7 +215,7 @@ const Cart = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                <CheckoutForm total={total} appliedPromo={appliedPromo} />
+                <CheckoutForm />
                 <button
                   onClick={() => setShowCheckout(false)}
                   className="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition-colors"
