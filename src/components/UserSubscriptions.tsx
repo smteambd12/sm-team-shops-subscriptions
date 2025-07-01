@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Package, Refresh, Settings, Star } from 'lucide-react';
+import { Calendar, Clock, Package, RefreshCw, Settings, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -135,7 +135,7 @@ const UserSubscriptions = () => {
           <p className="text-gray-600 mt-2">আপনার সক্রিয় সাবস্ক্রিপশনসমূহ দেখুন এবং পরিচালনা করুন</p>
         </div>
         <Button onClick={fetchSubscriptions} variant="outline" className="flex items-center gap-2">
-          <Refresh className="h-4 w-4" />
+          <RefreshCw className="h-4 w-4" />
           রিফ্রেশ
         </Button>
       </div>
