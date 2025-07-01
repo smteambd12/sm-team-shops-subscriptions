@@ -15,19 +15,10 @@ const Cart = () => {
   const { products, loading } = useProducts();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [appliedPromo, setAppliedPromo] = useState<{code: string, discount: number} | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<{code: string, discount: number} | null>(null);
 
   const subtotal = getCartTotal();
-
-  // Debug logging
-  console.log('Cart Debug:', {
-    itemsCount: items.length,
-    items: items,
-    productsCount: products.length,
-    loading: loading,
-    subtotal: subtotal
-  });
 
   const handleCheckout = () => {
     if (!user) {
@@ -36,6 +27,14 @@ const Cart = () => {
       return;
     }
     setShowCheckout(true);
+  };
+
+  const handlePromoApplied = (code: string, discount: number) => {
+    setAppliedPromo({ code, discount });
+  };
+
+  const handlePromoRemoved = () => {
+    setAppliedPromo(null);
   };
 
   if (loading) {
@@ -97,8 +96,6 @@ const Cart = () => {
                   const product = products.find(p => p.id === item.productId);
                   
                   if (!product) {
-                    console.log('Product not found:', { productId: item.productId, packageId: item.packageId });
-                    // Show placeholder for missing product
                     return (
                       <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
                         <p className="text-red-600">পণ্য লোড হচ্ছে... (ID: {item.productId})</p>
@@ -131,11 +128,15 @@ const Cart = () => {
             {!showCheckout ? (
               <OrderSummary
                 subtotal={subtotal}
-                appliedPromo={appliedPromo}
+                onPromoApplied={handlePromoApplied}
+                onPromoRemoved={handlePromoRemoved}
                 onCheckout={handleCheckout}
               />
             ) : (
-              <CheckoutSection onGoBack={() => setShowCheckout(false)} />
+              <CheckoutSection 
+                appliedPromo={appliedPromo}
+                onGoBack={() => setShowCheckout(false)} 
+              />
             )}
           </div>
         </div>

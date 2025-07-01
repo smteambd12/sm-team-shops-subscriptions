@@ -12,8 +12,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { usePromoCode } from '@/hooks/usePromoCode';
-import PromoCodeInput from './PromoCodeInput';
 import { useNavigate } from 'react-router-dom';
 import { 
   CreditCard, 
@@ -25,7 +23,11 @@ import {
   Mail
 } from 'lucide-react';
 
-const CheckoutForm = () => {
+interface CheckoutFormProps {
+  appliedPromo?: {code: string, discount: number} | null;
+}
+
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ appliedPromo }) => {
   const { items, clearCart, getCartTotal } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -42,10 +44,9 @@ const CheckoutForm = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState('bkash');
   const [transactionId, setTransactionId] = useState('');
-  const [promoDiscount, setPromoDiscount] = useState(0);
-  const [appliedPromoCode, setAppliedPromoCode] = useState('');
 
   const subtotal = getCartTotal();
+  const promoDiscount = appliedPromo?.discount || 0;
   const finalTotal = Math.max(0, subtotal - promoDiscount);
 
   useEffect(() => {
@@ -84,16 +85,6 @@ const CheckoutForm = () => {
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
-  };
-
-  const handlePromoApplied = (code: string, discountAmount: number) => {
-    setAppliedPromoCode(code);
-    setPromoDiscount(discountAmount);
-  };
-
-  const handlePromoRemoved = () => {
-    setAppliedPromoCode('');
-    setPromoDiscount(0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +142,7 @@ const CheckoutForm = () => {
             total_amount: finalTotal,
             payment_method: paymentMethod,
             transaction_id: transactionId,
-            promo_code: appliedPromoCode || null,
+            promo_code: appliedPromo?.code || null,
             discount_amount: promoDiscount,
             status: 'pending'
           }
@@ -187,25 +178,25 @@ const CheckoutForm = () => {
       if (itemsError) throw itemsError;
 
       // Increment promo code usage if applied
-      if (appliedPromoCode) {
+      if (appliedPromo?.code) {
         await supabase.rpc('increment_promo_usage', {
-          promo_code: appliedPromoCode
+          promo_code: appliedPromo.code
         });
       }
 
       toast({
         title: "অর্ডার সফল!",
-        description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই আমরা যোগাযোগ করব।",
+        description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে।",
       });
 
-      // Clear cart and redirect to profile
+      // Clear cart and redirect to order confirmation
       clearCart();
-      navigate('/profile');
+      navigate(`/order-confirmation?orderId=${orderData.id}`);
 
     } catch (error) {
       console.error('Error creating order:', error);
       toast({
-        title: "অর্ডার ত্রুটি",
+        title: "অর্ডার ত্রুটি", 
         description: "অর্ডার করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
         variant: "destructive",
       });
@@ -248,9 +239,9 @@ const CheckoutForm = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Order Summary */}
-        <div className="space-y-6">
+      <div className="max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Order Summary */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -263,9 +254,7 @@ const CheckoutForm = () => {
                 const product = products.find(p => p.id === item.productId);
                 const pkg = product?.packages.find(p => p.id === item.packageId);
                 
-                if (!product || !pkg) {
-                  return null;
-                }
+                if (!product || !pkg) return null;
 
                 const getDurationText = (duration: string) => {
                   switch (duration) {
@@ -309,7 +298,7 @@ const CheckoutForm = () => {
                 </div>
                 {promoDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>প্রোমো ছাড়:</span>
+                    <span>প্রোমো ছাড় ({appliedPromo?.code}):</span>
                     <span>-৳{promoDiscount.toLocaleString()}</span>
                   </div>
                 )}
@@ -321,140 +310,128 @@ const CheckoutForm = () => {
             </CardContent>
           </Card>
 
-          {/* Promo Code */}
-          <PromoCodeInput
-            orderAmount={subtotal}
-            onPromoApplied={handlePromoApplied}
-            onPromoRemoved={handlePromoRemoved}
-          />
-        </div>
+          {/* Customer Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                গ্রাহকের তথ্য
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="name">পূর্ণ নাম *</Label>
+                <Input
+                  id="name"
+                  value={customerInfo.name}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  ইমেইল *
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={customerInfo.email}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  ফোন নম্বর *
+                </Label>
+                <Input
+                  id="phone"
+                  value={customerInfo.phone}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                  placeholder="01XXXXXXXXX"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="address" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  ঠিকানা *
+                </Label>
+                <Textarea
+                  id="address"
+                  value={customerInfo.address}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
+                  placeholder="সম্পূর্ণ ঠিকানা লিখুন"
+                  required
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Checkout Form */}
-        <div className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Customer Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  গ্রাহকের তথ্য
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="name">পূর্ণ নাম *</Label>
-                  <Input
-                    id="name"
-                    value={customerInfo.name}
-                    onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    ইমেইল *
+          {/* Payment Method */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                পেমেন্ট মাধ্যম
+              </CardTitle>
+              <CardDescription>
+                {getPaymentNumber() ? (
+                  <span className="font-medium text-primary">
+                    {getPaymentMethodName()} নম্বর: {getPaymentNumber()}
+                  </span>
+                ) : (
+                  'পেমেন্ট মাধ্যম নির্বাচন করুন'
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="bkash" id="bkash" />
+                  <Label htmlFor="bkash" className="flex items-center gap-2">
+                    <Wallet className="h-4 w-4 text-pink-600" />
+                    bKash
                   </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={customerInfo.email}
-                    onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                    required
-                  />
                 </div>
-                <div>
-                  <Label htmlFor="phone" className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    ফোন নম্বর *
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="nagad" id="nagad" />
+                  <Label htmlFor="nagad" className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-orange-600" />
+                    Nagad
                   </Label>
-                  <Input
-                    id="phone"
-                    value={customerInfo.phone}
-                    onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
-                    placeholder="01XXXXXXXXX"
-                    required
-                  />
                 </div>
-                <div>
-                  <Label htmlFor="address" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    ঠিকানা *
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="rocket" id="rocket" />
+                  <Label htmlFor="rocket" className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-purple-600" />
+                    Rocket
                   </Label>
-                  <Textarea
-                    id="address"
-                    value={customerInfo.address}
-                    onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
-                    placeholder="সম্পূর্ণ ঠিকানা লিখুন"
-                    required
-                  />
                 </div>
-              </CardContent>
-            </Card>
+              </RadioGroup>
 
-            {/* Payment Method */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  পেমেন্ট মাধ্যম
-                </CardTitle>
-                <CardDescription>
-                  {getPaymentNumber() ? (
-                    <span className="font-medium text-primary">
-                      {getPaymentMethodName()} নম্বর: {getPaymentNumber()}
-                    </span>
-                  ) : (
-                    'পেমেন্ট মাধ্যম নির্বাচন করুন'
-                  )}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="bkash" id="bkash" />
-                    <Label htmlFor="bkash" className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-pink-600" />
-                      bKash
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="nagad" id="nagad" />
-                    <Label htmlFor="nagad" className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-orange-600" />
-                      Nagad
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="rocket" id="rocket" />
-                    <Label htmlFor="rocket" className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-purple-600" />
-                      Rocket
-                    </Label>
-                  </div>
-                </RadioGroup>
+              <div>
+                <Label htmlFor="transactionId">ট্রানজেকশন ID *</Label>
+                <Input
+                  id="transactionId"
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  placeholder="পেমেন্টের ট্রানজেকশন ID"
+                  required
+                />
+                <p className="text-sm text-gray-600 mt-1">
+                  {getPaymentNumber()} নম্বরে ৳{finalTotal.toLocaleString()} টাকা পাঠানোর পর ট্রানজেকশন ID দিন।
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-                <div>
-                  <Label htmlFor="transactionId">ট্রানজেকশন ID *</Label>
-                  <Input
-                    id="transactionId"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                    placeholder="পেমেন্টের ট্রানজেকশন ID"
-                    required
-                  />
-                  <p className="text-sm text-gray-600 mt-1">
-                    {getPaymentNumber()} নম্বরে ৳{finalTotal.toLocaleString()} টাকা পাঠানোর পর ট্রানজেকশন ID দিন।
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'অর্ডার করা হচ্ছে...' : `৳${finalTotal.toLocaleString()} - অর্ডার করুন`}
-            </Button>
-          </form>
-        </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'অর্ডার করা হচ্ছে...' : `৳${finalTotal.toLocaleString()} - অর্ডার করুন`}
+          </Button>
+        </form>
       </div>
     </div>
   );

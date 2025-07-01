@@ -1,34 +1,34 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePromoCode } from '@/hooks/usePromoCode';
 import PromoCodeInput from './PromoCodeInput';
 
 interface OrderSummaryProps {
   subtotal: number;
-  appliedPromo: {code: string, discount: number} | null;
+  onPromoApplied?: (code: string, discount: number) => void;
+  onPromoRemoved?: () => void;
   onCheckout: () => void;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
   subtotal,
-  appliedPromo,
+  onPromoApplied,
+  onPromoRemoved,
   onCheckout
 }) => {
-  const [localPromoDiscount, setLocalPromoDiscount] = useState(0);
-  const [localAppliedPromoCode, setLocalAppliedPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{code: string, discount: number} | null>(null);
 
-  // Use local promo state if available, otherwise use prop
-  const promoDiscount = localPromoDiscount || (appliedPromo ? appliedPromo.discount : 0);
-  const total = subtotal - promoDiscount;
+  const total = subtotal - (appliedPromo ? appliedPromo.discount : 0);
 
   const handlePromoApplied = (code: string, discountAmount: number) => {
-    setLocalAppliedPromoCode(code);
-    setLocalPromoDiscount(discountAmount);
+    const promoData = { code, discount: discountAmount };
+    setAppliedPromo(promoData);
+    onPromoApplied?.(code, discountAmount);
   };
 
   const handlePromoRemoved = () => {
-    setLocalAppliedPromoCode('');
-    setLocalPromoDiscount(0);
+    setAppliedPromo(null);
+    onPromoRemoved?.();
   };
 
   return (
@@ -50,16 +50,16 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <span>সাবটোটাল:</span>
           <span>৳{subtotal.toLocaleString()}</span>
         </div>
-        {promoDiscount > 0 && (
+        {appliedPromo && appliedPromo.discount > 0 && (
           <div className="flex justify-between text-green-600 text-sm sm:text-base">
-            <span>প্রোমো ছাড়:</span>
-            <span>-৳{promoDiscount.toLocaleString()}</span>
+            <span>প্রোমো ছাড় ({appliedPromo.code}):</span>
+            <span>-৳{appliedPromo.discount.toLocaleString()}</span>
           </div>
         )}
         <div className="border-t pt-3">
           <div className="flex justify-between text-lg sm:text-xl font-bold">
             <span>মোট:</span>
-            <span>৳{total.toLocaleString()}</span>
+            <span>৳{Math.max(0, total).toLocaleString()}</span>
           </div>
         </div>
       </div>
