@@ -59,49 +59,51 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Card className="h-full flex flex-col hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-      <CardHeader className="pb-4">
-        <div className="aspect-video relative mb-4 overflow-hidden rounded-lg">
+      <CardHeader className="pb-2 sm:pb-4 p-2 sm:p-6">
+        <div className="aspect-video relative mb-2 sm:mb-4 overflow-hidden rounded-lg">
           <img
             src={product.image || 'https://via.placeholder.com/400x300'}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
           />
-          <div className="absolute top-2 right-2">
-            <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white">
-              <Heart size={16} />
+          <div className="absolute top-1 sm:top-2 right-1 sm:right-2">
+            <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white p-1 sm:p-2 h-auto">
+              <Heart size={12} className="sm:w-4 sm:h-4" />
             </Button>
           </div>
           {selectedPkg?.discount && (
-            <div className="absolute top-2 left-2">
-              <Badge className="bg-red-500 text-white">
+            <div className="absolute top-1 sm:top-2 left-1 sm:left-2">
+              <Badge className="bg-red-500 text-white text-xs sm:text-sm px-1 sm:px-2 py-0.5">
                 {selectedPkg.discount}% ছাড়
               </Badge>
             </div>
           )}
         </div>
         
-        <div className="flex items-start justify-between mb-2">
-          <CardTitle className="text-xl font-bold text-gray-800 leading-tight">
+        <div className="flex items-start justify-between mb-1 sm:mb-2">
+          <CardTitle className="text-sm sm:text-xl font-bold text-gray-800 leading-tight line-clamp-2">
             {product.name}
           </CardTitle>
-          {getCategoryBadge(product.category)}
+          <div className="flex-shrink-0 ml-1">
+            {getCategoryBadge(product.category)}
+          </div>
         </div>
         
-        <CardDescription className="text-gray-600 text-sm leading-relaxed">
+        <CardDescription className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2 hidden sm:block">
           {product.description}
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col">
-        {/* Features */}
+      <CardContent className="flex-1 flex flex-col p-2 sm:p-6 pt-0">
+        {/* Features - Hidden on mobile to save space */}
         {product.features && product.features.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-2 sm:mb-4 hidden sm:block">
             <h4 className="font-medium text-gray-800 mb-2 text-sm">বৈশিষ্ট্য:</h4>
             <div className="space-y-1">
-              {product.features.slice(0, 3).map((feature, index) => (
+              {product.features.slice(0, 2).map((feature, index) => (
                 <div key={index} className="flex items-center text-sm text-gray-600">
                   <Star size={12} className="text-yellow-500 mr-2 flex-shrink-0" />
-                  <span>{feature}</span>
+                  <span className="line-clamp-1">{feature}</span>
                 </div>
               ))}
             </div>
@@ -109,23 +111,23 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
 
         {/* Package Selection */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            প্যাকেজ নির্বাচন করুন:
+        <div className="mb-2 sm:mb-4">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+            প্যাকেজ:
           </label>
           <Select value={selectedPackage} onValueChange={setSelectedPackage}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full text-xs sm:text-sm">
               <SelectValue placeholder="প্যাকেজ নির্বাচন করুন" />
             </SelectTrigger>
             <SelectContent>
               {product.packages.map((pkg) => (
                 <SelectItem key={pkg.id} value={pkg.id}>
                   <div className="flex justify-between items-center w-full">
-                    <span>{getDurationText(pkg.duration)}</span>
-                    <div className="ml-4 text-right">
-                      <span className="font-bold">৳{pkg.price}</span>
+                    <span className="text-xs sm:text-sm">{getDurationText(pkg.duration)}</span>
+                    <div className="ml-2 sm:ml-4 text-right">
+                      <span className="font-bold text-xs sm:text-sm">৳{pkg.price}</span>
                       {pkg.originalPrice && (
-                        <span className="text-sm text-gray-500 line-through ml-2">
+                        <span className="text-xs text-gray-500 line-through ml-1 sm:ml-2">
                           ৳{pkg.originalPrice}
                         </span>
                       )}
@@ -139,21 +141,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Price Display */}
         {selectedPkg && (
-          <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+          <div className="mb-2 sm:mb-4 p-2 sm:p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">মূল্য:</span>
+              <span className="text-xs sm:text-sm text-gray-600">মূল্য:</span>
               <div className="text-right">
-                <span className="text-2xl font-bold text-gray-800">৳{selectedPkg.price}</span>
+                <span className="text-lg sm:text-2xl font-bold text-gray-800">৳{selectedPkg.price}</span>
                 {selectedPkg.originalPrice && (
-                  <div className="text-sm text-gray-500 line-through">
+                  <div className="text-xs sm:text-sm text-gray-500 line-through">
                     ৳{selectedPkg.originalPrice}
                   </div>
                 )}
               </div>
             </div>
             {selectedPkg.discount && (
-              <div className="text-sm text-green-600 font-medium mt-1">
-                আপনি সাশ্রয় করছেন: ৳{(selectedPkg.originalPrice || 0) - selectedPkg.price}
+              <div className="text-xs sm:text-sm text-green-600 font-medium mt-1">
+                সাশ্রয়: ৳{(selectedPkg.originalPrice || 0) - selectedPkg.price}
               </div>
             )}
           </div>
@@ -162,11 +164,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Add to Cart Button */}
         <Button 
           onClick={handleAddToCart}
-          className="w-full mt-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3 rounded-lg transition-all duration-200 hover:shadow-lg"
+          className="w-full mt-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-2 sm:py-3 rounded-lg transition-all duration-200 hover:shadow-lg text-xs sm:text-sm"
           disabled={!selectedPackage}
         >
-          <ShoppingCart size={18} className="mr-2" />
-          কার্টে যোগ করুন
+          <ShoppingCart size={14} className="mr-1 sm:mr-2 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">কার্টে যোগ করুন</span>
+          <span className="sm:hidden">কার্ট</span>
         </Button>
       </CardContent>
     </Card>

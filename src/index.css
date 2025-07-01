@@ -100,6 +100,8 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Ensure minimum font size for mobile readability */
+    font-size: 16px;
   }
 }
 
@@ -164,7 +166,14 @@
   background: linear-gradient(45deg, #7c3aed, #2563eb);
 }
 
-/* Line clamp utility */
+/* Line clamp utility for mobile text truncation */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -185,7 +194,49 @@
 /* Mobile responsive improvements */
 @media (max-width: 768px) {
   .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Improve touch targets on mobile */
+  button, a, input, select {
+    min-height: 44px;
+  }
+  
+  /* Better mobile typography */
+  h1 {
+    line-height: 1.2;
+  }
+  
+  h2, h3 {
+    line-height: 1.3;
+  }
+  
+  /* Mobile-friendly spacing */
+  .space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 640px) {
+  /* Ensure cards don't get too small */
+  .grid-cols-2 > * {
+    min-height: 280px;
+  }
+  
+  /* Better mobile form styling */
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Mobile-friendly badges */
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
   }
 }
