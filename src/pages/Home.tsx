@@ -6,8 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
-import PremiumSubscriptionSection from '@/components/PremiumSubscriptionSection';
-import NewSubscriptionBanner from '@/components/NewSubscriptionBanner';
 
 const Home = () => {
   const { products, loading, error } = useProducts();
@@ -82,16 +80,6 @@ const Home = () => {
               ২৪/৭ সাপোর্ট
             </Badge>
           </div>
-        </div>
-      </section>
-
-      {/* Premium Subscription Section */}
-      <PremiumSubscriptionSection />
-
-      {/* New Subscription Banner */}
-      <section className="py-8 sm:py-12 bg-white/50 backdrop-blur-sm">
-        <div className="container mx-auto px-2 sm:px-4">
-          <NewSubscriptionBanner />
         </div>
       </section>
 
