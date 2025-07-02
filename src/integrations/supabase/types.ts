@@ -535,6 +535,10 @@ export type Database = {
         Args: Record<PropertyKey, never> | { promo_code: string }
         Returns: undefined
       }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       update_subscription_details: {
         Args: {
           p_order_id: string
