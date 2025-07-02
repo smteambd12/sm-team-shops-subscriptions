@@ -17,27 +17,31 @@ export const useSubscriptionNotifications = () => {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      console.log('useSubscriptionNotifications: No user, skipping');
+      return;
+    }
 
     const checkExpiringSubscriptions = async () => {
       try {
         console.log('Checking subscription notifications for user:', user.id);
         
-        // Check for subscriptions expiring in 7 days
+        const now = new Date();
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
 
+        // Check for subscriptions expiring in 7 days
         const { data: expiringSubscriptions, error } = await supabase
           .from('user_subscriptions')
           .select('*')
           .eq('user_id', user.id)
           .eq('is_active', true)
           .lte('expires_at', sevenDaysFromNow.toISOString())
-          .gte('expires_at', new Date().toISOString());
+          .gte('expires_at', now.toISOString());
 
         if (error) {
           console.error('Error fetching expiring subscriptions:', error);
-          throw error;
+          return;
         }
 
         // Check for expired subscriptions
@@ -46,12 +50,17 @@ export const useSubscriptionNotifications = () => {
           .select('*')
           .eq('user_id', user.id)
           .eq('is_active', true)
-          .lt('expires_at', new Date().toISOString());
+          .lt('expires_at', now.toISOString());
 
         if (expiredError) {
           console.error('Error fetching expired subscriptions:', expiredError);
-          throw expiredError;
+          return;
         }
+
+        console.log('Subscription check results:', {
+          expiring: expiringSubscriptions?.length || 0,
+          expired: expiredSubscriptions?.length || 0
+        });
 
         // Update counts
         setCounts({
@@ -59,78 +68,85 @@ export const useSubscriptionNotifications = () => {
           expiredCount: expiredSubscriptions?.length || 0
         });
 
-        // Show notifications for new expiring subscriptions
-        for (const subscription of expiringSubscriptions || []) {
-          const { data: existingNotification } = await supabase
-            .from('subscription_notifications')
-            .select('id')
-            .eq('subscription_id', subscription.id)
-            .eq('notification_type', 'expiry_warning')
-            .single();
-
-          if (!existingNotification) {
+        // Show notifications for expiring subscriptions
+        if (expiringSubscriptions && expiringSubscriptions.length > 0) {
+          for (const subscription of expiringSubscriptions) {
             const expiryDate = new Date(subscription.expires_at);
-            const daysLeft = Math.ceil((expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+            const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
             
-            toast.warning(
-              `আপনার ${subscription.product_name} সাবস্ক্রিপশন ${daysLeft} দিনের মধ্যে শেষ হয়ে যাবে।`,
-              {
-                duration: 10000,
-                action: {
-                  label: 'রিনিউ করুন',
-                  onClick: () => {
-                    window.location.href = '/subscriptions';
-                  },
-                },
-              }
-            );
-
-            // Record the notification
-            await supabase
+            // Check if we've already shown this notification
+            const { data: existingNotification } = await supabase
               .from('subscription_notifications')
-              .insert([{
-                subscription_id: subscription.id,
-                notification_type: 'expiry_warning',
-                sent_at: new Date().toISOString(),
-              }]);
+              .select('id')
+              .eq('subscription_id', subscription.id)
+              .eq('notification_type', 'expiry_warning')
+              .maybeSingle();
+
+            if (!existingNotification) {
+              toast.warning(
+                `আপনার ${subscription.product_name} সাবস্ক্রিপশন ${daysLeft} দিনের মধ্যে শেষ হয়ে যাবে।`,
+                {
+                  duration: 10000,
+                  action: {
+                    label: 'রিনিউ করুন',
+                    onClick: () => {
+                      window.location.href = '/subscriptions';
+                    },
+                  },
+                }
+              );
+
+              // Record the notification
+              await supabase
+                .from('subscription_notifications')
+                .insert([{
+                  subscription_id: subscription.id,
+                  notification_type: 'expiry_warning',
+                  sent_at: now.toISOString(),
+                }]);
+            }
           }
         }
 
-        // Deactivate and notify expired subscriptions
-        for (const subscription of expiredSubscriptions || []) {
-          await supabase
-            .from('user_subscriptions')
-            .update({ is_active: false })
-            .eq('id', subscription.id);
-
-          const { data: existingExpiredNotification } = await supabase
-            .from('subscription_notifications')
-            .select('id')
-            .eq('subscription_id', subscription.id)
-            .eq('notification_type', 'expired')
-            .single();
-
-          if (!existingExpiredNotification) {
-            toast.error(
-              `আপনার ${subscription.product_name} সাবস্ক্রিপশন মেয়াদ শেষ হয়ে গেছে।`,
-              {
-                duration: 15000,
-                action: {
-                  label: 'রিনিউ করুন',
-                  onClick: () => {
-                    window.location.href = '/subscriptions';
-                  },
-                },
-              }
-            );
-
+        // Handle expired subscriptions
+        if (expiredSubscriptions && expiredSubscriptions.length > 0) {
+          for (const subscription of expiredSubscriptions) {
+            // Deactivate expired subscription
             await supabase
+              .from('user_subscriptions')
+              .update({ is_active: false })
+              .eq('id', subscription.id);
+
+            // Check if we've already shown expiry notification
+            const { data: existingExpiredNotification } = await supabase
               .from('subscription_notifications')
-              .insert([{
-                subscription_id: subscription.id,
-                notification_type: 'expired',
-                sent_at: new Date().toISOString(),
-              }]);
+              .select('id')
+              .eq('subscription_id', subscription.id)
+              .eq('notification_type', 'expired')
+              .maybeSingle();
+
+            if (!existingExpiredNotification) {
+              toast.error(
+                `আপনার ${subscription.product_name} সাবস্ক্রিপশনের মেয়াদ শেষ হয়ে গেছে।`,
+                {
+                  duration: 15000,
+                  action: {
+                    label: 'রিনিউ করুন',
+                    onClick: () => {
+                      window.location.href = '/subscriptions';
+                    },
+                  },
+                }
+              );
+
+              await supabase
+                .from('subscription_notifications')
+                .insert([{
+                  subscription_id: subscription.id,
+                  notification_type: 'expired',
+                  sent_at: now.toISOString(),
+                }]);
+            }
           }
         }
       } catch (error) {

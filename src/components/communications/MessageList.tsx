@@ -6,28 +6,39 @@ import type { MessageListProps } from '@/types/communications';
 
 const MessageList: React.FC<MessageListProps> = ({ communications, loading }) => {
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('bn-BD', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    if (!dateString) return 'অজানা সময়';
+    
+    try {
+      return new Date(dateString).toLocaleString('bn-BD', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return 'অজানা সময়';
+    }
   };
 
   if (loading) {
     return (
       <div className="text-center py-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+        <p className="mt-2 text-sm text-gray-600">মেসেজ লোড হচ্ছে...</p>
       </div>
     );
   }
 
-  if (communications.length === 0) {
+  console.log('MessageList rendering with communications:', communications?.length || 0);
+
+  if (!communications || communications.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
         <p>এখনো কোন মেসেজ নেই</p>
+        <p className="text-xs mt-1">প্রথম মেসেজ পাঠান</p>
       </div>
     );
   }
@@ -59,7 +70,7 @@ const MessageList: React.FC<MessageListProps> = ({ communications, loading }) =>
                 ? 'bg-purple-600 text-white' 
                 : 'bg-gray-100 text-gray-900'
             }`}>
-              <p className="text-sm">{comm.message}</p>
+              <p className="text-sm whitespace-pre-wrap">{comm.message}</p>
               
               {comm.attachment_url && (
                 <div className="mt-2 pt-2 border-t border-opacity-20">

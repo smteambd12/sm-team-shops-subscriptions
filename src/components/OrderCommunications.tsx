@@ -12,7 +12,12 @@ const OrderCommunications: React.FC<OrderCommunicationsProps> = ({ orderId, orde
   const { user } = useAuth();
   const { communications, loading, refetch } = useOrderCommunications(orderId);
 
-  if (!user) return null;
+  if (!user) {
+    console.log('User not authenticated for OrderCommunications');
+    return null;
+  }
+
+  console.log('OrderCommunications rendering for order:', orderId, 'communications:', communications?.length);
 
   return (
     <Card>
@@ -23,7 +28,7 @@ const OrderCommunications: React.FC<OrderCommunicationsProps> = ({ orderId, orde
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <MessageList communications={communications} loading={loading} />
+        <MessageList communications={communications || []} loading={loading} />
         <MessageForm orderId={orderId} onMessageSent={refetch} />
       </CardContent>
     </Card>

@@ -12,12 +12,17 @@ export const useOrderCommunications = (orderId: string) => {
 
   useEffect(() => {
     if (user && orderId) {
+      console.log('useOrderCommunications: Starting fetch for order:', orderId, 'user:', user.id);
       fetchCommunications();
+    } else {
+      console.log('useOrderCommunications: Missing user or orderId', { user: !!user, orderId });
+      setLoading(false);
     }
   }, [user, orderId]);
 
   const fetchCommunications = async () => {
     if (!user || !orderId) {
+      console.log('fetchCommunications: Missing prerequisites', { user: !!user, orderId });
       setLoading(false);
       return;
     }
@@ -34,14 +39,17 @@ export const useOrderCommunications = (orderId: string) => {
 
       if (error) {
         console.error('Error fetching communications:', error);
-        throw error;
+        toast.error('মেসেজ লোড করতে সমস্যা হয়েছে: ' + error.message);
+        setCommunications([]);
+        return;
       }
       
-      console.log('Communications fetched:', data);
+      console.log('Communications fetched successfully:', data?.length || 0, 'messages');
       setCommunications(data || []);
-    } catch (error) {
-      console.error('Error fetching communications:', error);
-      toast.error('মেসেজ লোড করতে সমস্যা হয়েছে');
+    } catch (error: any) {
+      console.error('Unexpected error fetching communications:', error);
+      toast.error('মেসেজ লোড করতে অপ্রত্যাশিত সমস্যা হয়েছে');
+      setCommunications([]);
     } finally {
       setLoading(false);
     }
