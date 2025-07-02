@@ -19,12 +19,14 @@ import {
   MessageSquare,
   ArrowLeft,
   Calendar,
-  Bell
+  Bell,
+  Cog
 } from 'lucide-react';
 import ProductsManagement from '@/components/admin/ProductsManagement';
 import OrdersManagement from '@/components/admin/OrdersManagement';
 import PromoCodes from '@/components/admin/PromoCodes';
 import SiteSettings from '@/components/admin/SiteSettings';
+import SystemSettings from '@/components/admin/SystemSettings';
 import AdminStats from '@/components/admin/AdminStats';
 import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement';
 import NotificationCenter from '@/components/admin/NotificationCenter';
@@ -123,7 +125,7 @@ const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="stats" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-8">
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <BarChart3 size={16} />
             পরিসংখ্যান
@@ -151,6 +153,10 @@ const AdminDashboard = () => {
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings size={16} />
             সেটিংস
+          </TabsTrigger>
+          <TabsTrigger value="system" className="flex items-center gap-2">
+            <Cog size={16} />
+            সিস্টেম
           </TabsTrigger>
         </TabsList>
 
@@ -180,6 +186,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="settings">
           <SiteSettings />
+        </TabsContent>
+
+        <TabsContent value="system">
+          <SystemSettings />
         </TabsContent>
       </Tabs>
     </div>
