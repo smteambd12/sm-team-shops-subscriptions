@@ -1,0 +1,43 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import type { OrderCommunication } from '@/types/communications';
+
+export const useOrderCommunications = (orderId: string) => {
+  const { user } = useAuth();
+  const [communications, setCommunications] = useState<OrderCommunication[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && orderId) {
+      fetchCommunications();
+    }
+  }, [user, orderId]);
+
+  const fetchCommunications = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('order_communications')
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setCommunications(data || []);
+    } catch (error) {
+      console.error('Error fetching communications:', error);
+      toast.error('মেসেজ লোড করতে সমস্যা হয়েছে');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    communications,
+    loading,
+    refetch: fetchCommunications,
+  };
+};
