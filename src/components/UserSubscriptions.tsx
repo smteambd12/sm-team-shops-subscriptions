@@ -7,7 +7,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Package, Clock, Download, ExternalLink, FileText, Link2 } from 'lucide-react';
+import { useSubscriptionNotifications } from '@/hooks/useSubscriptionNotifications';
+import SubscriptionNotificationBanner from '@/components/notifications/SubscriptionNotificationBanner';
+import { Calendar, Package, Clock, Download, ExternalLink, FileText } from 'lucide-react';
 
 interface UserSubscription {
   id: string;
@@ -29,6 +31,7 @@ const UserSubscriptions = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const notificationCounts = useSubscriptionNotifications();
 
   useEffect(() => {
     if (user) {
@@ -39,13 +42,20 @@ const UserSubscriptions = () => {
   const fetchSubscriptions = async () => {
     try {
       setLoading(true);
+      console.log('Fetching subscriptions for user:', user?.id);
+      
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching subscriptions:', error);
+        throw error;
+      }
+      
+      console.log('Subscriptions fetched:', data);
       setSubscriptions(data || []);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
@@ -120,18 +130,6 @@ const UserSubscriptions = () => {
     );
   }
 
-  if (subscriptions.length === 0) {
-    return (
-      <Card>
-        <CardContent className="text-center py-12">
-          <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">কোন সাবস্ক্রিপশন নেই</h3>
-          <p className="text-gray-600">আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -141,88 +139,104 @@ const UserSubscriptions = () => {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {subscriptions.map((subscription) => (
-          <Card key={subscription.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    {subscription.product_name}
-                  </CardTitle>
-                  <CardDescription>
-                    প্যাকেজ: {subscription.package_duration}
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  {getStatusBadge(subscription)}
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {getRemainingDays(subscription.expires_at)}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p className="text-sm"><strong>মূল্য:</strong> ৳{subscription.price}</p>
-                  <p className="text-sm"><strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}</p>
-                  <p className="text-sm"><strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}</p>
-                </div>
-                <div>
-                  <p className="text-sm"><strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}</p>
-                  <p className="text-sm"><strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</p>
-                </div>
-              </div>
+      {/* Notification Banner */}
+      <SubscriptionNotificationBanner 
+        expiringCount={notificationCounts.expiringCount}
+        expiredCount={notificationCounts.expiredCount}
+      />
 
-              {/* File and Link Access */}
-              {(subscription.subscription_file_url || subscription.subscription_link) && (
-                <div className="mt-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                  <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                    <Download className="h-4 w-4" />
-                    সাবস্ক্রিপশন অ্যাক্সেস
-                  </h4>
-                  <div className="space-y-2">
-                    {subscription.subscription_file_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
-                        className="flex items-center gap-2 mr-2"
-                      >
-                        <FileText className="h-4 w-4" />
-                        {subscription.file_name || 'ফাইল ডাউনলোড'}
-                      </Button>
-                    )}
-                    {subscription.subscription_link && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(subscription.subscription_link, '_blank')}
-                        className="flex items-center gap-2"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        সাবস্ক্রিপশন লিংক
-                      </Button>
-                    )}
+      {subscriptions.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">কোন সাবস্ক্রিপশন নেই</h3>
+            <p className="text-gray-600">আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {subscriptions.map((subscription) => (
+            <Card key={subscription.id}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      {subscription.product_name}
+                    </CardTitle>
+                    <CardDescription>
+                      প্যাকেজ: {subscription.package_duration}
+                    </CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    {getStatusBadge(subscription)}
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {getRemainingDays(subscription.expires_at)}
+                    </Badge>
                   </div>
                 </div>
-              )}
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-sm"><strong>মূল্য:</strong> ৳{subscription.price}</p>
+                    <p className="text-sm"><strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}</p>
+                    <p className="text-sm"><strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm"><strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}</p>
+                    <p className="text-sm"><strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</p>
+                  </div>
+                </div>
 
-              {/* Show message if no access files/links are available */}
-              {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && (
-                <Alert>
-                  <AlertDescription>
-                    আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন।
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                {/* File and Link Access */}
+                {(subscription.subscription_file_url || subscription.subscription_link) && (
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                      <Download className="h-4 w-4" />
+                      সাবস্ক্রিপশন অ্যাক্সেস
+                    </h4>
+                    <div className="space-y-2">
+                      {subscription.subscription_file_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
+                          className="flex items-center gap-2 mr-2"
+                        >
+                          <FileText className="h-4 w-4" />
+                          {subscription.file_name || 'ফাইল ডাউনলোড'}
+                        </Button>
+                      )}
+                      {subscription.subscription_link && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(subscription.subscription_link, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          সাবস্ক্রিপশন লিংক
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Show message if no access files/links are available */}
+                {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && (
+                  <Alert>
+                    <AlertDescription>
+                      আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন।
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

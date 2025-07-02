@@ -18,6 +18,10 @@ const MessageForm: React.FC<MessageFormProps> = ({ orderId, onMessageSent }) => 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() && !attachment) return;
+    if (!user) {
+      toast.error('লগইন করুন প্রথমে');
+      return;
+    }
 
     try {
       setSending(true);
@@ -30,11 +34,15 @@ const MessageForm: React.FC<MessageFormProps> = ({ orderId, onMessageSent }) => 
         const fileExt = attachment.name.split('.').pop();
         const fileName = `${orderId}/${Date.now()}.${fileExt}`;
         
+        console.log('Uploading attachment:', fileName);
         const { error: uploadError } = await supabase.storage
           .from('order-attachments')
           .upload(fileName, attachment);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error('ফাইল আপলোড করতে সমস্যা হয়েছে');
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('order-attachments')
@@ -45,11 +53,13 @@ const MessageForm: React.FC<MessageFormProps> = ({ orderId, onMessageSent }) => 
         attachmentType = attachment.type;
       }
 
+      console.log('Sending message:', { orderId, userId: user.id, message: message.trim() });
+      
       const { error } = await supabase
         .from('order_communications')
         .insert([{
           order_id: orderId,
-          user_id: user?.id,
+          user_id: user.id,
           message: message.trim(),
           sender_type: 'user',
           attachment_url: attachmentUrl,
@@ -57,15 +67,18 @@ const MessageForm: React.FC<MessageFormProps> = ({ orderId, onMessageSent }) => 
           attachment_type: attachmentType,
         }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Message send error:', error);
+        throw error;
+      }
 
       setMessage('');
       setAttachment(null);
       toast.success('মেসেজ পাঠানো হয়েছে');
       onMessageSent();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      toast.error('মেসেজ পাঠাতে সমস্যা হয়েছে');
+      toast.error(error.message || 'মেসেজ পাঠাতে সমস্যা হয়েছে');
     } finally {
       setSending(false);
     }

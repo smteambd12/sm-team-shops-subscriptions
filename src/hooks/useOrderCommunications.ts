@@ -17,15 +17,27 @@ export const useOrderCommunications = (orderId: string) => {
   }, [user, orderId]);
 
   const fetchCommunications = async () => {
+    if (!user || !orderId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log('Fetching communications for order:', orderId, 'user:', user.id);
+      
       const { data, error } = await supabase
         .from('order_communications')
         .select('*')
         .eq('order_id', orderId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching communications:', error);
+        throw error;
+      }
+      
+      console.log('Communications fetched:', data);
       setCommunications(data || []);
     } catch (error) {
       console.error('Error fetching communications:', error);

@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare, Download, ExternalLink, FileText } from 'lucide-react';
 import OrderCommunications from '@/components/OrderCommunications';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -39,8 +39,15 @@ interface Order {
   order_items: OrderItem[];
 }
 
+interface UserSubscription {
+  subscription_file_url?: string;
+  subscription_link?: string;
+  file_name?: string;
+}
+
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [subscriptions, setSubscriptions] = useState<{[key: string]: UserSubscription[]}>({});
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -58,6 +65,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      console.log('Fetching orders for user:', user?.id);
       
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
@@ -65,13 +73,31 @@ const Orders = () => {
           *,
           order_items (*)
         `)
+        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (ordersError) {
+        console.error('Orders fetch error:', ordersError);
         throw ordersError;
       }
 
+      console.log('Orders fetched:', ordersData);
       setOrders(ordersData || []);
+
+      // Fetch subscription details for each order
+      const subscriptionData: {[key: string]: UserSubscription[]} = {};
+      for (const order of ordersData || []) {
+        const { data: subs } = await supabase
+          .from('user_subscriptions')
+          .select('subscription_file_url, subscription_link, file_name')
+          .eq('order_id', order.id);
+        
+        if (subs && subs.length > 0) {
+          subscriptionData[order.id] = subs;
+        }
+      }
+      setSubscriptions(subscriptionData);
+      
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast({
@@ -103,6 +129,16 @@ const Orders = () => {
         {config.label}
       </Badge>
     );
+  };
+
+  const handleFileDownload = (url: string, fileName?: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'subscription-file';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -204,6 +240,44 @@ const Orders = () => {
                       <strong>অ্যাডমিন মেসেজ:</strong> {order.admin_message}
                     </AlertDescription>
                   </Alert>
+                )}
+
+                {/* Subscription Files/Links */}
+                {subscriptions[order.id] && subscriptions[order.id].length > 0 && (
+                  <div className="mb-6 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                      <Download className="h-4 w-4" />
+                      সাবস্ক্রিপশন অ্যাক্সেস
+                    </h4>
+                    <div className="space-y-2">
+                      {subscriptions[order.id].map((sub, index) => (
+                        <div key={index} className="flex gap-2">
+                          {sub.subscription_file_url && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleFileDownload(sub.subscription_file_url!, sub.file_name)}
+                              className="flex items-center gap-2"
+                            >
+                              <FileText className="h-4 w-4" />
+                              {sub.file_name || 'ফাইল ডাউনলোড'}
+                            </Button>
+                          )}
+                          {sub.subscription_link && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(sub.subscription_link, '_blank')}
+                              className="flex items-center gap-2"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              সাবস্ক্রিপশন লিংক
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <div className="grid md:grid-cols-2 gap-6">
