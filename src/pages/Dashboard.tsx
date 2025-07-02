@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import SubscriptionExpiryNotification from '@/components/notifications/SubscriptionExpiryNotification';
 import {
   User,
   Package,
@@ -143,6 +144,9 @@ const Dashboard = () => {
           সেটিংস
         </Button>
       </div>
+
+      {/* Subscription Expiry Notifications */}
+      <SubscriptionExpiryNotification />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

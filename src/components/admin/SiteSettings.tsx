@@ -7,28 +7,31 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, CreditCard, MessageSquare, Search, Save } from 'lucide-react';
+import { Save, RefreshCw, Settings2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FooterSettings from './FooterSettings';
 
-interface Setting {
-  setting_key: string;
-  setting_value: string;
-  description: string;
+interface SiteSettingsData {
+  bkash_number: string;
+  nagad_number: string;
+  rocket_number: string;
+  live_chat_number: string;
+  search_placeholder: string;
+  enable_advanced_search: boolean;
 }
 
 const SiteSettings = () => {
-  const [settings, setSettings] = useState<Setting[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
-
-  const [formData, setFormData] = useState({
+  const [settings, setSettings] = useState<SiteSettingsData>({
     bkash_number: '',
     nagad_number: '',
     rocket_number: '',
     live_chat_number: '',
-    search_placeholder: '',
+    search_placeholder: 'প্রোডাক্ট খুঁজুন...',
     enable_advanced_search: false,
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchSettings();
@@ -39,11 +42,11 @@ const SiteSettings = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('site_settings')
-        .select('*')
+        .select('setting_key, setting_value')
         .in('setting_key', [
-          'bkash_number', 
-          'nagad_number', 
-          'rocket_number', 
+          'bkash_number',
+          'nagad_number',
+          'rocket_number',
           'live_chat_number',
           'search_placeholder',
           'enable_advanced_search'
@@ -51,21 +54,16 @@ const SiteSettings = () => {
 
       if (error) throw error;
 
-      const settingsMap = (data || []).reduce((acc, setting) => {
-        acc[setting.setting_key] = setting.setting_value || '';
-        return acc;
-      }, {} as any);
-
-      setFormData({
-        bkash_number: settingsMap.bkash_number || '',
-        nagad_number: settingsMap.nagad_number || '',
-        rocket_number: settingsMap.rocket_number || '',
-        live_chat_number: settingsMap.live_chat_number || '',
-        search_placeholder: settingsMap.search_placeholder || 'প্রোডাক্ট খুঁজুন...',
-        enable_advanced_search: settingsMap.enable_advanced_search === 'true',
+      const settingsObj: Partial<SiteSettingsData> = {};
+      data?.forEach(item => {
+        if (item.setting_key === 'enable_advanced_search') {
+          settingsObj[item.setting_key] = item.setting_value === 'true';
+        } else {
+          settingsObj[item.setting_key as keyof SiteSettingsData] = item.setting_value || '';
+        }
       });
 
-      setSettings(data || []);
+      setSettings(prev => ({ ...prev, ...settingsObj }));
     } catch (error) {
       console.error('Error fetching settings:', error);
       toast({
@@ -78,37 +76,36 @@ const SiteSettings = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSave = async () => {
     try {
       setSaving(true);
-
-      const updates = Object.entries(formData).map(([key, value]) => ({
+      
+      const settingsArray = Object.entries(settings).map(([key, value]) => ({
         setting_key: key,
-        setting_value: typeof value === 'boolean' ? value.toString() : value,
-        updated_at: new Date().toISOString(),
+        setting_value: String(value),
+        setting_type: typeof value === 'boolean' ? 'boolean' : 'text',
+        description: getSettingDescription(key)
       }));
 
-      for (const update of updates) {
+      for (const setting of settingsArray) {
         const { error } = await supabase
           .from('site_settings')
-          .upsert(update, { onConflict: 'setting_key' });
+          .upsert(setting, {
+            onConflict: 'setting_key'
+          });
 
         if (error) throw error;
       }
 
       toast({
         title: "সফল",
-        description: "সেটিংস আপডেট হয়েছে।",
+        description: "সাইট সেটিংস সেভ হয়েছে।",
       });
-
-      fetchSettings();
     } catch (error) {
-      console.error('Error updating settings:', error);
+      console.error('Error saving settings:', error);
       toast({
         title: "ত্রুটি",
-        description: "সেটিংস আপডেট করতে সমস্যা হয়েছে।",
+        description: "সেটিংস সেভ করতে সমস্যা হয়েছে।",
         variant: "destructive",
       });
     } finally {
@@ -116,163 +113,159 @@ const SiteSettings = () => {
     }
   };
 
+  const getSettingDescription = (key: string): string => {
+    const descriptions: Record<string, string> = {
+      bkash_number: 'bKash mobile banking number',
+      nagad_number: 'Nagad mobile banking number',
+      rocket_number: 'Rocket mobile banking number',
+      live_chat_number: 'WhatsApp number for live chat',
+      search_placeholder: 'Placeholder text for search input',
+      enable_advanced_search: 'Enable advanced search features'
+    };
+    return descriptions[key] || '';
+  };
+
+  const handleInputChange = (key: keyof SiteSettingsData, value: string | boolean) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardContent className="p-6">
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-20 bg-gray-200 rounded"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse">
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-20 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">সাইট সেটিংস</h2>
-        <p className="text-gray-600">পেমেন্ট নম্বর, লাইভ চ্যাট নম্বর ও সার্চ বক্স কনফিগার করুন।</p>
-      </div>
+    <Tabs defaultValue="general" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="general" className="flex items-center gap-2">
+          <Settings2 className="h-4 w-4" />
+          সাধারণ সেটিংস
+        </TabsTrigger>
+        <TabsTrigger value="footer" className="flex items-center gap-2">
+          <Settings2 className="h-4 w-4" />
+          ফুটার সেটিংস
+        </TabsTrigger>
+      </TabsList>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <TabsContent value="general">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              সার্চ সেটিংস
-            </CardTitle>
+            <CardTitle>সাইট সেটিংস</CardTitle>
             <CardDescription>
-              সার্চ বক্সের প্লেসহোল্ডার টেক্সট ও অন্যান্য অপশন সেট করুন।
+              ওয়েবসাইটের বিভিন্ন সেটিংস কনফিগার করুন
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="search_placeholder">সার্চ প্লেসহোল্ডার টেক্সট</Label>
-              <Input
-                id="search_placeholder"
-                value={formData.search_placeholder}
-                onChange={(e) => setFormData({ ...formData, search_placeholder: e.target.value })}
-                placeholder="প্রোডাক্ট খুঁজুন..."
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="enable_advanced_search"
-                checked={formData.enable_advanced_search}
-                onCheckedChange={(checked) => setFormData({ ...formData, enable_advanced_search: checked })}
-              />
-              <Label htmlFor="enable_advanced_search">অ্যাডভান্সড সার্চ চালু করুন</Label>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              পেমেন্ট নম্বর
-            </CardTitle>
-            <CardDescription>
-              গ্রাহকরা যে নম্বরে পেমেন্ট পাঠাবেন সেগুলো এখানে সেট করুন।
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="bkash_number">bKash নম্বর</Label>
-                <Input
-                  id="bkash_number"
-                  value={formData.bkash_number}
-                  onChange={(e) => setFormData({ ...formData, bkash_number: e.target.value })}
-                  placeholder="01XXXXXXXXX"
-                />
-              </div>
-              <div>
-                <Label htmlFor="nagad_number">Nagad নম্বর</Label>
-                <Input
-                  id="nagad_number"
-                  value={formData.nagad_number}
-                  onChange={(e) => setFormData({ ...formData, nagad_number: e.target.value })}
-                  placeholder="01XXXXXXXXX"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rocket_number">Rocket নম্বর</Label>
-                <Input
-                  id="rocket_number"
-                  value={formData.rocket_number}
-                  onChange={(e) => setFormData({ ...formData, rocket_number: e.target.value })}
-                  placeholder="01XXXXXXXXX"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              লাইভ চ্যাট
-            </CardTitle>
-            <CardDescription>
-              গ্রাহক সাপোর্টের জন্য WhatsApp নম্বর সেট করুন।
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <Label htmlFor="live_chat_number">WhatsApp নম্বর</Label>
-              <Input
-                id="live_chat_number"
-                value={formData.live_chat_number}
-                onChange={(e) => setFormData({ ...formData, live_chat_number: e.target.value })}
-                placeholder="01XXXXXXXXX"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                এই নম্বরে গ্রাহকরা সরাসরি WhatsApp-এ যোগাযোগ করতে পারবেন।
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={saving}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
-          </Button>
-        </div>
-      </form>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>বর্তমান সেটিংস</CardTitle>
-          <CardDescription>
-            সিস্টেমে সংরক্ষিত সেটিংস দেখুন।
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {settings.map((setting) => (
-              <div key={setting.setting_key} className="flex justify-between items-center p-2 border rounded">
-                <div>
-                  <span className="font-medium">{setting.description}</span>
-                  <p className="text-sm text-gray-600">{setting.setting_key}</p>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg">পেমেন্ট তথ্য</h4>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bkash_number">বিকাশ নম্বর</Label>
+                  <Input
+                    id="bkash_number"
+                    value={settings.bkash_number}
+                    onChange={(e) => handleInputChange('bkash_number', e.target.value)}
+                    placeholder="01XXXXXXXXX"
+                  />
                 </div>
-                <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                  {setting.setting_value || 'Not Set'}
-                </span>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nagad_number">নগদ নম্বর</Label>
+                  <Input
+                    id="nagad_number"
+                    value={settings.nagad_number}
+                    onChange={(e) => handleInputChange('nagad_number', e.target.value)}
+                    placeholder="01XXXXXXXXX"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rocket_number">রকেট নম্বর</Label>
+                  <Input
+                    id="rocket_number"
+                    value={settings.rocket_number}
+                    onChange={(e) => handleInputChange('rocket_number', e.target.value)}
+                    placeholder="01XXXXXXXXX-X"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="live_chat_number">লাইভ চ্যাট নম্বর (WhatsApp)</Label>
+                  <Input
+                    id="live_chat_number"
+                    value={settings.live_chat_number}
+                    onChange={(e) => handleInputChange('live_chat_number', e.target.value)}
+                    placeholder="8801XXXXXXXXX"
+                  />
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg">সার্চ সেটিংস</h4>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="search_placeholder">সার্চ প্লেসহোল্ডার টেক্সট</Label>
+                  <Input
+                    id="search_placeholder"
+                    value={settings.search_placeholder}
+                    onChange={(e) => handleInputChange('search_placeholder', e.target.value)}
+                    placeholder="প্রোডাক্ট খুঁজুন..."
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="enable_advanced_search"
+                    checked={settings.enable_advanced_search}
+                    onCheckedChange={(checked) => handleInputChange('enable_advanced_search', checked)}
+                  />
+                  <Label htmlFor="enable_advanced_search">অ্যাডভান্সড সার্চ চালু করুন</Label>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    সেভ হচ্ছে...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    সেভ করুন
+                  </>
+                )}
+              </Button>
+
+              <Button variant="outline" onClick={fetchSettings}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                রিলোড করুন
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="footer">
+        <FooterSettings />
+      </TabsContent>
+    </Tabs>
   );
 };
 
