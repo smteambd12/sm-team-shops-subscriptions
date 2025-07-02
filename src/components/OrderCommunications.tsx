@@ -9,19 +9,9 @@ import { MessageSquare, Send, Paperclip, Download, User, Shield } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface OrderCommunication {
-  id: string;
-  order_id: string;
-  user_id: string;
-  admin_id?: string;
-  message: string;
-  sender_type: 'user' | 'admin';
-  attachment_url?: string;
-  attachment_name?: string;
-  attachment_type?: string;
-  created_at: string;
-}
+type OrderCommunication = Tables<'order_communications'>;
 
 interface OrderCommunicationsProps {
   orderId: string;
@@ -166,7 +156,7 @@ const OrderCommunications: React.FC<OrderCommunicationsProps> = ({ orderId, orde
                       {comm.sender_type === 'admin' ? 'অ্যাডমিন' : 'আপনি'}
                     </Badge>
                     <span className="text-xs text-gray-500">
-                      {formatDateTime(comm.created_at)}
+                      {formatDateTime(comm.created_at || '')}
                     </span>
                   </div>
                   
