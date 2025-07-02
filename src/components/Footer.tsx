@@ -13,6 +13,9 @@ interface FooterSettings {
   email?: string;
   address?: string;
   working_hours?: string;
+  copyright_text?: string;
+  privacy_policy_url?: string;
+  terms_url?: string;
 }
 
 const Footer = () => {
@@ -36,7 +39,10 @@ const Footer = () => {
           'phone_number',
           'email',
           'address',
-          'working_hours'
+          'working_hours',
+          'copyright_text',
+          'privacy_policy_url',
+          'terms_url'
         ]);
 
       if (error) throw error;
@@ -66,13 +72,13 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               {settings.facebook_url && (
-                <a href={settings.facebook_url} className="text-gray-400 hover:text-white transition-colors">ফেসবুক</a>
+                <a href={settings.facebook_url} className="text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">ফেসবুক</a>
               )}
               {settings.instagram_url && (
-                <a href={settings.instagram_url} className="text-gray-400 hover:text-white transition-colors">ইনস্টাগ্রাম</a>
+                <a href={settings.instagram_url} className="text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">ইনস্টাগ্রাম</a>
               )}
               {settings.youtube_url && (
-                <a href={settings.youtube_url} className="text-gray-400 hover:text-white transition-colors">ইউটিউব</a>
+                <a href={settings.youtube_url} className="text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">ইউটিউব</a>
               )}
             </div>
           </div>
@@ -113,9 +119,19 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © ২০২৪ {settings.company_name || 'SM TEAM SHOPS'}. সকল অধিকার সংরক্ষিত। | 
-            <Link to="/privacy" className="hover:text-white ml-2">গোপনীয়তা নীতি</Link> |
-            <Link to="/terms" className="hover:text-white ml-2">শর্তাবলী</Link>
+            {settings.copyright_text || `© ২০২৪ ${settings.company_name || 'SM TEAM SHOPS'}. সকল অধিকার সংরক্ষিত।`} | 
+            <Link 
+              to={settings.privacy_policy_url || "/privacy"} 
+              className="hover:text-white ml-2"
+            >
+              গোপনীয়তা নীতি
+            </Link> |
+            <Link 
+              to={settings.terms_url || "/terms"} 
+              className="hover:text-white ml-2"
+            >
+              শর্তাবলী
+            </Link>
           </p>
         </div>
       </div>
