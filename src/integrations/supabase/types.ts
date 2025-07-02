@@ -30,6 +30,108 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_features: {
+        Row: {
+          category: string
+          created_at: string | null
+          credits_required: number | null
+          description: string | null
+          feature_url: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          credits_required?: number | null
+          description?: string | null
+          feature_url?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          credits_required?: number | null
+          description?: string | null
+          feature_url?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      bengali_holidays: {
+        Row: {
+          bengali_date: string | null
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          is_government_holiday: boolean | null
+          name: string
+          type: string | null
+        }
+        Insert: {
+          bengali_date?: string | null
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          is_government_holiday?: boolean | null
+          name: string
+          type?: string | null
+        }
+        Update: {
+          bengali_date?: string | null
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          is_government_holiday?: boolean | null
+          name?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
+      credit_packages: {
+        Row: {
+          created_at: string | null
+          credits_amount: number
+          discount_percentage: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string | null
+          credits_amount: number
+          discount_percentage?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string | null
+          credits_amount?: number
+          discount_percentage?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -246,6 +348,45 @@ export type Database = {
         }
         Relationships: []
       }
+      premium_plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_months: number
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          monthly_credits: number | null
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_months: number
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          monthly_credits?: number | null
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_months?: number
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          monthly_credits?: number | null
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       product_packages: {
         Row: {
           created_at: string | null
@@ -453,6 +594,71 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_credits: {
+        Row: {
+          created_at: string | null
+          credits_balance: number | null
+          id: string
+          total_purchased: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits_balance?: number | null
+          id?: string
+          total_purchased?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits_balance?: number | null
+          id?: string
+          total_purchased?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_premium_subscriptions: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          plan_id: string | null
+          starts_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          plan_id?: string | null
+          starts_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          plan_id?: string | null
+          starts_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_premium_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "premium_plans"
             referencedColumns: ["id"]
           },
         ]
