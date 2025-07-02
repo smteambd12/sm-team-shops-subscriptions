@@ -528,15 +528,26 @@ export type Database = {
     }
     Functions: {
       create_subscription_from_order: {
-        Args: { order_uuid: string }
+        Args: Record<PropertyKey, never> | { order_uuid: string }
         Returns: undefined
       }
       increment_promo_usage: {
-        Args: { promo_code: string }
+        Args: Record<PropertyKey, never> | { promo_code: string }
+        Returns: undefined
+      }
+      update_subscription_details: {
+        Args: {
+          p_order_id: string
+          p_file_url?: string
+          p_link?: string
+          p_file_name?: string
+        }
         Returns: undefined
       }
       validate_promo_code: {
-        Args: { code_text: string; order_amount: number }
+        Args:
+          | { code_text: string; order_amount: number }
+          | { promo_code: string }
         Returns: Json
       }
     }

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +15,10 @@ import {
   Package, 
   RefreshCw,
   MessageSquare,
-  Eye
+  Eye,
+  Upload,
+  Link2,
+  FileText
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -48,8 +52,15 @@ const OrdersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
+  const [subscriptionDetails, setSubscriptionDetails] = useState({
+    file: null as File | null,
+    link: '',
+    fileName: ''
+  });
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -150,6 +161,68 @@ const OrdersManagement = () => {
     }
   };
 
+  const handleFileUpload = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${selectedOrder?.id}_${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('order-attachments')
+      .upload(fileName, file);
+
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('order-attachments')
+      .getPublicUrl(fileName);
+
+    return { url: publicUrl, fileName: file.name };
+  };
+
+  const handleSubscriptionUpdate = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setUploading(true);
+      let fileUrl = '';
+      let fileName = '';
+
+      // Upload file if provided
+      if (subscriptionDetails.file) {
+        const uploadResult = await handleFileUpload(subscriptionDetails.file);
+        fileUrl = uploadResult.url;
+        fileName = uploadResult.fileName;
+      }
+
+      // Update subscription details
+      const { error } = await supabase.rpc('update_subscription_details', {
+        p_order_id: selectedOrder.id,
+        p_file_url: fileUrl || null,
+        p_link: subscriptionDetails.link || null,
+        p_file_name: fileName || subscriptionDetails.fileName || null
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "সফল",
+        description: "সাবস্ক্রিপশন আপডেট হয়েছে।",
+      });
+
+      setShowSubscriptionDialog(false);
+      setSubscriptionDetails({ file: null, link: '', fileName: '' });
+      setSelectedOrder(null);
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast({
+        title: "ত্রুটি",
+        description: "সাবস্ক্রিপশন আপডেট করতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { label: 'অপেক্ষমান', variant: 'secondary' as const, icon: Clock },
@@ -176,6 +249,12 @@ const OrdersManagement = () => {
     setNewStatus(order.status);
     setAdminMessage(order.admin_message || '');
     setShowStatusDialog(true);
+  };
+
+  const openSubscriptionDialog = (order: Order) => {
+    setSelectedOrder(order);
+    setSubscriptionDetails({ file: null, link: '', fileName: '' });
+    setShowSubscriptionDialog(true);
   };
 
   if (loading) {
@@ -280,12 +359,25 @@ const OrdersManagement = () => {
                   <RefreshCw size={14} />
                   স্ট্যাটাস আপডেট
                 </Button>
+                
+                {order.status === 'confirmed' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openSubscriptionDialog(order)}
+                    className="flex items-center gap-1"
+                  >
+                    <Upload size={14} />
+                    সাবস্ক্রিপশন আপডেট
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
+      {/* Status Update Dialog */}
       <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
         <DialogContent>
           <DialogHeader>
@@ -334,6 +426,89 @@ const OrdersManagement = () => {
                 </Button>
                 <Button onClick={handleStatusUpdate}>
                   আপডেট করুন
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Subscription Update Dialog */}
+      <Dialog open={showSubscriptionDialog} onOpenChange={setShowSubscriptionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>সাবস্ক্রিপশন ফাইল/লিংক আপডেট</DialogTitle>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="space-y-4">
+              <div>
+                <p><strong>অর্ডার:</strong> #{selectedOrder.id.slice(0, 8)}</p>
+                <p><strong>গ্রাহক:</strong> {selectedOrder.customer_name}</p>
+              </div>
+
+              <div>
+                <Label htmlFor="file">ফাইল আপলোড</Label>
+                <Input
+                  id="file"
+                  type="file"
+                  onChange={(e) => setSubscriptionDetails({
+                    ...subscriptionDetails,
+                    file: e.target.files?.[0] || null
+                  })}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="link">সাবস্ক্রিপশন লিংক</Label>
+                <Input
+                  id="link"
+                  type="url"
+                  value={subscriptionDetails.link}
+                  onChange={(e) => setSubscriptionDetails({
+                    ...subscriptionDetails,
+                    link: e.target.value
+                  })}
+                  placeholder="https://example.com/subscription"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="fileName">ফাইলের নাম (ঐচ্ছিক)</Label>
+                <Input
+                  id="fileName"
+                  value={subscriptionDetails.fileName}
+                  onChange={(e) => setSubscriptionDetails({
+                    ...subscriptionDetails,
+                    fileName: e.target.value
+                  })}
+                  placeholder="কাস্টম ফাইলের নাম"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowSubscriptionDialog(false)}>
+                  বাতিল
+                </Button>
+                <Button 
+                  onClick={handleSubscriptionUpdate} 
+                  disabled={uploading}
+                  className="flex items-center gap-2"
+                >
+                  {uploading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      আপলোড হচ্ছে...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      আপডেট করুন
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
