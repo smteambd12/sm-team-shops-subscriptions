@@ -540,12 +540,14 @@ export type Database = {
         Returns: boolean
       }
       update_subscription_details: {
-        Args: {
-          p_order_id: string
-          p_file_url?: string
-          p_link?: string
-          p_file_name?: string
-        }
+        Args:
+          | Record<PropertyKey, never>
+          | {
+              p_order_id: string
+              p_file_url?: string
+              p_link?: string
+              p_file_name?: string
+            }
         Returns: undefined
       }
       validate_promo_code: {

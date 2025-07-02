@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,10 +55,14 @@ const SiteSettings = () => {
 
       const settingsObj: Partial<SiteSettingsData> = {};
       data?.forEach(item => {
-        if (item.setting_key === 'enable_advanced_search') {
-          settingsObj[item.setting_key] = item.setting_value === 'true';
-        } else {
-          settingsObj[item.setting_key as keyof SiteSettingsData] = item.setting_value || '';
+        const key = item.setting_key as keyof SiteSettingsData;
+        if (key in settings) {
+          if (key === 'enable_advanced_search') {
+            settingsObj[key] = item.setting_value === 'true';
+          } else {
+            // Type assertion to handle string values for non-boolean keys
+            (settingsObj as any)[key] = item.setting_value || '';
+          }
         }
       });
 
