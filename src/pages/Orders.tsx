@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare } from 'lucide-react';
+import OrderCommunications from '@/components/OrderCommunications';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface OrderItem {
   id: string;
@@ -58,7 +59,6 @@ const Orders = () => {
     try {
       setLoading(true);
       
-      // Fetch orders with order items - RLS will automatically filter by user_id
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
@@ -166,13 +166,32 @@ const Orders = () => {
                       })}
                     </CardDescription>
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-2 mb-2">
-                      {getStatusBadge(order.status)}
+                  <div className="text-right flex items-center gap-2">
+                    <div className="text-right">
+                      <div className="flex items-center gap-2 mb-2">
+                        {getStatusBadge(order.status)}
+                      </div>
+                      <p className="text-lg font-semibold">
+                        ৳{order.total_amount.toLocaleString()}
+                      </p>
                     </div>
-                    <p className="text-lg font-semibold">
-                      ৳{order.total_amount.toLocaleString()}
-                    </p>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          চ্যাট
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>অর্ডার কমিউনিকেশন</DialogTitle>
+                        </DialogHeader>
+                        <OrderCommunications 
+                          orderId={order.id} 
+                          orderNumber={order.id.slice(0, 8)}
+                        />
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardHeader>

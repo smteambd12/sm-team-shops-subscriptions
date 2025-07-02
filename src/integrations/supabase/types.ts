@@ -51,6 +51,56 @@ export type Database = {
         }
         Relationships: []
       }
+      order_communications: {
+        Row: {
+          admin_id: string | null
+          attachment_name: string | null
+          attachment_type: string | null
+          attachment_url: string | null
+          created_at: string | null
+          id: string
+          message: string
+          order_id: string
+          sender_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          order_id: string
+          sender_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          order_id?: string
+          sender_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_communications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -375,11 +425,44 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          notification_type: string
+          sent_at: string | null
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notification_type: string
+          sent_at?: string | null
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notification_type?: string
+          sent_at?: string | null
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_notifications_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_subscriptions: {
         Row: {
           auto_renew: boolean | null
           created_at: string | null
           expires_at: string
+          file_name: string | null
           id: string
           is_active: boolean | null
           order_id: string | null
@@ -388,6 +471,8 @@ export type Database = {
           product_id: string | null
           product_name: string
           starts_at: string | null
+          subscription_file_url: string | null
+          subscription_link: string | null
           updated_at: string | null
           user_id: string
         }
@@ -395,6 +480,7 @@ export type Database = {
           auto_renew?: boolean | null
           created_at?: string | null
           expires_at: string
+          file_name?: string | null
           id?: string
           is_active?: boolean | null
           order_id?: string | null
@@ -403,6 +489,8 @@ export type Database = {
           product_id?: string | null
           product_name: string
           starts_at?: string | null
+          subscription_file_url?: string | null
+          subscription_link?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -410,6 +498,7 @@ export type Database = {
           auto_renew?: boolean | null
           created_at?: string | null
           expires_at?: string
+          file_name?: string | null
           id?: string
           is_active?: boolean | null
           order_id?: string | null
@@ -418,6 +507,8 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           starts_at?: string | null
+          subscription_file_url?: string | null
+          subscription_link?: string | null
           updated_at?: string | null
           user_id?: string
         }

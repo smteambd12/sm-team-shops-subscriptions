@@ -1,12 +1,14 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Package, RefreshCw, Settings, Star } from 'lucide-react';
+import { Calendar, Clock, Package, RefreshCw, Settings, Star, Download, ExternalLink, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface Subscription {
   id: string;
@@ -19,12 +21,16 @@ interface Subscription {
   is_active: boolean;
   auto_renew: boolean;
   order_id: string;
+  subscription_file_url?: string;
+  subscription_link?: string;
+  file_name?: string;
 }
 
 const UserSubscriptions = () => {
   const { user } = useAuth();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingFile, setUploadingFile] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -48,6 +54,60 @@ const UserSubscriptions = () => {
       toast.error('সাবস্ক্রিপশন লোড করতে সমস্যা হয়েছে');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (subscriptionId: string, file: File) => {
+    try {
+      setUploadingFile(subscriptionId);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${subscriptionId}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('order-attachments')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('order-attachments')
+        .getPublicUrl(fileName);
+
+      const { error: updateError } = await supabase
+        .from('user_subscriptions')
+        .update({
+          subscription_file_url: publicUrl,
+          file_name: file.name
+        })
+        .eq('id', subscriptionId);
+
+      if (updateError) throw updateError;
+
+      toast.success('ফাইল আপলোড সফল হয়েছে');
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('ফাইল আপলোড করতে সমস্যা হয়েছে');
+    } finally {
+      setUploadingFile(null);
+    }
+  };
+
+  const handleLinkUpdate = async (subscriptionId: string, link: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_subscriptions')
+        .update({ subscription_link: link })
+        .eq('id', subscriptionId);
+
+      if (error) throw error;
+
+      toast.success('লিংক আপডেট হয়েছে');
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error updating link:', error);
+      toast.error('লিংক আপডেট করতে সমস্যা হয়েছে');
     }
   };
 
@@ -87,7 +147,6 @@ const UserSubscriptions = () => {
   };
 
   const getProductImage = (productId: string) => {
-    // Default product images based on common services
     const images: { [key: string]: string } = {
       'netflix': '/lovable-uploads/4b4eb95d-25d0-46d7-8b98-706dba898e03.png',
       'spotify': 'https://images.unsplash.com/photo-1611339555312-e607c8352fd7?w=100&h=100&fit=crop',
@@ -221,6 +280,37 @@ const UserSubscriptions = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* File and Link Access Section */}
+                  {(subscription.subscription_file_url || subscription.subscription_link) && (
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <h4 className="text-sm font-semibold mb-2 text-blue-800">অ্যাক্সেস লিংক/ফাইল</h4>
+                      <div className="space-y-2">
+                        {subscription.subscription_file_url && (
+                          <a
+                            href={subscription.subscription_file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            <Download className="h-4 w-4" />
+                            {subscription.file_name || 'ফাইল ডাউনলোড'}
+                          </a>
+                        )}
+                        {subscription.subscription_link && (
+                          <a
+                            href={subscription.subscription_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            সার্ভিস অ্যাক্সেস করুন
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-2">
                     <Button 
