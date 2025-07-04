@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +18,60 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import OrderManagementDialog from './OrderManagementDialog';
-import type { EnhancedOrder, EnhancedOrderItem, UserSubscription } from '@/types/admin';
+
+interface OrderItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  package_id: string;
+  package_duration: string;
+  price: number;
+  original_price?: number;
+  discount_percentage?: number;
+  quantity: number;
+  product_image?: string;
+}
+
+interface UserSubscription {
+  id: string;
+  subscription_file_url?: string;
+  subscription_link?: string;
+  file_name?: string;
+  is_active: boolean;
+  expires_at: string;
+  created_at: string;
+}
+
+interface Order {
+  id: string;
+  user_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_address: string;
+  total_amount: number;
+  payment_method: string;
+  transaction_id?: string;
+  promo_code?: string;
+  discount_amount: number;
+  status: string;
+  admin_message?: string;
+  created_at: string;
+  updated_at?: string;
+  // Consolidated fields from orders table
+  product_name?: string;
+  product_price?: number;
+  product_quantity?: number;
+  duration_days?: number;
+  // New text fields with concatenated values
+  product_price_text?: string;
+  product_quantity_text?: string;
+  duration_days_text?: string;
+  order_items: OrderItem[];
+}
 
 interface OrderCardProps {
-  order: EnhancedOrder;
+  order: Order;
   subscriptions: {[key: string]: UserSubscription[]};
   products: {[key: string]: any};
   getStatusBadge: (status: string) => JSX.Element;

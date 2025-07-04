@@ -46,21 +46,12 @@ export interface EnhancedOrder {
 
 export interface UserSubscription {
   id: string;
-  user_id: string;
-  product_id?: string;
-  product_name: string;
-  package_duration: string;
-  price: number;
-  starts_at?: string;
-  expires_at: string;
-  is_active: boolean;
-  auto_renew?: boolean;
   subscription_file_url?: string;
   subscription_link?: string;
   file_name?: string;
+  is_active: boolean;
+  expires_at: string;
   created_at: string;
-  updated_at?: string;
-  order_id?: string;
 }
 
 export interface OrderStats {
