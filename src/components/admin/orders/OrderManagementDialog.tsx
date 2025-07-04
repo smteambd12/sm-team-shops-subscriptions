@@ -31,6 +31,7 @@ import {
   MapPin,
   CreditCard
 } from 'lucide-react';
+import OrderItemsDetails from './OrderItemsDetails';
 
 interface OrderManagementDialogProps {
   order: any;
@@ -376,6 +377,14 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
             </CardContent>
           </Card>
         </div>
+
+        {/* Order Items Details */}
+        <OrderItemsDetails
+          items={order.order_items}
+          getDurationLabel={getDurationLabel}
+          getCategoryLabel={getCategoryLabel}
+          formatCurrency={formatCurrency}
+        />
 
         {/* Order Management Section */}
         <Card className="border-2 border-blue-200">

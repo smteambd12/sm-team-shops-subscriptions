@@ -109,8 +109,11 @@ export type Database = {
           order_id: string
           original_price: number | null
           package_duration: string
+          package_features: string[] | null
           package_id: string
           price: number
+          product_category: string | null
+          product_description: string | null
           product_id: string
           product_image: string | null
           product_name: string
@@ -123,8 +126,11 @@ export type Database = {
           order_id: string
           original_price?: number | null
           package_duration: string
+          package_features?: string[] | null
           package_id: string
           price: number
+          product_category?: string | null
+          product_description?: string | null
           product_id: string
           product_image?: string | null
           product_name: string
@@ -137,8 +143,11 @@ export type Database = {
           order_id?: string
           original_price?: number | null
           package_duration?: string
+          package_features?: string[] | null
           package_id?: string
           price?: number
+          product_category?: string | null
+          product_description?: string | null
           product_id?: string
           product_image?: string | null
           product_name?: string
@@ -527,9 +536,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      confirm_order_and_create_subscriptions: {
+        Args: { order_uuid: string }
+        Returns: Json
+      }
       create_subscription_from_order: {
         Args: Record<PropertyKey, never> | { order_uuid: string }
         Returns: undefined
+      }
+      get_order_details_with_products: {
+        Args: { order_uuid: string }
+        Returns: {
+          order_id: string
+          customer_name: string
+          customer_email: string
+          customer_phone: string
+          total_amount: number
+          status: string
+          created_at: string
+          product_id: string
+          product_name: string
+          product_category: string
+          product_description: string
+          package_duration: string
+          package_price: number
+          quantity: number
+          package_features: string[]
+        }[]
       }
       increment_promo_usage: {
         Args: Record<PropertyKey, never> | { promo_code: string }

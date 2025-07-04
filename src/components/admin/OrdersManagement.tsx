@@ -19,8 +19,11 @@ interface OrderItem {
   id: string;
   product_id: string;
   product_name: string;
+  product_category?: string;
+  product_description?: string;
   package_id: string;
   package_duration: string;
+  package_features?: string[];
   price: number;
   original_price?: number;
   discount_percentage?: number;
@@ -174,17 +177,20 @@ const OrdersManagement = () => {
     try {
       setLoading(true);
       
-      // Fetch orders with items
+      // Fetch orders with enhanced order items including product details
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select(`
           *,
-          order_items (*)
+          order_items (
+            *
+          )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
+      console.log('Fetched orders with enhanced data:', ordersData);
       setOrders(ordersData || []);
 
       // Fetch product details for all products in orders
