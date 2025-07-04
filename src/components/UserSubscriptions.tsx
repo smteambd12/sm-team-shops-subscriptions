@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscriptionNotifications } from '@/hooks/useSubscriptionNotifications';
 import SubscriptionNotificationBanner from '@/components/notifications/SubscriptionNotificationBanner';
-import { Calendar, Package, Clock, Download, ExternalLink, FileText, RefreshCw } from 'lucide-react';
+import { Calendar, Package, Clock, Download, ExternalLink, FileText, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface UserSubscription {
   id: string;
@@ -178,100 +178,126 @@ const UserSubscriptions = () => {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {subscriptions.map((subscription) => (
-            <Card key={subscription.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-blue-600" />
-                      {subscription.product_name}
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      প্যাকেজ: {subscription.package_duration} • মূল্য: ৳{subscription.price.toLocaleString()}
-                    </CardDescription>
-                  </div>
-                  <div className="flex flex-col gap-2 items-end">
-                    {getStatusBadge(subscription)}
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {getRemainingDays(subscription.expires_at)}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">
-                        <strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">
-                        <strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      <strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}
-                    </p>
-                    <p className="text-sm">
-                      <strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
-                    </p>
-                  </div>
-                </div>
+          {subscriptions.map((subscription) => {
+            const now = new Date();
+            const expiresAt = new Date(subscription.expires_at);
+            const isExpired = expiresAt < now;
+            const isExpiringSoon = !isExpired && expiresAt.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000;
 
-                {/* File and Link Access */}
-                {(subscription.subscription_file_url || subscription.subscription_link) && (
-                  <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                      <Download className="h-4 w-4" />
-                      সাবস্ক্রিপশন অ্যাক্সেস
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {subscription.subscription_file_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
-                          className="flex items-center gap-2"
-                        >
-                          <FileText className="h-4 w-4" />
-                          {subscription.file_name || 'ফাইল ডাউনলোড'}
-                        </Button>
-                      )}
-                      {subscription.subscription_link && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(subscription.subscription_link, '_blank')}
-                          className="flex items-center gap-2"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          সাবস্ক্রিপশন লিংক
-                        </Button>
-                      )}
+            return (
+              <Card 
+                key={subscription.id} 
+                className={`hover:shadow-md transition-shadow ${
+                  isExpired ? 'border-red-200 bg-red-50' : 
+                  isExpiringSoon ? 'border-yellow-200 bg-yellow-50' : ''
+                }`}
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5 text-blue-600" />
+                        {subscription.product_name}
+                        {isExpired && (
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        )}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        প্যাকেজ: {subscription.package_duration} • মূল্য: ৳{subscription.price.toLocaleString()}
+                      </CardDescription>
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      {getStatusBadge(subscription)}
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {getRemainingDays(subscription.expires_at)}
+                      </Badge>
                     </div>
                   </div>
-                )}
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
+                          <strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
+                          <strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        <strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}
+                      </p>
+                      <p className="text-sm">
+                        <strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                      </p>
+                    </div>
+                  </div>
 
-                {/* Show message if no access files/links are available */}
-                {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && (
-                  <Alert className="mt-4">
-                    <Clock className="h-4 w-4" />
-                    <AlertDescription>
-                      আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন বা সাপোর্টের সাথে যোগাযোগ করুন।
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  {/* File and Link Access */}
+                  {(subscription.subscription_file_url || subscription.subscription_link) && (
+                    <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        সাবস্ক্রিপশন অ্যাক্সেস
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {subscription.subscription_file_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
+                            className="flex items-center gap-2"
+                          >
+                            <FileText className="h-4 w-4" />
+                            {subscription.file_name || 'ফাইল ডাউনলোড'}
+                          </Button>
+                        )}
+                        {subscription.subscription_link && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(subscription.subscription_link, '_blank')}
+                            className="flex items-center gap-2"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            সাবস্ক্রিপশন লিংক
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show message if no access files/links are available but subscription is active */}
+                  {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && !isExpired && (
+                    <Alert className="mt-4">
+                      <Clock className="h-4 w-4" />
+                      <AlertDescription>
+                        আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন বা সাপোর্টের সাথে যোগাযোগ করুন।
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Show renewal message for expired subscriptions */}
+                  {isExpired && (
+                    <Alert className="mt-4 border-red-200 bg-red-50">
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-red-800">
+                        এই সাবস্ক্রিপশনের মেয়াদ শেষ হয়ে গেছে। নতুন করে সাবস্ক্রিপশন নিতে হোমপেজে যান।
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
