@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -56,11 +55,7 @@ const MobileProductCard: React.FC<MobileProductCardProps> = ({ product }) => {
 
   const handleAddToCart = () => {
     if (selectedPkg) {
-      addToCart({
-        productId: product.id,
-        packageId: selectedPkg.id,
-        quantity: 1
-      });
+      addToCart(product.id, selectedPkg.id);
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 2000);
     }

@@ -178,6 +178,7 @@ const CheckoutOrderSummary: React.FC<CheckoutOrderSummaryProps> = ({
           ) : (
             <PromoCodeInput
               onPromoApplied={onPromoApplied}
+              onPromoRemoved={onPromoRemoved}
               orderAmount={subtotal}
             />
           )}
