@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +28,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  CreditCard
+  CreditCard,
+  ShoppingCart
 } from 'lucide-react';
 import OrderItemsDetails from './OrderItemsDetails';
 
@@ -350,6 +350,112 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
                     </span>
                   </div>
                 )}
+
+                {/* Detailed Product Information Section */}
+                <Card className="border-2 border-indigo-200 bg-indigo-50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-indigo-800 text-lg">
+                      <ShoppingCart className="h-5 w-5" />
+                      ক্রয়কৃত প্রোডাক্ট বিস্তারিত
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {order.order_items.map((item: any, index: number) => (
+                      <div key={item.id} className="bg-white p-4 rounded-lg border border-indigo-200">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-800 text-lg mb-1">
+                              {item.product_name}
+                            </h4>
+                            {item.product_description && (
+                              <p className="text-gray-600 text-sm mb-2">
+                                {item.product_description}
+                              </p>
+                            )}
+                          </div>
+                          {item.product_image && (
+                            <img 
+                              src={item.product_image} 
+                              alt={item.product_name}
+                              className="w-12 h-12 object-cover rounded-lg ml-3"
+                            />
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Clock className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm font-medium text-blue-800">প্যাকেজ মেয়াদ</span>
+                            </div>
+                            <p className="text-blue-700 font-semibold">
+                              {getDurationLabel(item.package_duration)}
+                            </p>
+                          </div>
+                          
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                              <DollarSign className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium text-green-800">মূল্য</span>
+                            </div>
+                            <p className="text-green-700 font-semibold">
+                              {formatCurrency(item.price)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-purple-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Package className="h-4 w-4 text-purple-600" />
+                              <span className="text-sm font-medium text-purple-800">পরিমাণ</span>
+                            </div>
+                            <p className="text-purple-700 font-semibold">{item.quantity} টি</p>
+                          </div>
+                          
+                          {item.product_category && (
+                            <div className="bg-orange-50 p-3 rounded-lg">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Layers className="h-4 w-4 text-orange-600" />
+                                <span className="text-sm font-medium text-orange-800">ক্যাটেগরি</span>
+                              </div>
+                              <p className="text-orange-700 font-semibold">
+                                {getCategoryLabel(item.product_category)}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {item.package_features && item.package_features.length > 0 && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Star className="h-4 w-4 text-yellow-600" />
+                              <span className="text-sm font-medium text-gray-700">প্যাকেজ ফিচার:</span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-1">
+                              {item.package_features.map((feature: string, featureIndex: number) => (
+                                <div key={featureIndex} className="flex items-center gap-2 text-sm text-gray-600">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  {feature}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mt-3 pt-3 border-t border-gray-200 bg-gray-50 p-3 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600 font-medium">সাবটোটাল:</span>
+                            <span className="font-bold text-lg text-gray-800">
+                              {formatCurrency(item.price * item.quantity)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
                 {order.promo_code && (
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="text-gray-600">প্রোমো কোড:</span>
