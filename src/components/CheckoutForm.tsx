@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -96,6 +97,36 @@ const CheckoutForm = () => {
     setPromoDiscount(0);
   };
 
+  // Calculate primary product information for the order
+  const getPrimaryProductInfo = () => {
+    if (items.length === 0) return null;
+
+    // Get the first item as primary product
+    const primaryItem = items[0];
+    const product = products.find(p => p.id === primaryItem.productId);
+    const pkg = product?.packages.find(p => p.id === primaryItem.packageId);
+
+    if (!product || !pkg) return null;
+
+    // Convert duration to days
+    const getDurationInDays = (duration: string) => {
+      switch (duration) {
+        case '1month': return 30;
+        case '3month': return 90;
+        case '6month': return 180;
+        case 'lifetime': return null; // null for lifetime
+        default: return null;
+      }
+    };
+
+    return {
+      product_name: product.name,
+      product_price: pkg.price,
+      product_quantity: primaryItem.quantity,
+      duration_days: getDurationInDays(pkg.duration)
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -138,24 +169,36 @@ const CheckoutForm = () => {
     try {
       setLoading(true);
 
-      // Create order
-      const { data: orderData, error: orderError } = await supabase
+      // Get primary product information
+      const primaryProductInfo = getPrimaryProductInfo();
+
+      // Create order with primary product information
+      const orderData = {
+        user_id: user.id,
+        customer_name: customerInfo.name,
+        customer_email: customerInfo.email,
+        customer_phone: customerInfo.phone,
+        customer_address: customerInfo.address,
+        total_amount: finalTotal,
+        payment_method: paymentMethod,
+        transaction_id: transactionId,
+        promo_code: appliedPromoCode || null,
+        discount_amount: promoDiscount,
+        status: 'pending',
+        // Add primary product information
+        ...(primaryProductInfo && {
+          product_name: primaryProductInfo.product_name,
+          product_price: primaryProductInfo.product_price,
+          product_quantity: primaryProductInfo.product_quantity,
+          duration_days: primaryProductInfo.duration_days
+        })
+      };
+
+      console.log('Creating order with data:', orderData);
+
+      const { data: createdOrder, error: orderError } = await supabase
         .from('orders')
-        .insert([
-          {
-            user_id: user.id,
-            customer_name: customerInfo.name,
-            customer_email: customerInfo.email,
-            customer_phone: customerInfo.phone,
-            customer_address: customerInfo.address,
-            total_amount: finalTotal,
-            payment_method: paymentMethod,
-            transaction_id: transactionId,
-            promo_code: appliedPromoCode || null,
-            discount_amount: promoDiscount,
-            status: 'pending'
-          }
-        ])
+        .insert([orderData])
         .select()
         .single();
 
@@ -167,7 +210,7 @@ const CheckoutForm = () => {
         const pkg = product?.packages.find(p => p.id === item.packageId);
         
         return {
-          order_id: orderData.id,
+          order_id: createdOrder.id,
           product_id: item.productId,
           product_name: product?.name || 'Unknown Product',
           product_image: product?.image || '',
@@ -200,9 +243,9 @@ const CheckoutForm = () => {
 
       // Clear cart and redirect to order confirmation
       clearCart();
-      navigate(`/order-confirmation/${orderData.id}`);
+      navigate(`/order-confirmation/${createdOrder.id}`);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating order:', error);
       toast({
         title: "অর্ডার ত্রুটি",
