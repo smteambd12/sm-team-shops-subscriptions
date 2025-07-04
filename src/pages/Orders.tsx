@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare, Download, ExternalLink, FileText } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare, Download, ExternalLink, FileText, Calendar, ShoppingCart, DollarSign } from 'lucide-react';
 import OrderCommunications from '@/components/OrderCommunications';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -19,7 +20,10 @@ interface OrderItem {
   package_id: string;
   package_duration: string;
   price: number;
+  original_price?: number;
+  discount_percentage?: number;
   quantity: number;
+  product_image?: string;
 }
 
 interface Order {
@@ -131,6 +135,16 @@ const Orders = () => {
     );
   };
 
+  const getDurationLabel = (duration: string) => {
+    const labels = {
+      '1month': '১ মাস',
+      '3month': '৩ মাস', 
+      '6month': '৬ মাস',
+      'lifetime': 'লাইফটাইম'
+    };
+    return labels[duration as keyof typeof labels] || duration;
+  };
+
   const handleFileDownload = (url: string, fileName?: string) => {
     const link = document.createElement('a');
     link.href = url;
@@ -185,14 +199,16 @@ const Orders = () => {
       ) : (
         <div className="space-y-6">
           {orders.map((order) => (
-            <Card key={order.id}>
+            <Card key={order.id} className="border-l-4 border-l-blue-500">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <ShoppingCart className="h-5 w-5" />
                       অর্ডার #{order.id.slice(0, 8)}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-base mt-1">
+                      <Calendar className="h-4 w-4 inline mr-1" />
                       {new Date(order.created_at).toLocaleDateString('bn-BD', {
                         year: 'numeric',
                         month: 'long',
@@ -207,7 +223,8 @@ const Orders = () => {
                       <div className="flex items-center gap-2 mb-2">
                         {getStatusBadge(order.status)}
                       </div>
-                      <p className="text-lg font-semibold">
+                      <p className="text-xl font-bold text-green-600 flex items-center gap-1">
+                        <DollarSign className="h-5 w-5" />
                         ৳{order.total_amount.toLocaleString()}
                       </p>
                     </div>
@@ -280,10 +297,99 @@ const Orders = () => {
                   </div>
                 )}
 
+                {/* Product Details Section - Enhanced */}
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
+                  <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-blue-800">
+                    <Package className="h-5 w-5" />
+                    অর্ডার করা প্রোডাক্ট সমূহ
+                  </h4>
+                  <div className="grid gap-4">
+                    {order.order_items.map((item, index) => (
+                      <div key={item.id} className="bg-white p-4 rounded-lg border shadow-sm">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h5 className="font-bold text-lg text-gray-800 mb-1">{item.product_name}</h5>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                              <Badge variant="outline" className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {getDurationLabel(item.package_duration)}
+                              </Badge>
+                              <Badge variant="outline">
+                                পরিমাণ: {item.quantity}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="flex flex-col items-end gap-1">
+                              {item.original_price && item.original_price > item.price && (
+                                <span className="text-sm text-gray-500 line-through">
+                                  ৳{item.original_price.toLocaleString()}
+                                </span>
+                              )}
+                              <span className="text-lg font-bold text-green-600">
+                                ৳{item.price.toLocaleString()}
+                              </span>
+                              {item.discount_percentage && item.discount_percentage > 0 && (
+                                <Badge variant="destructive" className="text-xs">
+                                  {item.discount_percentage}% ছাড়
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Product Summary */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="text-gray-600">প্রোডাক্ট ID:</span>
+                            <p className="font-mono text-xs">{item.product_id}</p>
+                          </div>
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="text-gray-600">প্যাকেজ সময়কাল:</span>
+                            <p className="font-semibold">{getDurationLabel(item.package_duration)}</p>
+                          </div>
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="text-gray-600">একক মূল্য:</span>
+                            <p className="font-semibold text-green-600">৳{item.price.toLocaleString()}</p>
+                          </div>
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="text-gray-600">মোট মূল্য:</span>
+                            <p className="font-bold text-green-600">৳{(item.price * item.quantity).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Order Summary */}
+                  <div className="mt-4 p-3 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">মোট আইটেম:</span>
+                        <p className="font-semibold">{order.order_items.reduce((sum, item) => sum + item.quantity, 0)}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">সাবটোটাল:</span>
+                        <p className="font-semibold">৳{(order.total_amount + (order.discount_amount || 0)).toLocaleString()}</p>
+                      </div>
+                      {order.discount_amount > 0 && (
+                        <div>
+                          <span className="text-gray-600">ছাড়:</span>
+                          <p className="font-semibold text-red-600">-৳{order.discount_amount.toLocaleString()}</p>
+                        </div>
+                      )}
+                      <div>
+                        <span className="text-gray-600">সর্বমোট:</span>
+                        <p className="font-bold text-xl text-green-600">৳{order.total_amount.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold mb-2">গ্রাহকের তথ্য</h4>
-                    <div className="space-y-1 text-sm">
+                    <div className="space-y-1 text-sm bg-gray-50 p-3 rounded">
                       <p><strong>নাম:</strong> {order.customer_name}</p>
                       <p><strong>ইমেইল:</strong> {order.customer_email}</p>
                       <p><strong>ফোন:</strong> {order.customer_phone}</p>
@@ -293,7 +399,7 @@ const Orders = () => {
                   
                   <div>
                     <h4 className="font-semibold mb-2">পেমেন্ট তথ্য</h4>
-                    <div className="space-y-1 text-sm">
+                    <div className="space-y-1 text-sm bg-gray-50 p-3 rounded">
                       <p><strong>পেমেন্ট মাধ্যম:</strong> {order.payment_method}</p>
                       {order.transaction_id && (
                         <p><strong>ট্রানজেকশন ID:</strong> {order.transaction_id}</p>
@@ -306,30 +412,6 @@ const Orders = () => {
                       )}
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">অর্ডার আইটেম</h4>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>পণ্য</TableHead>
-                        <TableHead>প্যাকেজ</TableHead>
-                        <TableHead>সংখ্যা</TableHead>
-                        <TableHead className="text-right">মূল্য</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {order.order_items.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium">{item.product_name}</TableCell>
-                          <TableCell>{item.package_duration}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                          <TableCell className="text-right">৳{item.price.toLocaleString()}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
                 </div>
               </CardContent>
             </Card>
