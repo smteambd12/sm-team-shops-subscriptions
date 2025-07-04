@@ -15,7 +15,9 @@ import {
   Phone,
   Download,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  Clock,
+  ShoppingCart
 } from 'lucide-react';
 import OrderManagementDialog from './OrderManagementDialog';
 
@@ -58,6 +60,11 @@ interface Order {
   admin_message?: string;
   created_at: string;
   updated_at?: string;
+  // New consolidated fields from orders table
+  product_name?: string;
+  product_price?: number;
+  product_quantity?: number;
+  duration_days?: number;
   order_items: OrderItem[];
 }
 
@@ -84,6 +91,13 @@ const OrderCard: React.FC<OrderCardProps> = ({
   formatCurrency,
   onOrderUpdate
 }) => {
+  const formatDurationDays = (days: number) => {
+    if (days >= 36500) return 'লাইফটাইম';
+    if (days >= 365) return `${Math.floor(days / 365)} বছর`;
+    if (days >= 30) return `${Math.floor(days / 30)} মাস`;
+    return `${days} দিন`;
+  };
+
   return (
     <Card className="overflow-hidden border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
       <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
@@ -111,7 +125,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                 {formatCurrency(order.total_amount)}
               </Badge>
               <Badge variant="outline" className="text-xs">
-                {order.order_items.reduce((sum, item) => sum + item.quantity, 0)} আইটেম
+                {order.product_quantity || order.order_items.reduce((sum, item) => sum + item.quantity, 0)} আইটেম
               </Badge>
             </div>
           </div>
@@ -152,26 +166,54 @@ const OrderCard: React.FC<OrderCardProps> = ({
             </div>
           </div>
 
-          {/* Products Summary */}
+          {/* Consolidated Products Summary */}
           <div>
             <h4 className="font-semibold mb-3 flex items-center gap-2 text-green-800">
-              <Package className="h-4 w-4" />
-              প্রোডাক্ট সামারি
+              <ShoppingCart className="h-4 w-4" />
+              পণ্যের সংক্ষিপ্ত তথ্য
             </h4>
             <div className="space-y-3">
-              {order.order_items.map((item) => (
-                <div key={item.id} className="text-sm p-3 bg-green-50 rounded-lg border border-green-200">
-                  <p className="font-semibold text-green-800 mb-1">{item.product_name}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">
-                      {getDurationLabel(item.package_duration)} × {item.quantity}
-                    </span>
-                    <span className="font-bold text-green-700">
-                      {formatCurrency(item.price * item.quantity)}
-                    </span>
+              {/* Display consolidated product information */}
+              <div className="text-sm p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="space-y-2">
+                  <div>
+                    <span className="font-medium text-green-800">পণ্য:</span>
+                    <p className="text-gray-700 text-xs mt-1">
+                      {order.product_name || order.order_items.map(item => item.product_name).join(' + ')}
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-green-200">
+                    <div>
+                      <span className="font-medium text-green-800 text-xs">মোট পরিমাণ:</span>
+                      <p className="text-gray-700 font-semibold">
+                        {order.product_quantity || order.order_items.reduce((sum, item) => sum + item.quantity, 0)} টি
+                      </p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-green-800 text-xs">মোট মেয়াদ:</span>
+                      <p className="text-gray-700 font-semibold">
+                        {order.duration_days ? formatDurationDays(order.duration_days) : 'N/A'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Show individual items if multiple */}
+              {order.order_items.length > 1 && (
+                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                  <span className="font-medium">বিস্তারিত:</span>
+                  <ul className="mt-1 space-y-1">
+                    {order.order_items.map((item, index) => (
+                      <li key={item.id} className="flex justify-between">
+                        <span>{item.product_name} ({getDurationLabel(item.package_duration)})</span>
+                        <span>{item.quantity}টি</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 
@@ -242,6 +284,35 @@ const OrderCard: React.FC<OrderCardProps> = ({
               <MessageSquare className="h-4 w-4 inline mr-2" />
               <strong>অ্যাডমিন বার্তা:</strong> {order.admin_message}
             </p>
+          </div>
+        )}
+
+        {/* Consolidated Product Summary */}
+        {order.product_name && (
+          <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+            <h5 className="font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              সংক্ষিপ্ত অর্ডার তথ্য
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="text-indigo-600 font-medium">পণ্যসমূহ:</span>
+                <p className="text-gray-700 mt-1">{order.product_name}</p>
+              </div>
+              <div>
+                <span className="text-indigo-600 font-medium">মোট পরিমাণ:</span>
+                <p className="text-gray-700 mt-1">{order.product_quantity} টি</p>
+              </div>
+              <div>
+                <span className="text-indigo-600 font-medium flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  মোট মেয়াদ:
+                </span>
+                <p className="text-gray-700 mt-1">
+                  {order.duration_days ? formatDurationDays(order.duration_days) : 'N/A'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </CardContent>

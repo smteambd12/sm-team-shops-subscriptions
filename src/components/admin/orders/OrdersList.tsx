@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Package, Table, Grid } from 'lucide-react';
 import OrderCard from './OrderCard';
+import OrdersTable from './OrdersTable';
 import type { EnhancedOrder, UserSubscription } from '@/types/admin';
 
 interface OrdersListProps {
@@ -28,6 +30,8 @@ const OrdersList: React.FC<OrdersListProps> = ({
   formatCurrency,
   onOrderUpdate
 }) => {
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+
   if (orders.length === 0) {
     return (
       <Card>
@@ -50,24 +54,64 @@ const OrdersList: React.FC<OrdersListProps> = ({
         <p className="text-sm text-gray-600">
           {orders.length} টি অর্ডার পাওয়া গেছে
         </p>
+        
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant={viewMode === 'cards' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('cards')}
+            className="flex items-center gap-2"
+          >
+            <Grid className="h-4 w-4" />
+            কার্ড ভিউ
+          </Button>
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('table')}
+            className="flex items-center gap-2"
+          >
+            <Table className="h-4 w-4" />
+            টেবিল ভিউ
+          </Button>
+        </div>
       </div>
       
-      <div className="grid gap-6">
-        {orders.map((order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            subscriptions={subscriptions}
-            products={products}
-            getStatusBadge={getStatusBadge}
-            getDurationLabel={getDurationLabel}
-            getPaymentMethodLabel={getPaymentMethodLabel}
-            formatDate={formatDate}
-            formatCurrency={formatCurrency}
-            onOrderUpdate={onOrderUpdate}
-          />
-        ))}
-      </div>
+      {viewMode === 'cards' ? (
+        <div className="grid gap-6">
+          {orders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              subscriptions={subscriptions}
+              products={products}
+              getStatusBadge={getStatusBadge}
+              getDurationLabel={getDurationLabel}
+              getPaymentMethodLabel={getPaymentMethodLabel}
+              formatDate={formatDate}
+              formatCurrency={formatCurrency}
+              onOrderUpdate={onOrderUpdate}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <OrdersTable
+              orders={orders}
+              subscriptions={subscriptions}
+              products={products}
+              getStatusBadge={getStatusBadge}
+              getDurationLabel={getDurationLabel}
+              getPaymentMethodLabel={getPaymentMethodLabel}
+              formatDate={formatDate}
+              formatCurrency={formatCurrency}
+              onOrderUpdate={onOrderUpdate}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
