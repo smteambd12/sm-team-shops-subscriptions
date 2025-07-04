@@ -36,6 +36,10 @@ export interface EnhancedOrder {
   product_price?: number;
   product_quantity?: number;
   duration_days?: number;
+  // New text fields with concatenated values
+  product_price_text?: string;
+  product_quantity_text?: string;
+  duration_days_text?: string;
   // Enhanced order items
   order_items: EnhancedOrderItem[];
 }

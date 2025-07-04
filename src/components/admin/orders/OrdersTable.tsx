@@ -59,7 +59,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           <TableRow>
             <TableHead>অর্ডার তথ্য</TableHead>
             <TableHead>গ্রাহক</TableHead>
-            <TableHead>পণ্যের তথ্য</TableHead>
+            <TableHead>পণ্যের বিস্তারিত</TableHead>
             <TableHead>মোট পরিমাণ</TableHead>
             <TableHead>স্ট্যাটাস</TableHead>
             <TableHead>পেমেন্ট</TableHead>
@@ -72,6 +72,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
             const displayProductName = order.product_name || order.order_items.map(item => item.product_name).join(' + ');
             const displayQuantity = order.product_quantity || order.order_items.reduce((sum, item) => sum + item.quantity, 0);
             const displayDuration = order.duration_days ? formatDurationDays(order.duration_days) : 'N/A';
+            
+            // Use concatenated text fields for detailed display
+            const displayQuantityText = order.product_quantity_text || displayQuantity.toString();
+            const displayDurationText = order.duration_days_text || displayDuration;
+            const displayPriceText = order.product_price_text || (order.product_price ? order.product_price.toString() : 'N/A');
 
             return (
               <TableRow key={order.id} className="hover:bg-gray-50">
@@ -98,7 +103,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                 
                 <TableCell>
                   <div className="space-y-2 max-w-xs">
-                    {/* Consolidated Product Information */}
+                    {/* Enhanced Product Information with Concatenated Details */}
                     <div className="bg-green-50 p-3 rounded border border-green-200">
                       <div className="font-medium text-green-800 text-sm flex items-center gap-1 mb-2">
                         <ShoppingCart className="h-3 w-3" />
@@ -108,20 +113,43 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                         {displayProductName}
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-2 text-xs">
                         <div>
-                          <span className="font-medium text-green-700">পরিমাণ:</span>
+                          <span className="font-medium text-green-700">পরিমাণসমূহ:</span>
                           <div className="text-gray-600 font-semibold">
-                            {displayQuantity} টি
+                            {displayQuantityText} টি
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-green-700">মূল্যসমূহ:</span>
+                          <div className="text-gray-600 font-semibold">
+                            ৳{displayPriceText}
                           </div>
                         </div>
                         <div>
                           <span className="font-medium text-green-700 flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            মেয়াদ:
+                            মেয়াদসমূহ:
                           </span>
                           <div className="text-gray-600 font-semibold">
-                            {displayDuration}
+                            {displayDurationText} দিন
+                          </div>
+                        </div>
+                        
+                        <div className="pt-2 border-t border-green-300">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <span className="font-medium text-green-700">মোট:</span>
+                              <div className="text-gray-600 font-bold text-sm">
+                                {displayQuantity} টি
+                              </div>
+                            </div>
+                            <div>
+                              <span className="font-medium text-green-700">মোট মেয়াদ:</span>
+                              <div className="text-gray-600 font-bold text-sm">
+                                {displayDuration}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>

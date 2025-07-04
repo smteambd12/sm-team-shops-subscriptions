@@ -63,6 +63,10 @@ interface Order {
   product_price?: number;
   product_quantity?: number;
   duration_days?: number;
+  // New text fields with concatenated values
+  product_price_text?: string;
+  product_quantity_text?: string;
+  duration_days_text?: string;
   order_items: OrderItem[];
 }
 
@@ -100,6 +104,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
   const displayProductName = order.product_name || order.order_items.map(item => item.product_name).join(' + ');
   const displayQuantity = order.product_quantity || order.order_items.reduce((sum, item) => sum + item.quantity, 0);
   const displayDuration = order.duration_days ? formatDurationDays(order.duration_days) : 'N/A';
+  
+  // Use concatenated text fields for detailed display
+  const displayQuantityText = order.product_quantity_text || displayQuantity.toString();
+  const displayDurationText = order.duration_days_text || displayDuration;
+  const displayPriceText = order.product_price_text || (order.product_price ? formatCurrency(order.product_price) : 'N/A');
 
   return (
     <Card className="overflow-hidden border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
@@ -169,11 +178,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
             </div>
           </div>
 
-          {/* Consolidated Products Summary */}
+          {/* Enhanced Products Summary with Concatenated Details */}
           <div>
             <h4 className="font-semibold mb-3 flex items-center gap-2 text-green-800">
               <ShoppingCart className="h-4 w-4" />
-              পণ্যের সারসংক্ষেপ
+              পণ্যের বিস্তারিত
             </h4>
             <div className="space-y-3">
               <div className="text-sm p-4 bg-green-50 rounded-lg border border-green-200">
@@ -185,21 +194,44 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-green-200">
+                  <div className="grid grid-cols-1 gap-3 pt-2 border-t border-green-200">
                     <div>
-                      <span className="font-medium text-green-800 text-xs">মোট পরিমাণ:</span>
-                      <p className="text-gray-700 font-semibold text-lg">
-                        {displayQuantity} টি
+                      <span className="font-medium text-green-800 text-xs">পরিমাণসমূহ:</span>
+                      <p className="text-gray-700 font-semibold text-sm">
+                        {displayQuantityText} টি
+                      </p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-green-800 text-xs">মূল্যসমূহ:</span>
+                      <p className="text-gray-700 font-semibold text-sm">
+                        ৳{displayPriceText}
                       </p>
                     </div>
                     <div>
                       <span className="font-medium text-green-800 text-xs flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        মোট মেয়াদ:
+                        মেয়াদসমূহ:
                       </span>
-                      <p className="text-gray-700 font-semibold text-lg">
-                        {displayDuration}
+                      <p className="text-gray-700 font-semibold text-sm">
+                        {displayDurationText} দিন
                       </p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-green-300">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="font-medium text-green-800 text-xs">মোট পরিমাণ:</span>
+                        <p className="text-gray-700 font-bold text-lg">
+                          {displayQuantity} টি
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-green-800 text-xs">মোট মেয়াদ:</span>
+                        <p className="text-gray-700 font-bold text-lg">
+                          {displayDuration}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
