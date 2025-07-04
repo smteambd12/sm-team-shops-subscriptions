@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -30,7 +31,10 @@ import {
   RefreshCw,
   ArrowRight,
   Download,
-  ExternalLink
+  ExternalLink,
+  Phone,
+  Mail,
+  Home
 } from 'lucide-react';
 
 interface OrderItem {
@@ -227,8 +231,8 @@ const OrdersManagement = () => {
     const Icon = config.icon;
 
     return (
-      <Badge className={`flex items-center gap-2 px-3 py-1 ${config.color} font-semibold`}>
-        <Icon size={14} />
+      <Badge className={`flex items-center gap-1 px-2 py-1 ${config.color} font-semibold text-xs`}>
+        <Icon size={12} />
         {config.label}
       </Badge>
     );
@@ -256,7 +260,6 @@ const OrdersManagement = () => {
   };
 
   const navigateToUserSubscriptions = (userId: string) => {
-    // Navigate to user subscriptions page
     window.open(`/dashboard?userId=${userId}&tab=subscriptions`, '_blank');
   };
 
@@ -296,368 +299,320 @@ const OrdersManagement = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
-          {orders.map((order) => (
-            <Card key={order.id} className="border-l-4 border-l-blue-500 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
-                <div className="flex justify-between items-start flex-wrap gap-4">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-xl flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <ShoppingCart className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <span className="text-gray-900">অর্ডার #</span>
-                        <span className="font-mono text-blue-600">{order.id.slice(0, 8)}</span>
-                      </div>
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(order.created_at).toLocaleDateString('bn-BD', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </CardDescription>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    {getStatusBadge(order.status)}
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600 flex items-center gap-1">
-                        <DollarSign className="h-5 w-5" />
-                        ৳{order.total_amount.toLocaleString('bn-BD')}
-                      </div>
-                    </div>
-                    
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedOrder(order)}
-                          className="flex items-center gap-2"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          পরিচালনা
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>অর্ডার পরিচালনা #{order.id.slice(0, 8)}</DialogTitle>
-                        </DialogHeader>
-                        
-                        <div className="space-y-6">
-                          {/* Order Status Update */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="status">অর্ডার স্ট্যাটাস</Label>
-                              <Select 
-                                value={statusUpdate || order.status} 
-                                onValueChange={setStatusUpdate}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              সকল অর্ডার ({orders.length})
+            </CardTitle>
+            <CardDescription>
+              সম্পূর্ণ অর্ডার তালিকা এবং বিস্তারিত তথ্য
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50">
+                    <TableHead className="font-bold">অর্ডার ID</TableHead>
+                    <TableHead className="font-bold">গ্রাহক তথ্য</TableHead>
+                    <TableHead className="font-bold">প্রোডাক্ট বিবরণ</TableHead>
+                    <TableHead className="font-bold">পেমেন্ট তথ্য</TableHead>
+                    <TableHead className="font-bold">মূল্য</TableHead>
+                    <TableHead className="font-bold">স্ট্যাটাস</TableHead>
+                    <TableHead className="font-bold">তারিখ</TableHead>
+                    <TableHead className="font-bold">অ্যাকশন</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.map((order) => (
+                    <TableRow key={order.id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <div className="font-mono text-sm bg-blue-100 px-2 py-1 rounded">
+                          #{order.id.slice(0, 8)}
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1 text-sm">
+                            <User className="h-3 w-3" />
+                            <span className="font-medium">{order.customer_name}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                            <Mail className="h-3 w-3" />
+                            {order.customer_email}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                            <Phone className="h-3 w-3" />
+                            {order.customer_phone}
+                          </div>
+                          <div className="flex items-start gap-1 text-xs text-gray-600">
+                            <Home className="h-3 w-3 mt-0.5" />
+                            <span className="line-clamp-2">{order.customer_address}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="space-y-2">
+                          {order.order_items.map((item, index) => (
+                            <div key={item.id} className="p-2 bg-gray-50 rounded text-sm">
+                              <div className="font-medium text-blue-800 mb-1">
+                                {item.product_name}
+                              </div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="text-xs px-1 py-0">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {getDurationLabel(item.package_duration)}
+                                </Badge>
+                                <span className="text-xs text-gray-600">
+                                  পরিমাণ: {item.quantity}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-gray-600">
+                                  ID: {item.product_id}
+                                </span>
+                                <div className="text-right">
+                                  {item.original_price && item.original_price > item.price && (
+                                    <div className="text-xs text-gray-500 line-through">
+                                      ৳{item.original_price}
+                                    </div>
+                                  )}
+                                  <div className="font-bold text-green-600">
+                                    ৳{item.price}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1 text-sm">
+                            <CreditCard className="h-3 w-3" />
+                            <span className="font-medium">
+                              {getPaymentMethodLabel(order.payment_method)}
+                            </span>
+                          </div>
+                          {order.transaction_id && (
+                            <div className="text-xs text-gray-600">
+                              <span className="font-medium">ট্রান্স ID:</span>
+                              <div className="font-mono bg-gray-100 px-1 py-0.5 rounded mt-1">
+                                {order.transaction_id}
+                              </div>
+                            </div>
+                          )}
+                          {order.promo_code && (
+                            <div className="flex items-center gap-1 text-xs text-green-700">
+                              <Tag className="h-3 w-3" />
+                              {order.promo_code}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="text-right">
+                          {order.discount_amount > 0 && (
+                            <div className="text-xs text-red-600 mb-1">
+                              ছাড়: -৳{order.discount_amount}
+                            </div>
+                          )}
+                          <div className="text-lg font-bold text-green-600">
+                            ৳{order.total_amount.toLocaleString('bn-BD')}
+                          </div>
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="space-y-2">
+                          {getStatusBadge(order.status)}
+                          {order.admin_message && (
+                            <div className="text-xs text-blue-600 bg-blue-50 p-1 rounded">
+                              {order.admin_message}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="text-sm text-gray-600">
+                          {new Date(order.created_at).toLocaleDateString('bn-BD', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(order.created_at).toLocaleTimeString('bn-BD', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedOrder(order)}
+                                className="flex items-center gap-1 text-xs"
                               >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">অপেক্ষমান</SelectItem>
-                                  <SelectItem value="confirmed">নিশ্চিত</SelectItem>
-                                  <SelectItem value="processing">প্রক্রিয়াধীন</SelectItem>
-                                  <SelectItem value="shipped">পাঠানো হয়েছে</SelectItem>
-                                  <SelectItem value="delivered">ডেলিভার হয়েছে</SelectItem>
-                                  <SelectItem value="cancelled">বাতিল</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label htmlFor="message">অ্যাডমিন বার্তা</Label>
-                              <Textarea
-                                id="message"
-                                placeholder="ঐচ্ছিক বার্তা..."
-                                value={adminMessage}
-                                onChange={(e) => setAdminMessage(e.target.value)}
-                              />
-                            </div>
-                          </div>
+                                <Edit3 className="h-3 w-3" />
+                                পরিচালনা
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>অর্ডার পরিচালনা #{order.id.slice(0, 8)}</DialogTitle>
+                              </DialogHeader>
+                              
+                              <div className="space-y-6">
+                                {/* Order Status Update */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label htmlFor="status">অর্ডার স্ট্যাটাস</Label>
+                                    <Select 
+                                      value={statusUpdate || order.status} 
+                                      onValueChange={setStatusUpdate}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="pending">অপেক্ষমান</SelectItem>
+                                        <SelectItem value="confirmed">নিশ্চিত</SelectItem>
+                                        <SelectItem value="processing">প্রক্রিয়াধীন</SelectItem>
+                                        <SelectItem value="shipped">পাঠানো হয়েছে</SelectItem>
+                                        <SelectItem value="delivered">ডেলিভার হয়েছে</SelectItem>
+                                        <SelectItem value="cancelled">বাতিল</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="message">অ্যাডমিন বার্তা</Label>
+                                    <Textarea
+                                      id="message"
+                                      placeholder="ঐচ্ছিক বার্তা..."
+                                      value={adminMessage}
+                                      onChange={(e) => setAdminMessage(e.target.value)}
+                                    />
+                                  </div>
+                                </div>
 
-                          {/* Subscription Details */}
-                          <div className="border-t pt-4">
-                            <h4 className="font-semibold mb-4">সাবস্ক্রিপশন তথ্য</h4>
-                            <div className="grid grid-cols-3 gap-4">
-                              <div>
-                                <Label htmlFor="fileUrl">ফাইল URL</Label>
-                                <Input
-                                  id="fileUrl"
-                                  placeholder="https://..."
-                                  value={fileUrl}
-                                  onChange={(e) => setFileUrl(e.target.value)}
-                                />
+                                {/* Subscription Details */}
+                                <div className="border-t pt-4">
+                                  <h4 className="font-semibold mb-4">সাবস্ক্রিপশন তথ্য</h4>
+                                  <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                      <Label htmlFor="fileUrl">ফাইল URL</Label>
+                                      <Input
+                                        id="fileUrl"
+                                        placeholder="https://..."
+                                        value={fileUrl}
+                                        onChange={(e) => setFileUrl(e.target.value)}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="subscriptionLink">সাবস্ক্রিপশন লিংক</Label>
+                                      <Input
+                                        id="subscriptionLink"
+                                        placeholder="https://..."
+                                        value={subscriptionLink}
+                                        onChange={(e) => setSubscriptionLink(e.target.value)}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="fileName">ফাইলের নাম</Label>
+                                      <Input
+                                        id="fileName"
+                                        placeholder="file.zip"
+                                        value={fileName}
+                                        onChange={(e) => setFileName(e.target.value)}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-4 pt-4 border-t">
+                                  <Button
+                                    onClick={() => updateOrderStatus(order.id, statusUpdate || order.status, adminMessage)}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                    স্ট্যাটাস আপডেট
+                                  </Button>
+                                  
+                                  <Button
+                                    onClick={() => updateSubscriptionDetails(order.id)}
+                                    variant="outline"
+                                    className="flex items-center gap-2"
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                    সাবস্ক্রিপশন আপডেট
+                                  </Button>
+                                  
+                                  <Button
+                                    onClick={() => navigateToUserSubscriptions(order.user_id)}
+                                    variant="outline"
+                                    className="flex items-center gap-2"
+                                  >
+                                    <ArrowRight className="h-4 w-4" />
+                                    ইউজার সাবস্ক্রিপশন
+                                  </Button>
+                                </div>
                               </div>
-                              <div>
-                                <Label htmlFor="subscriptionLink">সাবস্ক্রিপশন লিংক</Label>
-                                <Input
-                                  id="subscriptionLink"
-                                  placeholder="https://..."
-                                  value={subscriptionLink}
-                                  onChange={(e) => setSubscriptionLink(e.target.value)}
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="fileName">ফাইলের নাম</Label>
-                                <Input
-                                  id="fileName"
-                                  placeholder="file.zip"
-                                  value={fileName}
-                                  onChange={(e) => setFileName(e.target.value)}
-                                />
-                              </div>
-                            </div>
-                          </div>
+                            </DialogContent>
+                          </Dialog>
 
-                          {/* Action Buttons */}
-                          <div className="flex gap-4 pt-4 border-t">
-                            <Button
-                              onClick={() => updateOrderStatus(order.id, statusUpdate || order.status, adminMessage)}
-                              className="flex items-center gap-2"
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                              স্ট্যাটাস আপডেট
-                            </Button>
-                            
-                            <Button
-                              onClick={() => updateSubscriptionDetails(order.id)}
-                              variant="outline"
-                              className="flex items-center gap-2"
-                            >
-                              <FileText className="h-4 w-4" />
-                              সাবস্ক্রিপশন আপডেট
-                            </Button>
-                            
-                            <Button
-                              onClick={() => navigateToUserSubscriptions(order.user_id)}
-                              variant="outline"
-                              className="flex items-center gap-2"
-                            >
-                              <ArrowRight className="h-4 w-4" />
-                              ইউজার সাবস্ক্রিপশন
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="p-6 space-y-6">
-                {/* Admin Message Alert */}
-                {order.admin_message && (
-                  <Alert className="border-blue-200 bg-blue-50">
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
-                      <strong>অ্যাডমিন বার্তা:</strong> {order.admin_message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Subscription Access Section */}
-                {subscriptions[order.id] && subscriptions[order.id].length > 0 && (
-                  <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
-                    <h4 className="font-bold text-lg text-green-800 mb-3 flex items-center gap-2">
-                      <Download className="h-5 w-5" />
-                      সাবস্ক্রিপশন অ্যাক্সেস
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {subscriptions[order.id].map((sub, index) => (
-                        <div key={index} className="flex gap-2">
-                          {sub.subscription_file_url && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(sub.subscription_file_url, '_blank')}
-                              className="flex items-center gap-2"
-                            >
-                              <FileText className="h-4 w-4" />
-                              {sub.file_name || 'ফাইল'}
-                            </Button>
-                          )}
-                          {sub.subscription_link && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(sub.subscription_link, '_blank')}
-                              className="flex items-center gap-2"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              সাবস্ক্রিপশন লিংক
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Product Details Section */}
-                <div className="bg-gray-50 rounded-lg p-5 border">
-                  <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800">
-                    <Package className="h-5 w-5 text-blue-600" />
-                    অর্ডার করা প্রোডাক্ট সমূহ
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    {order.order_items.map((item, index) => (
-                      <div key={item.id} className="bg-white rounded-lg p-4 border shadow-sm">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <h5 className="font-bold text-lg text-gray-900 mb-2 flex items-center gap-2">
-                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                                #{index + 1}
-                              </span>
-                              {item.product_name}
-                            </h5>
-                            
-                            <div className="flex items-center gap-3 mb-2">
-                              <Badge variant="outline" className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700">
-                                <Clock className="h-3 w-3" />
-                                {getDurationLabel(item.package_duration)}
-                              </Badge>
-                              <Badge variant="outline" className="flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700">
-                                <Package className="h-3 w-3" />
-                                পরিমাণ: {item.quantity}
-                              </Badge>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className="flex flex-col items-end gap-1">
-                              {item.original_price && item.original_price > item.price && (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-gray-500 line-through">
-                                    ৳{item.original_price.toLocaleString('bn-BD')}
-                                  </span>
-                                  {item.discount_percentage && item.discount_percentage > 0 && (
-                                    <Badge variant="destructive" className="text-xs">
-                                      {item.discount_percentage}% ছাড়
-                                    </Badge>
+                          {/* Subscription Access */}
+                          {subscriptions[order.id] && subscriptions[order.id].length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {subscriptions[order.id].map((sub, index) => (
+                                <div key={index} className="flex gap-1">
+                                  {sub.subscription_file_url && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(sub.subscription_file_url, '_blank')}
+                                      className="flex items-center gap-1 text-xs px-2 py-1 h-6"
+                                    >
+                                      <FileText className="h-3 w-3" />
+                                      ফাইল
+                                    </Button>
+                                  )}
+                                  {sub.subscription_link && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(sub.subscription_link, '_blank')}
+                                      className="flex items-center gap-1 text-xs px-2 py-1 h-6"
+                                    >
+                                      <ExternalLink className="h-3 w-3" />
+                                      লিংক
+                                    </Button>
                                   )}
                                 </div>
-                              )}
-                              <div className="text-xl font-bold text-green-600 flex items-center gap-1">
-                                <DollarSign className="h-4 w-4" />
-                                ৳{item.price.toLocaleString('bn-BD')}
-                              </div>
+                              ))}
                             </div>
-                          </div>
+                          )}
                         </div>
-                        
-                        <div className="grid grid-cols-4 gap-3 p-3 bg-gray-50 rounded text-sm">
-                          <div className="text-center">
-                            <div className="font-medium text-gray-600 mb-1">প্রোডাক্ট ID</div>
-                            <div className="font-mono text-xs bg-white px-2 py-1 rounded">
-                              {item.product_id}
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium text-gray-600 mb-1">সময়কাল</div>
-                            <div className="font-semibold text-purple-600">
-                              {getDurationLabel(item.package_duration)}
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium text-gray-600 mb-1">একক মূল্য</div>
-                            <div className="font-semibold text-green-600">
-                              ৳{item.price.toLocaleString('bn-BD')}
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium text-gray-600 mb-1">মোট মূল্য</div>
-                            <div className="font-bold text-green-700">
-                              ৳{(item.price * item.quantity).toLocaleString('bn-BD')}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Customer & Payment Information */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg p-4 border">
-                    <h4 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-800">
-                      <User className="h-5 w-5 text-blue-600" />
-                      গ্রাহকের তথ্য
-                    </h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                        <User className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium">নাম:</span>
-                        <span className="font-semibold">{order.customer_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                        <MessageSquare className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium">ইমেইল:</span>
-                        <span className="font-semibold">{order.customer_email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                        <Package className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium">ফোন:</span>
-                        <span className="font-semibold">{order.customer_phone}</span>
-                      </div>
-                      <div className="flex items-start gap-2 p-2 bg-gray-50 rounded">
-                        <MapPin className="h-4 w-4 text-gray-500 mt-1" />
-                        <div>
-                          <span className="text-sm font-medium">ঠিকানা:</span>
-                          <span className="ml-2 font-semibold">{order.customer_address}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-4 border">
-                    <h4 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-800">
-                      <CreditCard className="h-5 w-5 text-green-600" />
-                      পেমেন্ট তথ্য
-                    </h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                        <CreditCard className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium">পেমেন্ট মাধ্যম:</span>
-                        <span className="font-semibold">{getPaymentMethodLabel(order.payment_method)}</span>
-                      </div>
-                      {order.transaction_id && (
-                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                          <FileText className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm font-medium">ট্রানজেকশন ID:</span>
-                          <span className="font-mono text-sm bg-white px-2 py-1 rounded border">
-                            {order.transaction_id}
-                          </span>
-                        </div>
-                      )}
-                      {order.promo_code && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-200">
-                          <Tag className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium">প্রোমো কোড:</span>
-                          <span className="font-semibold text-green-700">{order.promo_code}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-200">
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium">মোট পরিমাণ:</span>
-                        <span className="text-lg font-bold text-green-700">
-                          ৳{order.total_amount.toLocaleString('bn-BD')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
