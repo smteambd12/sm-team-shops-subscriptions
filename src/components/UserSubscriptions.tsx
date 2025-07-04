@@ -9,10 +9,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscriptionNotifications } from '@/hooks/useSubscriptionNotifications';
 import SubscriptionNotificationBanner from '@/components/notifications/SubscriptionNotificationBanner';
-import { Calendar, Package, Clock, Download, ExternalLink, FileText, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Calendar, Package, Clock, Download, ExternalLink, FileText, RefreshCw, AlertTriangle, ShoppingCart, DollarSign, User, Mail, Phone, MapPin, CreditCard } from 'lucide-react';
 
 interface UserSubscription {
   id: string;
+  user_id: string;
+  product_id: string;
   product_name: string;
   package_duration: string;
   price: number;
@@ -24,6 +26,22 @@ interface UserSubscription {
   subscription_link?: string;
   file_name?: string;
   created_at: string;
+  order_id?: string;
+  // Order details from join
+  order?: {
+    id: string;
+    customer_name: string;
+    customer_email: string;
+    customer_phone: string;
+    customer_address: string;
+    total_amount: number;
+    payment_method: string;
+    transaction_id?: string;
+    promo_code?: string;
+    discount_amount: number;
+    status: string;
+    created_at: string;
+  };
 }
 
 const UserSubscriptions = () => {
@@ -46,7 +64,23 @@ const UserSubscriptions = () => {
       
       const { data, error } = await supabase
         .from('user_subscriptions')
-        .select('*')
+        .select(`
+          *,
+          orders:order_id (
+            id,
+            customer_name,
+            customer_email,
+            customer_phone,
+            customer_address,
+            total_amount,
+            payment_method,
+            transaction_id,
+            promo_code,
+            discount_amount,
+            status,
+            created_at
+          )
+        `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
@@ -56,7 +90,16 @@ const UserSubscriptions = () => {
       }
       
       console.log('Subscriptions fetched:', data);
-      setSubscriptions(data || []);
+      
+      // Process the data to ensure proper structure
+      const processedSubscriptions = (data || []).map(sub => ({
+        ...sub,
+        order: sub.orders && typeof sub.orders === 'object' && !Array.isArray(sub.orders) 
+          ? sub.orders 
+          : null
+      }));
+      
+      setSubscriptions(processedSubscriptions);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       toast({
@@ -103,6 +146,31 @@ const UserSubscriptions = () => {
     return `${daysDiff} দিন বাকি`;
   };
 
+  const getDurationLabel = (duration: string) => {
+    const labels = {
+      '1month': '১ মাস',
+      '3month': '৩ মাস', 
+      '6month': '৬ মাস',
+      'lifetime': 'লাইফটাইম'
+    };
+    return labels[duration as keyof typeof labels] || duration;
+  };
+
+  const getPaymentMethodLabel = (method: string) => {
+    const methods = {
+      'bkash': 'বিকাশ',
+      'nagad': 'নগদ',
+      'rocket': 'রকেট',
+      'card': 'কার্ড',
+      'bank': 'ব্যাংক ট্রান্সফার'
+    };
+    return methods[method as keyof typeof methods] || method;
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `৳${amount.toLocaleString('bn-BD')}`;
+  };
+
   const handleFileDownload = (url: string, fileName?: string) => {
     const link = document.createElement('a');
     link.href = url;
@@ -146,7 +214,7 @@ const UserSubscriptions = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">আমার সাবস্ক্রিপশন</h2>
-          <p className="text-gray-600">আপনার সব সাবস্ক্রিপশন এখানে দেখুন।</p>
+          <p className="text-gray-600">আপনার সব সাবস্ক্রিপশন এবং অর্ডার বিস্তারিত এখানে দেখুন।</p>
         </div>
         <Button
           onClick={handleRefresh}
@@ -177,7 +245,7 @@ const UserSubscriptions = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           {subscriptions.map((subscription) => {
             const now = new Date();
             const expiresAt = new Date(subscription.expires_at);
@@ -187,23 +255,33 @@ const UserSubscriptions = () => {
             return (
               <Card 
                 key={subscription.id} 
-                className={`hover:shadow-md transition-shadow ${
+                className={`hover:shadow-lg transition-all duration-300 ${
                   isExpired ? 'border-red-200 bg-red-50' : 
-                  isExpiringSoon ? 'border-yellow-200 bg-yellow-50' : ''
+                  isExpiringSoon ? 'border-yellow-200 bg-yellow-50' : 
+                  'border-blue-200 hover:border-blue-300'
                 }`}
               >
-                <CardHeader>
+                <CardHeader className="pb-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2">
-                        <Package className="h-5 w-5 text-blue-600" />
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                        <Package className="h-6 w-6 text-blue-600" />
                         {subscription.product_name}
                         {isExpired && (
-                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <AlertTriangle className="h-5 w-5 text-red-500" />
                         )}
                       </CardTitle>
-                      <CardDescription className="mt-1">
-                        প্যাকেজ: {subscription.package_duration} • মূল্য: ৳{subscription.price.toLocaleString()}
+                      <CardDescription className="mt-2 text-base">
+                        <div className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-4 w-4 text-blue-600" />
+                            প্যাকেজ মেয়াদ: {getDurationLabel(subscription.package_duration)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4 text-green-600" />
+                            মূল্য: {formatCurrency(subscription.price)}
+                          </span>
+                        </div>
                       </CardDescription>
                     </div>
                     <div className="flex flex-col gap-2 items-end">
@@ -215,46 +293,129 @@ const UserSubscriptions = () => {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">
-                          <strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
-                        </span>
+                
+                <CardContent className="space-y-6">
+                  {/* Subscription Details */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                        <div>
+                          <span className="text-sm font-medium text-blue-800">শুরুর তারিখ</span>
+                          <p className="text-blue-700">{new Date(subscription.starts_at).toLocaleDateString('bn-BD')}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">
-                          <strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
-                        </span>
+                      <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
+                        <Calendar className="h-4 w-4 text-purple-600" />
+                        <div>
+                          <span className="text-sm font-medium text-purple-800">শেষের তারিখ</span>
+                          <p className="text-purple-700">{new Date(subscription.expires_at).toLocaleDateString('bn-BD')}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-sm">
-                        <strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}
-                      </p>
-                      <p className="text-sm">
-                        <strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
-                      </p>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <span className="text-sm font-medium text-green-800">অটো রিনিউ:</span>
+                        <p className="text-green-700">{subscription.auto_renew ? 'হ্যাঁ' : 'না'}</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-800">স্ট্যাটাস:</span>
+                        <p className="text-gray-700">{subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</p>
+                      </div>
                     </div>
                   </div>
 
+                  {/* Order Details (if available) */}
+                  {subscription.order && (
+                    <Card className="border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-indigo-800">
+                          <ShoppingCart className="h-5 w-5" />
+                          অর্ডার বিস্তারিত (#{subscription.order.id.slice(0, 8)})
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 p-3 bg-white rounded-lg shadow-sm">
+                              <User className="h-4 w-4 text-blue-600" />
+                              <div>
+                                <span className="text-sm text-gray-600">গ্রাহকের নাম:</span>
+                                <p className="font-semibold text-gray-800">{subscription.order.customer_name}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 p-3 bg-white rounded-lg shadow-sm">
+                              <Mail className="h-4 w-4 text-blue-600" />
+                              <div>
+                                <span className="text-sm text-gray-600">ইমেইল:</span>
+                                <p className="font-semibold text-gray-800">{subscription.order.customer_email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 p-3 bg-white rounded-lg shadow-sm">
+                              <Phone className="h-4 w-4 text-blue-600" />
+                              <div>
+                                <span className="text-sm text-gray-600">ফোন:</span>
+                                <p className="font-semibold text-gray-800">{subscription.order.customer_phone}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-2 p-3 bg-white rounded-lg shadow-sm">
+                              <MapPin className="h-4 w-4 text-blue-600 mt-1" />
+                              <div>
+                                <span className="text-sm text-gray-600">ঠিকানা:</span>
+                                <p className="font-semibold text-gray-800">{subscription.order.customer_address}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 p-3 bg-white rounded-lg shadow-sm">
+                              <CreditCard className="h-4 w-4 text-green-600" />
+                              <div>
+                                <span className="text-sm text-gray-600">পেমেন্ট মাধ্যম:</span>
+                                <p className="font-semibold text-gray-800">{getPaymentMethodLabel(subscription.order.payment_method)}</p>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-gradient-to-r from-green-100 to-green-200 rounded-lg border border-green-300">
+                              <span className="text-sm text-green-700">মোট পরিমাণ:</span>
+                              <p className="font-bold text-lg text-green-800">{formatCurrency(subscription.order.total_amount)}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {subscription.order.transaction_id && (
+                          <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <span className="text-sm font-medium text-yellow-800">ট্রানজেকশন ID:</span>
+                            <p className="font-mono text-sm bg-white px-2 py-1 rounded border mt-1">{subscription.order.transaction_id}</p>
+                          </div>
+                        )}
+
+                        {subscription.order.promo_code && (
+                          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                            <span className="text-purple-700 font-medium">প্রোমো কোড: {subscription.order.promo_code}</span>
+                            <span className="text-purple-700 font-bold">ছাড়: {formatCurrency(subscription.order.discount_amount)}</span>
+                          </div>
+                        )}
+
+                        <div className="text-center text-sm text-gray-600 bg-white p-2 rounded border">
+                          অর্ডার তারিখ: {new Date(subscription.order.created_at).toLocaleDateString('bn-BD')}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* File and Link Access */}
                   {(subscription.subscription_file_url || subscription.subscription_link) && (
-                    <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
                       <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                        <Download className="h-4 w-4" />
+                        <Download className="h-5 w-5" />
                         সাবস্ক্রিপশন অ্যাক্সেস
                       </h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3">
                         {subscription.subscription_file_url && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-100"
                           >
                             <FileText className="h-4 w-4" />
                             {subscription.file_name || 'ফাইল ডাউনলোড'}
@@ -265,7 +426,7 @@ const UserSubscriptions = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => window.open(subscription.subscription_link, '_blank')}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-100"
                           >
                             <ExternalLink className="h-4 w-4" />
                             সাবস্ক্রিপশন লিংক
@@ -277,9 +438,9 @@ const UserSubscriptions = () => {
 
                   {/* Show message if no access files/links are available but subscription is active */}
                   {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && !isExpired && (
-                    <Alert className="mt-4">
-                      <Clock className="h-4 w-4" />
-                      <AlertDescription>
+                    <Alert className="border-orange-200 bg-orange-50">
+                      <Clock className="h-4 w-4 text-orange-600" />
+                      <AlertDescription className="text-orange-800">
                         আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন বা সাপোর্টের সাথে যোগাযোগ করুন।
                       </AlertDescription>
                     </Alert>
@@ -287,7 +448,7 @@ const UserSubscriptions = () => {
 
                   {/* Show renewal message for expired subscriptions */}
                   {isExpired && (
-                    <Alert className="mt-4 border-red-200 bg-red-50">
+                    <Alert className="border-red-200 bg-red-50">
                       <AlertTriangle className="h-4 w-4 text-red-600" />
                       <AlertDescription className="text-red-800">
                         এই সাবস্ক্রিপশনের মেয়াদ শেষ হয়ে গেছে। নতুন করে সাবস্ক্রিপশন নিতে হোমপেজে যান।

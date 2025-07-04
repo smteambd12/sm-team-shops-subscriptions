@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,9 @@ import {
   Phone,
   MapPin,
   CreditCard,
-  ShoppingCart
+  ShoppingCart,
+  Link as LinkIcon,
+  Upload
 } from 'lucide-react';
 import OrderItemsDetails from './OrderItemsDetails';
 import type { EnhancedOrder, UserSubscription } from '@/types/admin';
@@ -52,7 +54,27 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
   const [fileUrl, setFileUrl] = useState('');
   const [subscriptionLink, setSubscriptionLink] = useState('');
   const [fileName, setFileName] = useState('');
+  const [orderSubscriptions, setOrderSubscriptions] = useState<UserSubscription[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchOrderSubscriptions();
+  }, [order.id]);
+
+  const fetchOrderSubscriptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('order_id', order.id);
+
+      if (error) throw error;
+      setOrderSubscriptions(data || []);
+    } catch (error) {
+      console.error('Error fetching order subscriptions:', error);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('bn-BD', {
@@ -112,6 +134,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
 
   const updateOrderStatus = async (orderId: string, newStatus: string, message?: string) => {
     try {
+      setLoading(true);
       const { error } = await supabase
         .from('orders')
         .update({ 
@@ -133,6 +156,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
       });
 
       onOrderUpdate(orderId);
+      await fetchOrderSubscriptions(); // Refresh subscriptions after status update
     } catch (error: any) {
       console.error('Error updating order:', error);
       toast({
@@ -140,11 +164,14 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
         description: "অর্ডার আপডেট করতে সমস্যা হয়েছে।",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const createSubscriptions = async (orderId: string) => {
     try {
+      setLoading(true);
       const { error } = await supabase.rpc('create_subscription_from_order', {
         order_uuid: orderId
       });
@@ -155,6 +182,8 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
         title: "সফল",
         description: "ইউজার সাবস্ক্রিপশন তৈরি হয়েছে।",
       });
+
+      await fetchOrderSubscriptions(); // Refresh the subscriptions list
     } catch (error: any) {
       console.error('Error creating subscriptions:', error);
       toast({
@@ -162,11 +191,14 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
         description: "সাবস্ক্রিপশন তৈরি করতে সমস্যা হয়েছে।",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateSubscriptionDetails = async (orderId: string) => {
     try {
+      setLoading(true);
       const { error } = await supabase.rpc('update_subscription_details', {
         p_order_id: orderId,
         p_file_url: fileUrl || null,
@@ -182,6 +214,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
       });
 
       onOrderUpdate(orderId);
+      await fetchOrderSubscriptions(); // Refresh subscriptions
       setFileUrl('');
       setSubscriptionLink('');
       setFileName('');
@@ -192,6 +225,8 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
         description: "সাবস্ক্রিপশন আপডেট করতে সমস্যা হয়েছে।",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -214,7 +249,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
           <Button
             onClick={() => updateOrderStatus(order.id, 'confirmed', adminMessage)}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-            disabled={order.status === 'confirmed'}
+            disabled={order.status === 'confirmed' || loading}
           >
             <CheckCircle className="h-4 w-4" />
             {order.status === 'confirmed' ? 'ইতিমধ্যে কনফার্ম' : 'অর্ডার কনফার্ম করুন'}
@@ -233,12 +268,58 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
             onClick={() => updateOrderStatus(order.id, 'processing', adminMessage)}
             variant="outline"
             className="flex items-center gap-2"
-            disabled={order.status === 'processing' || order.status === 'delivered'}
+            disabled={order.status === 'processing' || order.status === 'delivered' || loading}
           >
             <RefreshCw className="h-4 w-4" />
             প্রক্রিয়াধীন করুন
           </Button>
         </div>
+
+        {/* Order Subscriptions Status */}
+        {orderSubscriptions.length > 0 && (
+          <Card className="border-2 border-green-200 bg-green-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-800">
+                <CheckCircle className="h-5 w-5" />
+                তৈরি হওয়া সাবস্ক্রিপশন ({orderSubscriptions.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3">
+                {orderSubscriptions.map((sub, index) => (
+                  <div key={sub.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                    <div>
+                      <p className="font-semibold">{sub.product_name}</p>
+                      <p className="text-sm text-gray-600">
+                        {getDurationLabel(sub.package_duration)} • {formatCurrency(sub.price)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        মেয়াদ: {new Date(sub.expires_at).toLocaleDateString('bn-BD')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {sub.subscription_file_url && (
+                        <Badge variant="outline" className="text-green-700 border-green-300">
+                          <FileText className="h-3 w-3 mr-1" />
+                          ফাইল
+                        </Badge>
+                      )}
+                      {sub.subscription_link && (
+                        <Badge variant="outline" className="text-blue-700 border-blue-300">
+                          <LinkIcon className="h-3 w-3 mr-1" />
+                          লিংক
+                        </Badge>
+                      )}
+                      <Badge variant={sub.is_active ? "default" : "secondary"}>
+                        {sub.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Order Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -352,111 +433,6 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
                   </div>
                 )}
 
-                {/* Detailed Product Information Section */}
-                <Card className="border-2 border-indigo-200 bg-indigo-50">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-indigo-800 text-lg">
-                      <ShoppingCart className="h-5 w-5" />
-                      ক্রয়কৃত প্রোডাক্ট বিস্তারিত
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {order.order_items.map((item: any, index: number) => (
-                      <div key={item.id} className="bg-white p-4 rounded-lg border border-indigo-200">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-800 text-lg mb-1">
-                              {item.product_name}
-                            </h4>
-                            {item.product_description && (
-                              <p className="text-gray-600 text-sm mb-2">
-                                {item.product_description}
-                              </p>
-                            )}
-                          </div>
-                          {item.product_image && (
-                            <img 
-                              src={item.product_image} 
-                              alt={item.product_name}
-                              className="w-12 h-12 object-cover rounded-lg ml-3"
-                            />
-                          )}
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Clock className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm font-medium text-blue-800">প্যাকেজ মেয়াদ</span>
-                            </div>
-                            <p className="text-blue-700 font-semibold">
-                              {getDurationLabel(item.package_duration)}
-                            </p>
-                          </div>
-                          
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2 mb-1">
-                              <DollarSign className="h-4 w-4 text-green-600" />
-                              <span className="text-sm font-medium text-green-800">মূল্য</span>
-                            </div>
-                            <p className="text-green-700 font-semibold">
-                              {formatCurrency(item.price)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-purple-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Package className="h-4 w-4 text-purple-600" />
-                              <span className="text-sm font-medium text-purple-800">পরিমাণ</span>
-                            </div>
-                            <p className="text-purple-700 font-semibold">{item.quantity} টি</p>
-                          </div>
-                          
-                          {item.product_category && (
-                            <div className="bg-orange-50 p-3 rounded-lg">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Layers className="h-4 w-4 text-orange-600" />
-                                <span className="text-sm font-medium text-orange-800">ক্যাটেগরি</span>
-                              </div>
-                              <p className="text-orange-700 font-semibold">
-                                {getCategoryLabel(item.product_category)}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {item.package_features && item.package_features.length > 0 && (
-                          <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Star className="h-4 w-4 text-yellow-600" />
-                              <span className="text-sm font-medium text-gray-700">প্যাকেজ ফিচার:</span>
-                            </div>
-                            <div className="grid grid-cols-1 gap-1">
-                              {item.package_features.map((feature: string, featureIndex: number) => (
-                                <div key={featureIndex} className="flex items-center gap-2 text-sm text-gray-600">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  {feature}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="mt-3 pt-3 border-t border-gray-200 bg-gray-50 p-3 rounded-lg">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600 font-medium">সাবটোটাল:</span>
-                            <span className="font-bold text-lg text-gray-800">
-                              {formatCurrency(item.price * item.quantity)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
                 {order.promo_code && (
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="text-gray-600">প্রোমো কোড:</span>
@@ -548,7 +524,10 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="fileUrl" className="font-semibold">ফাইল URL</Label>
+                <Label htmlFor="fileUrl" className="font-semibold flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
+                  ফাইল URL
+                </Label>
                 <Input
                   id="fileUrl"
                   placeholder="https://example.com/file.zip"
@@ -558,7 +537,10 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="subscriptionLink" className="font-semibold">সাবস্ক্রিপশন লিংক</Label>
+                <Label htmlFor="subscriptionLink" className="font-semibold flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4" />
+                  সাবস্ক্রিপশন লিংক
+                </Label>
                 <Input
                   id="subscriptionLink"
                   placeholder="https://app.example.com/login"
@@ -568,7 +550,10 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="fileName" className="font-semibold">ফাইলের নাম</Label>
+                <Label htmlFor="fileName" className="font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  ফাইলের নাম
+                </Label>
                 <Input
                   id="fileName"
                   placeholder="app-files.zip"
@@ -587,6 +572,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
             onClick={() => updateOrderStatus(order.id, statusUpdate || order.status, adminMessage)}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-3"
             size="lg"
+            disabled={loading}
           >
             <CheckCircle className="h-5 w-5" />
             স্ট্যাটাস আপডেট করুন
@@ -597,6 +583,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
             variant="outline"
             className="flex items-center gap-2 border-purple-300 text-purple-700 hover:bg-purple-50 px-6 py-3"
             size="lg"
+            disabled={loading}
           >
             <FileText className="h-5 w-5" />
             সাবস্ক্রিপশন আপডেট করুন
@@ -607,9 +594,10 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
             variant="outline"
             className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50 px-6 py-3"
             size="lg"
+            disabled={loading || order.status === 'confirmed'}
           >
             <Plus className="h-5 w-5" />
-            সাবস্ক্রিপশন তৈরি করুন
+            {order.status === 'confirmed' ? 'সাবস্ক্রিপশন তৈরি হয়েছে' : 'সাবস্ক্রিপশন তৈরি করুন'}
           </Button>
         </div>
       </div>
