@@ -14,22 +14,7 @@ import {
   formatDate, 
   formatCurrency 
 } from './orders/utils';
-
-interface OrderItem {
-  id: string;
-  product_id: string;
-  product_name: string;
-  product_category?: string;
-  product_description?: string;
-  package_id: string;
-  package_duration: string;
-  package_features?: string[];
-  price: number;
-  original_price?: number;
-  discount_percentage?: number;
-  quantity: number;
-  product_image?: string;
-}
+import type { EnhancedOrder, EnhancedOrderItem, UserSubscription, OrderStats } from '@/types/admin';
 
 interface Product {
   id: string;
@@ -40,45 +25,9 @@ interface Product {
   image: string;
 }
 
-interface Order {
-  id: string;
-  user_id: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  customer_address: string;
-  total_amount: number;
-  payment_method: string;
-  transaction_id?: string;
-  promo_code?: string;
-  discount_amount: number;
-  status: string;
-  admin_message?: string;
-  created_at: string;
-  updated_at?: string;
-  order_items: OrderItem[];
-}
-
-interface UserSubscription {
-  id: string;
-  subscription_file_url?: string;
-  subscription_link?: string;
-  file_name?: string;
-  is_active: boolean;
-  expires_at: string;
-  created_at: string;
-}
-
-interface OrderStats {
-  totalOrders: number;
-  pendingOrders: number;
-  confirmedOrders: number;
-  totalRevenue: number;
-}
-
 const OrdersManagement = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<EnhancedOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<EnhancedOrder[]>([]);
   const [products, setProducts] = useState<{[key: string]: Product}>({});
   const [subscriptions, setSubscriptions] = useState<{[key: string]: UserSubscription[]}>({});
   const [loading, setLoading] = useState(true);

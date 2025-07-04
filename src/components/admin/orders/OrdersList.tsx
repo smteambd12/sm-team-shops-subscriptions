@@ -3,10 +3,11 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Package } from 'lucide-react';
 import OrderCard from './OrderCard';
+import type { EnhancedOrder, UserSubscription } from '@/types/admin';
 
 interface OrdersListProps {
-  orders: any[];
-  subscriptions: any;
+  orders: EnhancedOrder[];
+  subscriptions: {[key: string]: UserSubscription[]};
   products: any;
   getStatusBadge: (status: string) => JSX.Element;
   getDurationLabel: (duration: string) => string;

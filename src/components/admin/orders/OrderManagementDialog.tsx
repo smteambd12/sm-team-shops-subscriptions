@@ -32,10 +32,11 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import OrderItemsDetails from './OrderItemsDetails';
+import type { EnhancedOrder, UserSubscription } from '@/types/admin';
 
 interface OrderManagementDialogProps {
-  order: any;
-  subscriptions: any;
+  order: EnhancedOrder;
+  subscriptions: {[key: string]: UserSubscription[]};
   products: any;
   onOrderUpdate: (orderId: string) => void;
 }
@@ -256,7 +257,7 @@ const OrderManagementDialog: React.FC<OrderManagementDialogProps> = ({
               <Package className="h-8 w-8 mx-auto text-green-600 mb-2" />
               <div className="text-sm text-green-600 font-medium">মোট আইটেম</div>
               <div className="text-lg font-bold text-green-800">
-                {order.order_items.reduce((sum: number, item: any) => sum + item.quantity, 0)}
+                {order.order_items.reduce((sum, item) => sum + item.quantity, 0)}
               </div>
             </CardContent>
           </Card>

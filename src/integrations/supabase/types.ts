@@ -210,8 +210,12 @@ export type Database = {
           customer_name: string
           customer_phone: string
           discount_amount: number | null
+          duration_days: number | null
           id: string
           payment_method: string
+          product_name: string | null
+          product_price: number | null
+          product_quantity: number | null
           promo_code: string | null
           status: string | null
           total_amount: number
@@ -227,8 +231,12 @@ export type Database = {
           customer_name: string
           customer_phone: string
           discount_amount?: number | null
+          duration_days?: number | null
           id?: string
           payment_method: string
+          product_name?: string | null
+          product_price?: number | null
+          product_quantity?: number | null
           promo_code?: string | null
           status?: string | null
           total_amount: number
@@ -244,8 +252,12 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           discount_amount?: number | null
+          duration_days?: number | null
           id?: string
           payment_method?: string
+          product_name?: string | null
+          product_price?: number | null
+          product_quantity?: number | null
           promo_code?: string | null
           status?: string | null
           total_amount?: number
