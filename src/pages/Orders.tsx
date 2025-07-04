@@ -3,13 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare, Download, ExternalLink, FileText, Calendar, ShoppingCart, DollarSign } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, RefreshCw, MessageSquare, Download, ExternalLink, FileText, Calendar, ShoppingCart, DollarSign, User, MapPin, CreditCard, Tag, Eye } from 'lucide-react';
 import OrderCommunications from '@/components/OrderCommunications';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -116,20 +115,20 @@ const Orders = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { label: 'অপেক্ষমান', variant: 'secondary' as const, icon: Clock },
-      confirmed: { label: 'নিশ্চিত', variant: 'default' as const, icon: CheckCircle },
-      processing: { label: 'প্রক্রিয়াধীন', variant: 'default' as const, icon: RefreshCw },
-      shipped: { label: 'পাঠানো হয়েছে', variant: 'default' as const, icon: Package },
-      delivered: { label: 'ডেলিভার হয়েছে', variant: 'default' as const, icon: CheckCircle },
-      cancelled: { label: 'বাতিল', variant: 'destructive' as const, icon: XCircle },
+      pending: { label: 'অপেক্ষমান', variant: 'secondary' as const, icon: Clock, color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+      confirmed: { label: 'নিশ্চিত', variant: 'default' as const, icon: CheckCircle, color: 'bg-green-100 text-green-800 border-green-200' },
+      processing: { label: 'প্রক্রিয়াধীন', variant: 'default' as const, icon: RefreshCw, color: 'bg-blue-100 text-blue-800 border-blue-200' },
+      shipped: { label: 'পাঠানো হয়েছে', variant: 'default' as const, icon: Package, color: 'bg-purple-100 text-purple-800 border-purple-200' },
+      delivered: { label: 'ডেলিভার হয়েছে', variant: 'default' as const, icon: CheckCircle, color: 'bg-green-100 text-green-800 border-green-200' },
+      cancelled: { label: 'বাতিল', variant: 'destructive' as const, icon: XCircle, color: 'bg-red-100 text-red-800 border-red-200' },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     const Icon = config.icon;
 
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon size={12} />
+      <Badge className={`flex items-center gap-2 px-3 py-1 ${config.color} font-semibold`}>
+        <Icon size={14} />
         {config.label}
       </Badge>
     );
@@ -145,6 +144,17 @@ const Orders = () => {
     return labels[duration as keyof typeof labels] || duration;
   };
 
+  const getPaymentMethodLabel = (method: string) => {
+    const methods = {
+      'bkash': 'বিকাশ',
+      'nagad': 'নগদ',
+      'rocket': 'রকেট',
+      'card': 'কার্ড',
+      'bank': 'ব্যাংক ট্রান্সফার'
+    };
+    return methods[method as keyof typeof methods] || method;
+  };
+
   const handleFileDownload = (url: string, fileName?: string) => {
     const link = document.createElement('a');
     link.href = url;
@@ -158,58 +168,95 @@ const Orders = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
+        <div className="animate-pulse space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="h-10 bg-gray-200 rounded w-32"></div>
+            <div className="h-8 bg-gray-200 rounded w-48"></div>
           </div>
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="p-6">
+              <div className="space-y-4">
+                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Header Section */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 hover:bg-gray-50"
+          >
+            <ArrowLeft size={16} />
+            হোমে ফিরুন
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">আমার অর্ডার সমূহ</h1>
+            <p className="text-gray-600 mt-1">আপনার সকল অর্ডার এবং সাবস্ক্রিপশনের সম্পূর্ণ বিবরণ</p>
+          </div>
+        </div>
         <Button
+          onClick={fetchOrders}
           variant="outline"
           size="sm"
-          onClick={() => navigate('/')}
           className="flex items-center gap-2"
         >
-          <ArrowLeft size={16} />
-          হোমে ফিরুন
+          <RefreshCw size={16} />
+          রিফ্রেশ
         </Button>
-        <h1 className="text-3xl font-bold">আমার অর্ডার</h1>
       </div>
 
       {orders.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">কোন অর্ডার নেই</h3>
-            <p className="text-gray-600 mb-4">আপনার এখনো কোন অর্ডার নেই।</p>
-            <Button onClick={() => navigate('/')}>
-              কেনাকাটা শুরু করুন
-            </Button>
+        <Card className="text-center py-16">
+          <CardContent>
+            <div className="flex flex-col items-center">
+              <Package className="mx-auto h-20 w-20 text-gray-400 mb-6" />
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900">কোন অর্ডার নেই</h3>
+              <p className="text-gray-600 mb-6 max-w-md">
+                আপনার এখনো কোন অর্ডার নেই। আমাদের দুর্দান্ত প্রোডাক্ট কালেকশন দেখুন এবং আজই কেনাকাটা শুরু করুন।
+              </p>
+              <Button 
+                onClick={() => navigate('/')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+              >
+                কেনাকাটা শুরু করুন
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {orders.map((order) => (
-            <Card key={order.id} className="border-l-4 border-l-blue-500">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <ShoppingCart className="h-5 w-5" />
-                      অর্ডার #{order.id.slice(0, 8)}
+            <Card key={order.id} className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+                <div className="flex justify-between items-start flex-wrap gap-4">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-2xl flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <ShoppingCart className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <span className="text-gray-900">অর্ডার #</span>
+                        <span className="font-mono text-blue-600">{order.id.slice(0, 8)}</span>
+                      </div>
                     </CardTitle>
-                    <CardDescription className="text-base mt-1">
-                      <Calendar className="h-4 w-4 inline mr-1" />
-                      {new Date(order.created_at).toLocaleDateString('bn-BD', {
+                    <CardDescription className="text-base flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-5 w-5" />
+                      অর্ডারের তারিখ: {new Date(order.created_at).toLocaleDateString('bn-BD', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -218,26 +265,30 @@ const Orders = () => {
                       })}
                     </CardDescription>
                   </div>
-                  <div className="text-right flex items-center gap-2">
+                  
+                  <div className="flex items-center gap-4">
+                    {getStatusBadge(order.status)}
                     <div className="text-right">
-                      <div className="flex items-center gap-2 mb-2">
-                        {getStatusBadge(order.status)}
+                      <div className="text-3xl font-bold text-green-600 flex items-center gap-2">
+                        <DollarSign className="h-6 w-6" />
+                        ৳{order.total_amount.toLocaleString('bn-BD')}
                       </div>
-                      <p className="text-xl font-bold text-green-600 flex items-center gap-1">
-                        <DollarSign className="h-5 w-5" />
-                        ৳{order.total_amount.toLocaleString()}
-                      </p>
+                      <div className="text-sm text-gray-500">মোট পরিমাণ</div>
                     </div>
+                    
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" className="flex items-center gap-2 hover:bg-blue-50">
                           <MessageSquare className="h-4 w-4" />
                           চ্যাট
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>অর্ডার কমিউনিকেশন</DialogTitle>
+                          <DialogTitle className="flex items-center gap-2">
+                            <MessageSquare className="h-5 w-5" />
+                            অর্ডার কমিউনিকেশন #{order.id.slice(0, 8)}
+                          </DialogTitle>
                         </DialogHeader>
                         <OrderCommunications 
                           orderId={order.id} 
@@ -248,33 +299,36 @@ const Orders = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                {/* Admin Message */}
+
+              <CardContent className="p-6 space-y-6">
+                {/* Admin Message Alert */}
                 {order.admin_message && (
-                  <Alert className="mb-6 border-blue-200 bg-blue-50">
-                    <MessageSquare className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>অ্যাডমিন মেসেজ:</strong> {order.admin_message}
+                  <Alert className="border-blue-200 bg-blue-50">
+                    <MessageSquare className="h-5 w-5 text-blue-600" />
+                    <AlertDescription className="text-blue-800">
+                      <strong className="font-semibold">অ্যাডমিন বার্তা:</strong> {order.admin_message}
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Subscription Files/Links */}
+                {/* Subscription Access Section */}
                 {subscriptions[order.id] && subscriptions[order.id].length > 0 && (
-                  <div className="mb-6 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                    <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                      <Download className="h-4 w-4" />
+                  <div className="p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                    <h4 className="font-bold text-lg text-green-800 mb-4 flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Download className="h-5 w-5 text-green-600" />
+                      </div>
                       সাবস্ক্রিপশন অ্যাক্সেস
                     </h4>
-                    <div className="space-y-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       {subscriptions[order.id].map((sub, index) => (
-                        <div key={index} className="flex gap-2">
+                        <div key={index} className="flex flex-wrap gap-2">
                           {sub.subscription_file_url && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleFileDownload(sub.subscription_file_url!, sub.file_name)}
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 bg-white hover:bg-green-50 border-green-300"
                             >
                               <FileText className="h-4 w-4" />
                               {sub.file_name || 'ফাইল ডাউনলোড'}
@@ -285,7 +339,7 @@ const Orders = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => window.open(sub.subscription_link, '_blank')}
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 bg-white hover:bg-green-50 border-green-300"
                             >
                               <ExternalLink className="h-4 w-4" />
                               সাবস্ক্রিপশন লিংক
@@ -297,119 +351,226 @@ const Orders = () => {
                   </div>
                 )}
 
-                {/* Product Details Section - Enhanced */}
-                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
-                  <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-blue-800">
-                    <Package className="h-5 w-5" />
+                {/* Enhanced Product Details Section */}
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200">
+                  <h4 className="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Package className="h-6 w-6 text-blue-600" />
+                    </div>
                     অর্ডার করা প্রোডাক্ট সমূহ
                   </h4>
-                  <div className="grid gap-4">
+                  
+                  <div className="space-y-4">
                     {order.order_items.map((item, index) => (
-                      <div key={item.id} className="bg-white p-4 rounded-lg border shadow-sm">
-                        <div className="flex justify-between items-start mb-3">
+                      <div key={item.id} className="bg-white rounded-lg p-5 border shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start mb-4">
                           <div className="flex-1">
-                            <h5 className="font-bold text-lg text-gray-800 mb-1">{item.product_name}</h5>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                              <Badge variant="outline" className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
+                            <h5 className="font-bold text-xl text-gray-900 mb-2 flex items-center gap-2">
+                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">
+                                #{index + 1}
+                              </span>
+                              {item.product_name}
+                            </h5>
+                            
+                            {/* Package and Quantity Info */}
+                            <div className="flex flex-wrap items-center gap-3 mb-3">
+                              <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 bg-purple-50 text-purple-700 border-purple-200">
+                                <Clock className="h-4 w-4" />
                                 {getDurationLabel(item.package_duration)}
                               </Badge>
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-700 border-orange-200">
+                                <Package className="h-4 w-4" />
                                 পরিমাণ: {item.quantity}
                               </Badge>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="flex flex-col items-end gap-1">
+                          
+                          {/* Price Section */}
+                          <div className="text-right ml-4">
+                            <div className="flex flex-col items-end gap-2">
                               {item.original_price && item.original_price > item.price && (
-                                <span className="text-sm text-gray-500 line-through">
-                                  ৳{item.original_price.toLocaleString()}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg text-gray-500 line-through">
+                                    ৳{item.original_price.toLocaleString('bn-BD')}
+                                  </span>
+                                  {item.discount_percentage && item.discount_percentage > 0 && (
+                                    <Badge variant="destructive" className="text-xs font-bold">
+                                      {item.discount_percentage}% ছাড়
+                                    </Badge>
+                                  )}
+                                </div>
                               )}
-                              <span className="text-lg font-bold text-green-600">
-                                ৳{item.price.toLocaleString()}
-                              </span>
-                              {item.discount_percentage && item.discount_percentage > 0 && (
-                                <Badge variant="destructive" className="text-xs">
-                                  {item.discount_percentage}% ছাড়
-                                </Badge>
-                              )}
+                              <div className="text-2xl font-bold text-green-600 flex items-center gap-1">
+                                <DollarSign className="h-5 w-5" />
+                                ৳{item.price.toLocaleString('bn-BD')}
+                              </div>
+                              <div className="text-sm text-gray-500">প্রতি ইউনিট</div>
                             </div>
                           </div>
                         </div>
                         
-                        {/* Product Summary */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="text-gray-600">প্রোডাক্ট ID:</span>
-                            <p className="font-mono text-xs">{item.product_id}</p>
+                        {/* Detailed Item Information Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                          <div className="text-center">
+                            <div className="text-sm font-medium text-gray-600 mb-1">প্রোডাক্ট ID</div>
+                            <div className="font-mono text-xs bg-white px-2 py-1 rounded border">
+                              {item.product_id}
+                            </div>
                           </div>
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="text-gray-600">প্যাকেজ সময়কাল:</span>
-                            <p className="font-semibold">{getDurationLabel(item.package_duration)}</p>
+                          <div className="text-center">
+                            <div className="text-sm font-medium text-gray-600 mb-1">সময়কাল</div>
+                            <div className="font-semibold text-purple-600">
+                              {getDurationLabel(item.package_duration)}
+                            </div>
                           </div>
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="text-gray-600">একক মূল্য:</span>
-                            <p className="font-semibold text-green-600">৳{item.price.toLocaleString()}</p>
+                          <div className="text-center">
+                            <div className="text-sm font-medium text-gray-600 mb-1">একক মূল্য</div>
+                            <div className="font-semibold text-green-600">
+                              ৳{item.price.toLocaleString('bn-BD')}
+                            </div>
                           </div>
-                          <div className="bg-gray-50 p-2 rounded">
-                            <span className="text-gray-600">মোট মূল্য:</span>
-                            <p className="font-bold text-green-600">৳{(item.price * item.quantity).toLocaleString()}</p>
+                          <div className="text-center">
+                            <div className="text-sm font-medium text-gray-600 mb-1">মোট মূল্য</div>
+                            <div className="font-bold text-green-700 text-lg">
+                              ৳{(item.price * item.quantity).toLocaleString('bn-BD')}
+                            </div>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                   
-                  {/* Order Summary */}
-                  <div className="mt-4 p-3 bg-white rounded-lg border-2 border-dashed border-gray-300">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">মোট আইটেম:</span>
-                        <p className="font-semibold">{order.order_items.reduce((sum, item) => sum + item.quantity, 0)}</p>
+                  {/* Order Financial Summary */}
+                  <div className="mt-6 p-5 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                    <h5 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
+                      <Eye className="h-5 w-5" />
+                      অর্ডার সামারি
+                    </h5>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-sm text-gray-600 mb-1">মোট আইটেম</div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {order.order_items.reduce((sum, item) => sum + item.quantity, 0)}
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-gray-600">সাবটোটাল:</span>
-                        <p className="font-semibold">৳{(order.total_amount + (order.discount_amount || 0)).toLocaleString()}</p>
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-sm text-gray-600 mb-1">সাবটোটাল</div>
+                        <div className="text-xl font-semibold">
+                          ৳{(order.total_amount + (order.discount_amount || 0)).toLocaleString('bn-BD')}
+                        </div>
                       </div>
                       {order.discount_amount > 0 && (
-                        <div>
-                          <span className="text-gray-600">ছাড়:</span>
-                          <p className="font-semibold text-red-600">-৳{order.discount_amount.toLocaleString()}</p>
+                        <div className="text-center p-3 bg-red-50 rounded-lg">
+                          <div className="text-sm text-gray-600 mb-1">ছাড়</div>
+                          <div className="text-xl font-semibold text-red-600">
+                            -৳{order.discount_amount.toLocaleString('bn-BD')}
+                          </div>
                         </div>
                       )}
-                      <div>
-                        <span className="text-gray-600">সর্বমোট:</span>
-                        <p className="font-bold text-xl text-green-600">৳{order.total_amount.toLocaleString()}</p>
+                      <div className="text-center p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                        <div className="text-sm text-gray-600 mb-1">সর্বমোট</div>
+                        <div className="text-2xl font-bold text-green-700">
+                          ৳{order.total_amount.toLocaleString('bn-BD')}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                {/* Customer & Payment Information */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-2">গ্রাহকের তথ্য</h4>
-                    <div className="space-y-1 text-sm bg-gray-50 p-3 rounded">
-                      <p><strong>নাম:</strong> {order.customer_name}</p>
-                      <p><strong>ইমেইল:</strong> {order.customer_email}</p>
-                      <p><strong>ফোন:</strong> {order.customer_phone}</p>
-                      <p><strong>ঠিকানা:</strong> {order.customer_address}</p>
+                  {/* Customer Information */}
+                  <div className="bg-white rounded-lg p-5 border-2 border-gray-200">
+                    <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800">
+                      <User className="h-5 w-5 text-blue-600" />
+                      গ্রাহকের তথ্য
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">নাম:</span>
+                          <span className="ml-2 font-semibold">{order.customer_name}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                        <MessageSquare className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">ইমেইল:</span>
+                          <span className="ml-2 font-semibold">{order.customer_email}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                        <Package className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">ফোন:</span>
+                          <span className="ml-2 font-semibold">{order.customer_phone}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-2 bg-gray-50 rounded">
+                        <MapPin className="h-4 w-4 text-gray-500 mt-1" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">ঠিকানা:</span>
+                          <span className="ml-2 font-semibold">{order.customer_address}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div>
-                    <h4 className="font-semibold mb-2">পেমেন্ট তথ্য</h4>
-                    <div className="space-y-1 text-sm bg-gray-50 p-3 rounded">
-                      <p><strong>পেমেন্ট মাধ্যম:</strong> {order.payment_method}</p>
+                  {/* Payment Information */}
+                  <div className="bg-white rounded-lg p-5 border-2 border-gray-200">
+                    <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-gray-800">
+                      <CreditCard className="h-5 w-5 text-green-600" />
+                      পেমেন্ট তথ্য
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                        <CreditCard className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">পেমেন্ট মাধ্যম:</span>
+                          <span className="ml-2 font-semibold">{getPaymentMethodLabel(order.payment_method)}</span>
+                        </div>
+                      </div>
                       {order.transaction_id && (
-                        <p><strong>ট্রানজেকশন ID:</strong> {order.transaction_id}</p>
+                        <div className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                          <FileText className="h-4 w-4 text-gray-500" />
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">ট্রানজেকশন ID:</span>
+                            <span className="ml-2 font-mono text-sm bg-white px-2 py-1 rounded border">
+                              {order.transaction_id}
+                            </span>
+                          </div>
+                        </div>
                       )}
                       {order.promo_code && (
-                        <p><strong>প্রোমো কোড:</strong> {order.promo_code}</p>
+                        <div className="flex items-center gap-3 p-2 bg-green-50 rounded border border-green-200">
+                          <Tag className="h-4 w-4 text-green-600" />
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">প্রোমো কোড:</span>
+                            <span className="ml-2 font-semibold text-green-700">{order.promo_code}</span>
+                          </div>
+                        </div>
                       )}
                       {order.discount_amount > 0 && (
-                        <p><strong>ছাড়:</strong> ৳{order.discount_amount.toLocaleString()}</p>
+                        <div className="flex items-center gap-3 p-2 bg-red-50 rounded border border-red-200">
+                          <DollarSign className="h-4 w-4 text-red-600" />
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">মোট ছাড়:</span>
+                            <span className="ml-2 font-bold text-red-600">
+                              ৳{order.discount_amount.toLocaleString('bn-BD')}
+                            </span>
+                          </div>
+                        </div>
                       )}
+                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded border-2 border-green-200">
+                        <DollarSign className="h-5 w-5 text-green-600" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">পেমেন্ট পরিমাণ:</span>
+                          <span className="ml-2 text-xl font-bold text-green-700">
+                            ৳{order.total_amount.toLocaleString('bn-BD')}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
