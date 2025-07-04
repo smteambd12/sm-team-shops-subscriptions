@@ -100,15 +100,24 @@ const OrderCard: React.FC<OrderCardProps> = ({
     return `${days} দিন`;
   };
 
-  // Use consolidated data from orders table as primary source
-  const displayProductName = order.product_name || order.order_items.map(item => item.product_name).join(' + ');
-  const displayQuantity = order.product_quantity || order.order_items.reduce((sum, item) => sum + item.quantity, 0);
+  // Use consolidated data from orders table as primary source, with fallback to order_items
+  const displayProductName = order.product_name || 
+    (order.order_items && order.order_items.length > 0 ? 
+      order.order_items.map(item => item.product_name).join(' + ') : 
+      'N/A');
+      
+  const displayQuantity = order.product_quantity || 
+    (order.order_items && order.order_items.length > 0 ? 
+      order.order_items.reduce((sum, item) => sum + item.quantity, 0) : 
+      0);
+      
   const displayDuration = order.duration_days ? formatDurationDays(order.duration_days) : 'N/A';
   
-  // Use concatenated text fields for detailed display
+  // Use concatenated text fields for detailed display when available
   const displayQuantityText = order.product_quantity_text || displayQuantity.toString();
   const displayDurationText = order.duration_days_text || displayDuration;
-  const displayPriceText = order.product_price_text || (order.product_price ? formatCurrency(order.product_price) : 'N/A');
+  const displayPriceText = order.product_price_text || 
+    (order.product_price ? formatCurrency(order.product_price) : 'N/A');
 
   return (
     <Card className="overflow-hidden border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
