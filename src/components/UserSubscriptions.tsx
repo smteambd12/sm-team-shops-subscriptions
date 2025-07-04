@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscriptionNotifications } from '@/hooks/useSubscriptionNotifications';
+import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionNotificationBanner from '@/components/notifications/SubscriptionNotificationBanner';
 import { Calendar, Package, Clock, Download, ExternalLink, FileText, RefreshCw, AlertTriangle } from 'lucide-react';
 
@@ -32,6 +32,7 @@ const UserSubscriptions = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const notificationCounts = useSubscriptionNotifications();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (user) {
@@ -120,19 +121,19 @@ const UserSubscriptions = () => {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className={`flex ${isMobile ? 'flex-col' : 'justify-between items-center'} gap-3`}>
           <div>
-            <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-72"></div>
+            <div className={`${isMobile ? 'h-6' : 'h-8'} bg-gray-200 rounded ${isMobile ? 'w-32' : 'w-48'} mb-2`}></div>
+            <div className={`h-4 bg-gray-200 rounded ${isMobile ? 'w-48' : 'w-72'}`}></div>
           </div>
-          <div className="h-10 bg-gray-200 rounded w-24"></div>
+          <div className={`${isMobile ? 'h-8' : 'h-10'} bg-gray-200 rounded ${isMobile ? 'w-20' : 'w-24'}`}></div>
         </div>
         {[1, 2, 3].map((i) => (
           <Card key={i}>
-            <CardContent className="p-6">
+            <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
               <div className="animate-pulse">
                 <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-20 bg-gray-200 rounded"></div>
+                <div className={`${isMobile ? 'h-16' : 'h-20'} bg-gray-200 rounded`}></div>
               </div>
             </CardContent>
           </Card>
@@ -142,17 +143,17 @@ const UserSubscriptions = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      <div className={`flex ${isMobile ? 'flex-col' : 'justify-between items-center'} gap-3 sm:gap-4`}>
         <div>
-          <h2 className="text-2xl font-bold">আমার সাবস্ক্রিপশন</h2>
-          <p className="text-gray-600">আপনার সব সাবস্ক্রিপশন এখানে দেখুন।</p>
+          <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>আমার সাবস্ক্রিপশন</h2>
+          <p className={`text-gray-600 ${isMobile ? 'text-sm' : ''}`}>আপনার সব সাবস্ক্রিপশন এখানে দেখুন।</p>
         </div>
         <Button
           onClick={handleRefresh}
           variant="outline"
           size="sm"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-fit"
         >
           <RefreshCw className="h-4 w-4" />
           রিফ্রেশ
@@ -167,17 +168,17 @@ const UserSubscriptions = () => {
 
       {subscriptions.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-12">
-            <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">কোন সাবস্ক্রিপশন নেই</h3>
-            <p className="text-gray-600 mb-4">আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
+          <CardContent className={`text-center ${isMobile ? 'py-8' : 'py-12'}`}>
+            <Package className={`mx-auto ${isMobile ? 'h-12 w-12' : 'h-16 w-16'} text-gray-400 mb-4`} />
+            <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold mb-2`}>কোন সাবস্ক্রিপশন নেই</h3>
+            <p className={`text-gray-600 mb-4 ${isMobile ? 'text-sm px-4' : ''}`}>আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
             <Button onClick={() => window.location.href = '/'}>
               নতুন সাবস্ক্রিপশন দেখুন
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {subscriptions.map((subscription) => {
             const now = new Date();
             const expiresAt = new Date(subscription.expires_at);
@@ -190,52 +191,52 @@ const UserSubscriptions = () => {
                 className={`hover:shadow-md transition-shadow ${
                   isExpired ? 'border-red-200 bg-red-50' : 
                   isExpiringSoon ? 'border-yellow-200 bg-yellow-50' : ''
-                }`}
+                } ${isMobile ? 'mx-1' : ''}`}
               >
-                <CardHeader>
-                  <div className="flex justify-between items-start">
+                <CardHeader className={`${isMobile ? 'p-4' : 'p-6'}`}>
+                  <div className={`flex ${isMobile ? 'flex-col' : 'justify-between items-start'} gap-3`}>
                     <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2">
-                        <Package className="h-5 w-5 text-blue-600" />
-                        {subscription.product_name}
+                      <CardTitle className={`flex items-center gap-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                        <Package className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />
+                        <span className={`${isMobile ? 'text-sm' : ''}`}>{subscription.product_name}</span>
                         {isExpired && (
                           <AlertTriangle className="h-4 w-4 text-red-500" />
                         )}
                       </CardTitle>
-                      <CardDescription className="mt-1">
+                      <CardDescription className={`mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                         প্যাকেজ: {subscription.package_duration} • মূল্য: ৳{subscription.price.toLocaleString()}
                       </CardDescription>
                     </div>
-                    <div className="flex flex-col gap-2 items-end">
+                    <div className={`flex ${isMobile ? 'flex-row justify-between w-full' : 'flex-col'} gap-2 items-end`}>
                       {getStatusBadge(subscription)}
-                      <Badge variant="outline" className="flex items-center gap-1">
+                      <Badge variant="outline" className={`flex items-center gap-1 ${isMobile ? 'text-xs' : ''}`}>
                         <Clock className="h-3 w-3" />
                         {getRemainingDays(subscription.expires_at)}
                       </Badge>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <CardContent className={`${isMobile ? 'p-4' : 'p-6'} pt-0`}>
+                  <div className={`grid ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'} gap-3 sm:gap-4 mb-3 sm:mb-4`}>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">
+                        <span className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
                           <strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">
+                        <span className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
                           <strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
                         </span>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm">
+                      <p className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
                         <strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}
                       </p>
-                      <p className="text-sm">
+                      <p className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
                         <strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
                       </p>
                     </div>
@@ -243,8 +244,8 @@ const UserSubscriptions = () => {
 
                   {/* File and Link Access */}
                   {(subscription.subscription_file_url || subscription.subscription_link) && (
-                    <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                    <div className={`mt-4 ${isMobile ? 'p-3' : 'p-4'} bg-green-50 rounded-lg border border-green-200`}>
+                      <h4 className={`font-semibold text-green-800 mb-2 sm:mb-3 flex items-center gap-2 ${isMobile ? 'text-sm' : ''}`}>
                         <Download className="h-4 w-4" />
                         সাবস্ক্রিপশন অ্যাক্সেস
                       </h4>
@@ -254,7 +255,7 @@ const UserSubscriptions = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
                           >
                             <FileText className="h-4 w-4" />
                             {subscription.file_name || 'ফাইল ডাউনলোড'}
@@ -265,7 +266,7 @@ const UserSubscriptions = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => window.open(subscription.subscription_link, '_blank')}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
                           >
                             <ExternalLink className="h-4 w-4" />
                             সাবস্ক্রিপশন লিংক
@@ -279,7 +280,7 @@ const UserSubscriptions = () => {
                   {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && !isExpired && (
                     <Alert className="mt-4">
                       <Clock className="h-4 w-4" />
-                      <AlertDescription>
+                      <AlertDescription className={`${isMobile ? 'text-xs' : 'text-sm'}`}>
                         আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন বা সাপোর্টের সাথে যোগাযোগ করুন।
                       </AlertDescription>
                     </Alert>
@@ -289,7 +290,7 @@ const UserSubscriptions = () => {
                   {isExpired && (
                     <Alert className="mt-4 border-red-200 bg-red-50">
                       <AlertTriangle className="h-4 w-4 text-red-600" />
-                      <AlertDescription className="text-red-800">
+                      <AlertDescription className={`text-red-800 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                         এই সাবস্ক্রিপশনের মেয়াদ শেষ হয়ে গেছে। নতুন করে সাবস্ক্রিপশন নিতে হোমপেজে যান।
                       </AlertDescription>
                     </Alert>
