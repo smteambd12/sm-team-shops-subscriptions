@@ -19,9 +19,12 @@ import {
   Eye,
   Upload,
   Link2,
-  FileText
+  FileText,
+  Calendar,
+  User
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Order {
   id: string;
@@ -46,6 +49,21 @@ interface OrderItem {
   package_duration: string;
   price: number;
   quantity: number;
+  product_id: string;
+}
+
+interface UserSubscription {
+  id: string;
+  product_name: string;
+  package_duration: string;
+  price: number;
+  starts_at: string;
+  expires_at: string;
+  is_active: boolean;
+  auto_renew: boolean;
+  subscription_file_url?: string;
+  subscription_link?: string;
+  file_name?: string;
 }
 
 const OrdersManagement = () => {
@@ -54,8 +72,10 @@ const OrdersManagement = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
+  const [showOrderDetailsDialog, setShowOrderDetailsDialog] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
+  const [orderSubscriptions, setOrderSubscriptions] = useState<UserSubscription[]>([]);
   const [subscriptionDetails, setSubscriptionDetails] = useState({
     file: null as File | null,
     link: '',
@@ -90,6 +110,25 @@ const OrdersManagement = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOrderSubscriptions = async (orderId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('order_id', orderId);
+
+      if (error) throw error;
+      setOrderSubscriptions(data || []);
+    } catch (error) {
+      console.error('Error fetching order subscriptions:', error);
+      toast({
+        title: "ত্রুটি",
+        description: "সাবস্ক্রিপশন তথ্য লোড করতে সমস্যা হয়েছে।",
+        variant: "destructive",
+      });
     }
   };
 
@@ -212,6 +251,8 @@ const OrdersManagement = () => {
       setShowSubscriptionDialog(false);
       setSubscriptionDetails({ file: null, link: '', fileName: '' });
       setSelectedOrder(null);
+      // Refresh subscriptions for this order
+      fetchOrderSubscriptions(selectedOrder.id);
     } catch (error) {
       console.error('Error updating subscription:', error);
       toast({
@@ -255,7 +296,14 @@ const OrdersManagement = () => {
   const openSubscriptionDialog = (order: Order) => {
     setSelectedOrder(order);
     setSubscriptionDetails({ file: null, link: '', fileName: '' });
+    fetchOrderSubscriptions(order.id);
     setShowSubscriptionDialog(true);
+  };
+
+  const openOrderDetailsDialog = (order: Order) => {
+    setSelectedOrder(order);
+    fetchOrderSubscriptions(order.id);
+    setShowOrderDetailsDialog(true);
   };
 
   if (loading) {
@@ -331,6 +379,22 @@ const OrdersManagement = () => {
                   </p>
                 </div>
               </div>
+              
+              {/* Product Details Summary */}
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  প্রোডাক্ট সমূহ
+                </h4>
+                <div className="space-y-1 text-sm">
+                  {order.order_items.map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                      <span>{item.product_name} ({item.package_duration})</span>
+                      <span>৳{item.price.toLocaleString()} × {item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -347,15 +411,15 @@ const OrdersManagement = () => {
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold mb-2">অর্ডার সামারি</h4>
+                  <h4 className="font-semibold mb-2">অর্ডার বিবরণ</h4>
                   <div className="space-y-1 text-sm">
-                    {order.order_items.map((item) => (
-                      <p key={item.id}>
-                        {item.product_name} ({item.package_duration}) × {item.quantity} = ৳{item.price.toLocaleString()}
-                      </p>
-                    ))}
+                    <p><strong>সাবটোটাল:</strong> ৳{(order.total_amount + (order.discount_amount || 0)).toLocaleString()}</p>
                     {order.discount_amount > 0 && (
-                      <p className="text-green-600">ছাড়: -৳{order.discount_amount.toLocaleString()}</p>
+                      <p className="text-green-600"><strong>ছাড়:</strong> -৳{order.discount_amount.toLocaleString()}</p>
+                    )}
+                    <p><strong>মোট:</strong> ৳{order.total_amount.toLocaleString()}</p>
+                    {order.promo_code && (
+                      <p><strong>প্রোমো কোড:</strong> {order.promo_code}</p>
                     )}
                   </div>
                 </div>
@@ -369,7 +433,17 @@ const OrdersManagement = () => {
                 </div>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  size="sm"
+                  onClick={() => openOrderDetailsDialog(order)}
+                  variant="outline"
+                  className="flex items-center gap-1"
+                >
+                  <Eye size={14} />
+                  বিস্তারিত দেখুন
+                </Button>
+                
                 <Button
                   size="sm"
                   onClick={() => openStatusDialog(order)}
@@ -387,7 +461,7 @@ const OrdersManagement = () => {
                     className="flex items-center gap-1"
                   >
                     <Upload size={14} />
-                    সাবস্ক্রিপশন আপডেট
+                    সাবস্ক্রিপশন পরিচালনা
                   </Button>
                 )}
               </div>
@@ -395,6 +469,139 @@ const OrdersManagement = () => {
           </Card>
         ))}
       </div>
+
+      {/* Order Details Dialog */}
+      <Dialog open={showOrderDetailsDialog} onOpenChange={setShowOrderDetailsDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>অর্ডার বিস্তারিত তথ্য</DialogTitle>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="space-y-6">
+              {/* Order Info */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      গ্রাহকের তথ্য
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <p><strong>নাম:</strong> {selectedOrder.customer_name}</p>
+                    <p><strong>ইমেইল:</strong> {selectedOrder.customer_email}</p>
+                    <p><strong>ফোন:</strong> {selectedOrder.customer_phone}</p>
+                    <p><strong>ঠিকানা:</strong> {selectedOrder.customer_address}</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      অর্ডার তথ্য
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <p><strong>অর্ডার ID:</strong> #{selectedOrder.id.slice(0, 8)}</p>
+                    <p><strong>স্ট্যাটাস:</strong> {getStatusBadge(selectedOrder.status)}</p>
+                    <p><strong>তারিখ:</strong> {new Date(selectedOrder.created_at).toLocaleDateString('bn-BD')}</p>
+                    <p><strong>পেমেন্ট মেথড:</strong> {selectedOrder.payment_method}</p>
+                    {selectedOrder.transaction_id && (
+                      <p><strong>ট্রানজেকশন ID:</strong> {selectedOrder.transaction_id}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Product Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">প্রোডাক্ট বিবরণ</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>প্রোডাক্ট</TableHead>
+                        <TableHead>প্যাকেজ সময়কাল</TableHead>
+                        <TableHead>সংখ্যা</TableHead>
+                        <TableHead>মূল্য</TableHead>
+                        <TableHead>মোট</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedOrder.order_items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">{item.product_name}</TableCell>
+                          <TableCell>{item.package_duration}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>৳{item.price.toLocaleString()}</TableCell>
+                          <TableCell>৳{(item.price * item.quantity).toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="mt-4 text-right space-y-1">
+                    <p><strong>সাবটোটাল:</strong> ৳{(selectedOrder.total_amount + (selectedOrder.discount_amount || 0)).toLocaleString()}</p>
+                    {selectedOrder.discount_amount > 0 && (
+                      <p className="text-green-600"><strong>ছাড়:</strong> -৳{selectedOrder.discount_amount.toLocaleString()}</p>
+                    )}
+                    <p className="text-lg"><strong>মোট:</strong> ৳{selectedOrder.total_amount.toLocaleString()}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Subscriptions (if order is confirmed) */}
+              {selectedOrder.status === 'confirmed' && orderSubscriptions.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      সাবস্ক্রিপশন তথ্য
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {orderSubscriptions.map((subscription) => (
+                        <div key={subscription.id} className="p-4 border rounded-lg">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-semibold">{subscription.product_name}</h4>
+                              <p className="text-sm text-gray-600">প্যাকেজ: {subscription.package_duration}</p>
+                              <p className="text-sm text-gray-600">মূল্য: ৳{subscription.price.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm"><strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}</p>
+                              <p className="text-sm"><strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}</p>
+                              <p className="text-sm"><strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</p>
+                              <p className="text-sm"><strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}</p>
+                            </div>
+                          </div>
+                          
+                          {(subscription.subscription_file_url || subscription.subscription_link) && (
+                            <div className="mt-3 p-2 bg-green-50 rounded border-l-4 border-green-500">
+                              <p className="text-sm font-medium text-green-800">অ্যাক্সেস তথ্য:</p>
+                              {subscription.subscription_file_url && (
+                                <p className="text-sm text-green-700">ফাইল: {subscription.file_name || 'ডাউনলোড উপলব্ধ'}</p>
+                              )}
+                              {subscription.subscription_link && (
+                                <p className="text-sm text-green-700">লিংক: উপলব্ধ</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Status Update Dialog */}
       <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
@@ -455,63 +662,107 @@ const OrdersManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Subscription Update Dialog */}
+      {/* Subscription Management Dialog */}
       <Dialog open={showSubscriptionDialog} onOpenChange={setShowSubscriptionDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>সাবস্ক্রিপশন ফাইল/লিংক আপডেট</DialogTitle>
+            <DialogTitle>সাবস্ক্রিপশন পরিচালনা</DialogTitle>
           </DialogHeader>
           
           {selectedOrder && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="p-3 bg-gray-50 rounded-lg">
                 <p className="text-sm"><strong>অর্ডার:</strong> #{selectedOrder.id.slice(0, 8)}</p>
                 <p className="text-sm"><strong>গ্রাহক:</strong> {selectedOrder.customer_name}</p>
               </div>
 
-              <div>
-                <Label htmlFor="file">ফাইল আপলোড</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  onChange={(e) => setSubscriptionDetails({
-                    ...subscriptionDetails,
-                    file: e.target.files?.[0] || null
-                  })}
-                  className="mt-1"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  পিডিএফ, টেক্সট বা ইমেজ ফাইল আপলোড করুন
-                </p>
-              </div>
+              {/* Current Subscriptions */}
+              {orderSubscriptions.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3">বর্তমান সাবস্ক্রিপশন সমূহ:</h3>
+                  <div className="space-y-3">
+                    {orderSubscriptions.map((subscription) => (
+                      <div key={subscription.id} className="p-3 border rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{subscription.product_name}</h4>
+                            <p className="text-sm text-gray-600">{subscription.package_duration} • ৳{subscription.price.toLocaleString()}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(subscription.starts_at).toLocaleDateString('bn-BD')} - {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
+                            </p>
+                          </div>
+                          <Badge variant={subscription.is_active ? "default" : "secondary"}>
+                            {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                          </Badge>
+                        </div>
+                        
+                        {(subscription.subscription_file_url || subscription.subscription_link) && (
+                          <div className="mt-2 p-2 bg-green-50 rounded text-sm">
+                            <p className="font-medium text-green-800">অ্যাক্সেস তথ্য:</p>
+                            {subscription.subscription_file_url && (
+                              <p className="text-green-700">📄 {subscription.file_name || 'ডাউনলোড ফাইল'}</p>
+                            )}
+                            {subscription.subscription_link && (
+                              <p className="text-green-700">🔗 সাবস্ক্রিপশন লিংক</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <div>
-                <Label htmlFor="link">সাবস্ক্রিপশন লিংক</Label>
-                <Input
-                  id="link"
-                  type="url"
-                  value={subscriptionDetails.link}
-                  onChange={(e) => setSubscriptionDetails({
-                    ...subscriptionDetails,
-                    link: e.target.value
-                  })}
-                  placeholder="https://example.com/subscription"
-                  className="mt-1"
-                />
-              </div>
+              {/* Add/Update Subscription Files */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">সাবস্ক্রিপশন ফাইল/লিংক আপডেট করুন:</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="file">ফাইল আপলোড</Label>
+                    <Input
+                      id="file"
+                      type="file"
+                      onChange={(e) => setSubscriptionDetails({
+                        ...subscriptionDetails,
+                        file: e.target.files?.[0] || null
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      পিডিএফ, টেক্সট বা ইমেজ ফাইল আপলোড করুন
+                    </p>
+                  </div>
 
-              <div>
-                <Label htmlFor="fileName">ফাইলের নাম (ঐচ্ছিক)</Label>
-                <Input
-                  id="fileName"
-                  value={subscriptionDetails.fileName}
-                  onChange={(e) => setSubscriptionDetails({
-                    ...subscriptionDetails,
-                    fileName: e.target.value
-                  })}
-                  placeholder="কাস্টম ফাইলের নাম"
-                  className="mt-1"
-                />
+                  <div>
+                    <Label htmlFor="link">সাবস্ক্রিপশন লিংক</Label>
+                    <Input
+                      id="link"
+                      type="url"
+                      value={subscriptionDetails.link}
+                      onChange={(e) => setSubscriptionDetails({
+                        ...subscriptionDetails,
+                        link: e.target.value
+                      })}
+                      placeholder="https://example.com/subscription"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="fileName">ফাইলের নাম (ঐচ্ছিক)</Label>
+                    <Input
+                      id="fileName"
+                      value={subscriptionDetails.fileName}
+                      onChange={(e) => setSubscriptionDetails({
+                        ...subscriptionDetails,
+                        fileName: e.target.value
+                      })}
+                      placeholder="কাস্টম ফাইলের নাম"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end space-x-2">
