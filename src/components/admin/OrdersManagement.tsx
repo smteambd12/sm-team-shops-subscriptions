@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -260,6 +261,13 @@ const OrdersManagement = () => {
   if (loading) {
     return (
       <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-72"></div>
+          </div>
+          <div className="h-10 bg-gray-200 rounded w-24"></div>
+        </div>
         {[1, 2, 3].map((i) => (
           <Card key={i}>
             <CardContent className="p-6">
@@ -276,14 +284,25 @@ const OrdersManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">অর্ডার পরিচালনা</h2>
-        <p className="text-gray-600">সব অর্ডার দেখুন এবং স্ট্যাটাস আপডেট করুন।</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">অর্ডার পরিচালনা</h2>
+          <p className="text-gray-600">সব অর্ডার দেখুন এবং স্ট্যাটাস আপডেট করুন।</p>
+        </div>
+        <Button
+          onClick={fetchOrders}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          রিফ্রেশ
+        </Button>
       </div>
 
       <div className="grid gap-4">
         {orders.map((order) => (
-          <Card key={order.id}>
+          <Card key={order.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
@@ -343,7 +362,7 @@ const OrdersManagement = () => {
               </div>
 
               {order.admin_message && (
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-sm">
                     <strong>অ্যাডমিন মেসেজ:</strong> {order.admin_message}
                   </p>
@@ -379,17 +398,20 @@ const OrdersManagement = () => {
 
       {/* Status Update Dialog */}
       <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>অর্ডার স্ট্যাটাস আপডেট</DialogTitle>
           </DialogHeader>
           
           {selectedOrder && (
             <div className="space-y-4">
-              <div>
-                <p><strong>অর্ডার:</strong> #{selectedOrder.id.slice(0, 8)}</p>
-                <p><strong>গ্রাহক:</strong> {selectedOrder.customer_name}</p>
-                <p><strong>বর্তমান স্ট্যাটাস:</strong> {getStatusBadge(selectedOrder.status)}</p>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm"><strong>অর্ডার:</strong> #{selectedOrder.id.slice(0, 8)}</p>
+                <p className="text-sm"><strong>গ্রাহক:</strong> {selectedOrder.customer_name}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <strong className="text-sm">বর্তমান স্ট্যাটাস:</strong>
+                  {getStatusBadge(selectedOrder.status)}
+                </div>
               </div>
 
               <div>
@@ -435,16 +457,16 @@ const OrdersManagement = () => {
 
       {/* Subscription Update Dialog */}
       <Dialog open={showSubscriptionDialog} onOpenChange={setShowSubscriptionDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>সাবস্ক্রিপশন ফাইল/লিংক আপডেট</DialogTitle>
           </DialogHeader>
           
           {selectedOrder && (
             <div className="space-y-4">
-              <div>
-                <p><strong>অর্ডার:</strong> #{selectedOrder.id.slice(0, 8)}</p>
-                <p><strong>গ্রাহক:</strong> {selectedOrder.customer_name}</p>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm"><strong>অর্ডার:</strong> #{selectedOrder.id.slice(0, 8)}</p>
+                <p className="text-sm"><strong>গ্রাহক:</strong> {selectedOrder.customer_name}</p>
               </div>
 
               <div>
@@ -458,6 +480,9 @@ const OrdersManagement = () => {
                   })}
                   className="mt-1"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  পিডিএফ, টেক্সট বা ইমেজ ফাইল আপলোড করুন
+                </p>
               </div>
 
               <div>

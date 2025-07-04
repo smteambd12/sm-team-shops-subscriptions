@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscriptionNotifications } from '@/hooks/useSubscriptionNotifications';
 import SubscriptionNotificationBanner from '@/components/notifications/SubscriptionNotificationBanner';
-import { Calendar, Package, Clock, Download, ExternalLink, FileText } from 'lucide-react';
+import { Calendar, Package, Clock, Download, ExternalLink, FileText, RefreshCw } from 'lucide-react';
 
 interface UserSubscription {
   id: string;
@@ -113,9 +113,20 @@ const UserSubscriptions = () => {
     document.body.removeChild(link);
   };
 
+  const handleRefresh = () => {
+    fetchSubscriptions();
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-72"></div>
+          </div>
+          <div className="h-10 bg-gray-200 rounded w-24"></div>
+        </div>
         {[1, 2, 3].map((i) => (
           <Card key={i}>
             <CardContent className="p-6">
@@ -137,6 +148,15 @@ const UserSubscriptions = () => {
           <h2 className="text-2xl font-bold">আমার সাবস্ক্রিপশন</h2>
           <p className="text-gray-600">আপনার সব সাবস্ক্রিপশন এখানে দেখুন।</p>
         </div>
+        <Button
+          onClick={handleRefresh}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          রিফ্রেশ
+        </Button>
       </div>
 
       {/* Notification Banner */}
@@ -150,25 +170,28 @@ const UserSubscriptions = () => {
           <CardContent className="text-center py-12">
             <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold mb-2">কোন সাবস্ক্রিপশন নেই</h3>
-            <p className="text-gray-600">আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
+            <p className="text-gray-600 mb-4">আপনার এখনো কোন সক্রিয় সাবস্ক্রিপশন নেই।</p>
+            <Button onClick={() => window.location.href = '/'}>
+              নতুন সাবস্ক্রিপশন দেখুন
+            </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4">
           {subscriptions.map((subscription) => (
-            <Card key={subscription.id}>
+            <Card key={subscription.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5" />
+                      <Package className="h-5 w-5 text-blue-600" />
                       {subscription.product_name}
                     </CardTitle>
-                    <CardDescription>
-                      প্যাকেজ: {subscription.package_duration}
+                    <CardDescription className="mt-1">
+                      প্যাকেজ: {subscription.package_duration} • মূল্য: ৳{subscription.price.toLocaleString()}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 items-end">
                     {getStatusBadge(subscription)}
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
@@ -179,31 +202,44 @@ const UserSubscriptions = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm"><strong>মূল্য:</strong> ৳{subscription.price}</p>
-                    <p className="text-sm"><strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}</p>
-                    <p className="text-sm"><strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm">
+                        <strong>শুরু:</strong> {new Date(subscription.starts_at).toLocaleDateString('bn-BD')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm">
+                        <strong>শেষ:</strong> {new Date(subscription.expires_at).toLocaleDateString('bn-BD')}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm"><strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}</p>
-                    <p className="text-sm"><strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm">
+                      <strong>অটো রিনিউ:</strong> {subscription.auto_renew ? 'হ্যাঁ' : 'না'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>স্ট্যাটাস:</strong> {subscription.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                    </p>
                   </div>
                 </div>
 
                 {/* File and Link Access */}
                 {(subscription.subscription_file_url || subscription.subscription_link) && (
-                  <div className="mt-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
                     <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
                       <Download className="h-4 w-4" />
                       সাবস্ক্রিপশন অ্যাক্সেস
                     </h4>
-                    <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
                       {subscription.subscription_file_url && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleFileDownload(subscription.subscription_file_url!, subscription.file_name)}
-                          className="flex items-center gap-2 mr-2"
+                          className="flex items-center gap-2"
                         >
                           <FileText className="h-4 w-4" />
                           {subscription.file_name || 'ফাইল ডাউনলোড'}
@@ -226,9 +262,10 @@ const UserSubscriptions = () => {
 
                 {/* Show message if no access files/links are available */}
                 {!subscription.subscription_file_url && !subscription.subscription_link && subscription.is_active && (
-                  <Alert>
+                  <Alert className="mt-4">
+                    <Clock className="h-4 w-4" />
                     <AlertDescription>
-                      আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন।
+                      আপনার সাবস্ক্রিপশন অ্যাক্সেস ফাইল/লিংক এখনো প্রস্তুত হয়নি। অনুগ্রহ করে অপেক্ষা করুন বা সাপোর্টের সাথে যোগাযোগ করুন।
                     </AlertDescription>
                   </Alert>
                 )}
