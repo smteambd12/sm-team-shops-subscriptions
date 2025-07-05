@@ -21,6 +21,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Dashboard from "./pages/Dashboard";
 import LiveChat from "./pages/LiveChat";
 import AdminChat from "./pages/AdminChat";
+import TeamSupport from "./pages/TeamSupport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ function App() {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/team-support" element={<TeamSupport />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/favorites" element={<Favorites />} />

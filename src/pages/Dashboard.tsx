@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import SubscriptionExpiryNotification from '@/components/notifications/SubscriptionExpiryNotification';
-import LiveChatCard from '@/components/dashboard/LiveChatCard';
 import ChatWidget from '@/components/dashboard/ChatWidget';
 import {
   User,
@@ -27,7 +26,8 @@ import {
   Target,
   BarChart3,
   PieChart,
-  Activity
+  Activity,
+  Users
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -141,19 +141,24 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold">আমার ড্যাশবোর্ড</h1>
             <p className="text-gray-600 mt-2">আপনার অ্যাকাউন্টের সব তথ্য এক জায়গায়</p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/profile')}>
-            <Settings className="h-4 w-4 mr-2" />
-            সেটিংস
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/team-support')}
+              className="flex items-center gap-2"
+            >
+              <Users className="h-4 w-4" />
+              টিম সাপোর্ট
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/profile')}>
+              <Settings className="h-4 w-4 mr-2" />
+              সেটিংস
+            </Button>
+          </div>
         </div>
 
         {/* Subscription Expiry Notifications */}
         <SubscriptionExpiryNotification />
-
-        {/* Live Chat Highlight Card */}
-        <div className="mb-8">
-          <LiveChatCard />
-        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
