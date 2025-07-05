@@ -2,7 +2,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// ✅ এখানে পরিবর্তন হয়েছে: BrowserRouter → HashRouter
 import { HashRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./contexts/AuthContext";
@@ -35,7 +34,6 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <Toaster />
-            {/* ✅ HashRouter ব্যবহার করা হয়েছে */}
             <HashRouter>
               <div className="min-h-screen bg-gray-50 flex flex-col">
                 <Header />
@@ -56,6 +54,8 @@ function App() {
                     <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/admin/chat" element={<AdminChat />} />
+
+                    {/* ভুল বা অন্য URL এ NotFound দেখাবে */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
