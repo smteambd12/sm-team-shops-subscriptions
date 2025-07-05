@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import SubscriptionExpiryNotification from '@/components/notifications/SubscriptionExpiryNotification';
+import LiveChatCard from '@/components/dashboard/LiveChatCard';
 import {
   User,
   Package,
@@ -147,6 +148,11 @@ const Dashboard = () => {
 
       {/* Subscription Expiry Notifications */}
       <SubscriptionExpiryNotification />
+
+      {/* Live Chat Highlight Card */}
+      <div className="mb-8">
+        <LiveChatCard />
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
