@@ -23,7 +23,7 @@ export const useAdminChat = () => {
 
       if (error) throw error;
 
-      setChatRooms(data || []);
+      setChatRooms((data || []) as ChatRoom[]);
     } catch (error) {
       console.error('Error fetching chat rooms:', error);
       toast({
@@ -47,7 +47,7 @@ export const useAdminChat = () => {
 
       if (error) throw error;
 
-      setMessages(data || []);
+      setMessages((data || []) as ChatMessage[]);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({

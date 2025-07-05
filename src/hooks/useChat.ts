@@ -32,7 +32,7 @@ export const useChat = (roomId?: string) => {
 
       if (roomError) throw roomError;
 
-      setRoom(roomData);
+      setRoom(roomData as ChatRoom);
       return roomData.id;
     } catch (error) {
       console.error('Error getting/creating chat room:', error);
@@ -56,7 +56,7 @@ export const useChat = (roomId?: string) => {
 
       if (error) throw error;
 
-      setMessages(data || []);
+      setMessages((data || []) as ChatMessage[]);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
