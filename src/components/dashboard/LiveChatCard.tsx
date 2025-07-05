@@ -4,13 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Headphones, Clock, Users, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import SupportOptions from './SupportOptions';
 
 const LiveChatCard = () => {
   const navigate = useNavigate();
 
   const handleChatClick = () => {
     navigate('/chat');
+  };
+
+  const handleTeamSupportClick = () => {
+    navigate('/team-support');
   };
 
   return (
@@ -71,10 +74,28 @@ const LiveChatCard = () => {
         </CardContent>
       </Card>
 
-      {/* Support Options */}
-      <div className="lg:col-span-1">
-        <SupportOptions />
-      </div>
+      {/* Team Support Card */}
+      <Card className="lg:col-span-1 hover:shadow-lg transition-all duration-300">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="bg-blue-100 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-bold mb-2">টিম সাপোর্ট</h3>
+            <p className="text-gray-600 text-sm mb-4">
+              WhatsApp, ফোন এবং ইমেইলের মাধ্যমে আমাদের সাথে যোগাযোগ করুন
+            </p>
+            <Button 
+              onClick={handleTeamSupportClick}
+              className="w-full"
+              variant="outline"
+            >
+              টিম সাপোর্ট পেজ
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
