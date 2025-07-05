@@ -1,8 +1,10 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// ✅ এখানে পরিবর্তন হয়েছে: BrowserRouter → HashRouter
+import { HashRouter, Routes, Route } from "react-router-dom";
+
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import Header from "./components/Header";
@@ -33,7 +35,8 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <Toaster />
-            <BrowserRouter>
+            {/* ✅ HashRouter ব্যবহার করা হয়েছে */}
+            <HashRouter>
               <div className="min-h-screen bg-gray-50 flex flex-col">
                 <Header />
                 <main className="flex-1">
@@ -58,7 +61,7 @@ function App() {
                 </main>
                 <Footer />
               </div>
-            </BrowserRouter>
+            </HashRouter>
           </CartProvider>
         </AuthProvider>
       </TooltipProvider>
