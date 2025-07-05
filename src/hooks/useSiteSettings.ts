@@ -9,6 +9,10 @@ interface SiteSettings {
   live_chat_number: string;
   search_placeholder: string;
   enable_advanced_search: boolean;
+  team_support_whatsapp_number: string;
+  team_support_whatsapp_link: string;
+  team_support_phone_number: string;
+  team_support_email: string;
 }
 
 export const useSiteSettings = () => {
@@ -19,6 +23,10 @@ export const useSiteSettings = () => {
     live_chat_number: '',
     search_placeholder: 'প্রোডাক্ট খুঁজুন...',
     enable_advanced_search: false,
+    team_support_whatsapp_number: '',
+    team_support_whatsapp_link: '',
+    team_support_phone_number: '',
+    team_support_email: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +47,11 @@ export const useSiteSettings = () => {
           'rocket_number', 
           'live_chat_number',
           'search_placeholder',
-          'enable_advanced_search'
+          'enable_advanced_search',
+          'team_support_whatsapp_number',
+          'team_support_whatsapp_link',
+          'team_support_phone_number',
+          'team_support_email'
         ]);
 
       if (error) throw error;
@@ -56,6 +68,10 @@ export const useSiteSettings = () => {
         live_chat_number: settingsMap.live_chat_number || '',
         search_placeholder: settingsMap.search_placeholder || 'প্রোডাক্ট খুঁজুন...',
         enable_advanced_search: settingsMap.enable_advanced_search === 'true',
+        team_support_whatsapp_number: settingsMap.team_support_whatsapp_number || '',
+        team_support_whatsapp_link: settingsMap.team_support_whatsapp_link || '',
+        team_support_phone_number: settingsMap.team_support_phone_number || '',
+        team_support_email: settingsMap.team_support_email || '',
       });
     } catch (error) {
       console.error('Error fetching settings:', error);

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,11 +17,13 @@ import {
 } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { formatDistanceToNow } from 'date-fns';
 
 const ChatWidget = () => {
   const { user } = useAuth();
   const { messages, loading, sendMessage } = useChat();
+  const { settings } = useSiteSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -50,13 +51,22 @@ const ChatWidget = () => {
   };
 
   const handleWhatsAppClick = () => {
-    const whatsappNumber = '+8801234567890'; // Replace with your WhatsApp number
+    const whatsappNumber = settings.team_support_whatsapp_number;
+    const whatsappLink = settings.team_support_whatsapp_link;
     const message = encodeURIComponent('আসসালামু আলাইকুম, আমার সাহায্য প্রয়োজন।');
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    
+    if (whatsappLink) {
+      window.open(whatsappLink, '_blank');
+    } else if (whatsappNumber) {
+      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    }
   };
 
   const handlePhoneClick = () => {
-    window.open('tel:+8801234567890', '_self');
+    const phoneNumber = settings.team_support_phone_number;
+    if (phoneNumber) {
+      window.open(`tel:${phoneNumber}`, '_self');
+    }
   };
 
   if (!isOpen) {
@@ -81,6 +91,7 @@ const ChatWidget = () => {
               size="sm"
               className="bg-green-600 hover:bg-green-700 text-white rounded-full w-12 h-12 shadow-md"
               title="হোয়াটসঅ্যাপে যোগাযোগ"
+              disabled={!settings.team_support_whatsapp_number && !settings.team_support_whatsapp_link}
             >
               <MessageSquare className="h-4 w-4" />
             </Button>
@@ -89,6 +100,7 @@ const ChatWidget = () => {
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 shadow-md"
               title="ফোনে যোগাযোগ"
+              disabled={!settings.team_support_phone_number}
             >
               <Phone className="h-4 w-4" />
             </Button>
@@ -229,6 +241,7 @@ const ChatWidget = () => {
                     size="sm"
                     variant="outline"
                     className="text-xs px-2 py-1 h-6"
+                    disabled={!settings.team_support_whatsapp_number && !settings.team_support_whatsapp_link}
                   >
                     <MessageSquare className="h-3 w-3 mr-1" />
                     WhatsApp
@@ -238,6 +251,7 @@ const ChatWidget = () => {
                     size="sm"
                     variant="outline"
                     className="text-xs px-2 py-1 h-6"
+                    disabled={!settings.team_support_phone_number}
                   >
                     <Phone className="h-3 w-3 mr-1" />
                     কল

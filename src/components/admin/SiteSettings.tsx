@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,10 @@ interface SiteSettingsData {
   live_chat_number: string;
   search_placeholder: string;
   enable_advanced_search: boolean;
+  team_support_whatsapp_number: string;
+  team_support_whatsapp_link: string;
+  team_support_phone_number: string;
+  team_support_email: string;
 }
 
 const SiteSettings = () => {
@@ -27,6 +32,10 @@ const SiteSettings = () => {
     live_chat_number: '',
     search_placeholder: 'প্রোডাক্ট খুঁজুন...',
     enable_advanced_search: false,
+    team_support_whatsapp_number: '',
+    team_support_whatsapp_link: '',
+    team_support_phone_number: '',
+    team_support_email: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,7 +57,11 @@ const SiteSettings = () => {
           'rocket_number',
           'live_chat_number',
           'search_placeholder',
-          'enable_advanced_search'
+          'enable_advanced_search',
+          'team_support_whatsapp_number',
+          'team_support_whatsapp_link',
+          'team_support_phone_number',
+          'team_support_email'
         ]);
 
       if (error) throw error;
@@ -123,7 +136,11 @@ const SiteSettings = () => {
       rocket_number: 'Rocket mobile banking number',
       live_chat_number: 'WhatsApp number for live chat',
       search_placeholder: 'Placeholder text for search input',
-      enable_advanced_search: 'Enable advanced search features'
+      enable_advanced_search: 'Enable advanced search features',
+      team_support_whatsapp_number: 'টিম সাপোর্ট হোয়াটসঅ্যাপ নাম্বার',
+      team_support_whatsapp_link: 'টিম সাপোর্ট হোয়াটসঅ্যাপ লিংক (ঐচ্ছিক)',
+      team_support_phone_number: 'টিম সাপোর্ট ফোন নাম্বার',
+      team_support_email: 'টিম সাপোর্ট ইমেইল'
     };
     return descriptions[key] || '';
   };
@@ -211,6 +228,52 @@ const SiteSettings = () => {
                     value={settings.live_chat_number}
                     onChange={(e) => handleInputChange('live_chat_number', e.target.value)}
                     placeholder="8801XXXXXXXXX"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg">টিম সাপোর্ট তথ্য</h4>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="team_support_whatsapp_number">টিম সাপোর্ট হোয়াটসঅ্যাপ নম্বর</Label>
+                  <Input
+                    id="team_support_whatsapp_number"
+                    value={settings.team_support_whatsapp_number}
+                    onChange={(e) => handleInputChange('team_support_whatsapp_number', e.target.value)}
+                    placeholder="8801XXXXXXXXX"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="team_support_whatsapp_link">টিম সাপোর্ট হোয়াটসঅ্যাপ লিংক (ঐচ্ছিক)</Label>
+                  <Input
+                    id="team_support_whatsapp_link"
+                    value={settings.team_support_whatsapp_link}
+                    onChange={(e) => handleInputChange('team_support_whatsapp_link', e.target.value)}
+                    placeholder="https://wa.me/..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="team_support_phone_number">টিম সাপোর্ট ফোন নম্বর</Label>
+                  <Input
+                    id="team_support_phone_number"
+                    value={settings.team_support_phone_number}
+                    onChange={(e) => handleInputChange('team_support_phone_number', e.target.value)}
+                    placeholder="8801XXXXXXXXX"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="team_support_email">টিম সাপোর্ট ইমেইল</Label>
+                  <Input
+                    id="team_support_email"
+                    value={settings.team_support_email}
+                    onChange={(e) => handleInputChange('team_support_email', e.target.value)}
+                    placeholder="support@yourcompany.com"
                   />
                 </div>
               </div>

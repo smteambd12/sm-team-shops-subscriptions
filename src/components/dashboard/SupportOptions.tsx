@@ -3,21 +3,53 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Phone, Mail, Clock, Users, Globe } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const SupportOptions = () => {
+  const { settings, loading } = useSiteSettings();
+
   const handleWhatsAppClick = () => {
-    const whatsappNumber = '+8801234567890'; // Replace with your WhatsApp number
+    const whatsappNumber = settings.team_support_whatsapp_number;
+    const whatsappLink = settings.team_support_whatsapp_link;
     const message = encodeURIComponent('আসসালামু আলাইকুম, আমার সাহায্য প্রয়োজন।');
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    
+    if (whatsappLink) {
+      window.open(whatsappLink, '_blank');
+    } else if (whatsappNumber) {
+      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    }
   };
 
   const handlePhoneClick = () => {
-    window.open('tel:+8801234567890', '_self');
+    const phoneNumber = settings.team_support_phone_number;
+    if (phoneNumber) {
+      window.open(`tel:${phoneNumber}`, '_self');
+    }
   };
 
   const handleEmailClick = () => {
-    window.open('mailto:support@yourcompany.com?subject=সাহায্য প্রয়োজন', '_self');
+    const email = settings.team_support_email;
+    if (email) {
+      window.open(`mailto:${email}?subject=সাহায্য প্রয়োজন`, '_self');
+    }
   };
+
+  if (loading) {
+    return (
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-3">
+            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
@@ -32,6 +64,7 @@ const SupportOptions = () => {
           <Button
             onClick={handleWhatsAppClick}
             className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 h-12"
+            disabled={!settings.team_support_whatsapp_number && !settings.team_support_whatsapp_link}
           >
             <MessageSquare className="h-4 w-4" />
             <div className="text-left">
@@ -43,6 +76,7 @@ const SupportOptions = () => {
           <Button
             onClick={handlePhoneClick}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 h-12"
+            disabled={!settings.team_support_phone_number}
           >
             <Phone className="h-4 w-4" />
             <div className="text-left">
@@ -55,6 +89,7 @@ const SupportOptions = () => {
             onClick={handleEmailClick}
             variant="outline"
             className="border-blue-300 text-blue-700 hover:bg-blue-50 flex items-center gap-2 h-12"
+            disabled={!settings.team_support_email}
           >
             <Mail className="h-4 w-4" />
             <div className="text-left">
