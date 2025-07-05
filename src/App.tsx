@@ -19,6 +19,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserSubscriptions from "./components/UserSubscriptions";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Dashboard from "./pages/Dashboard";
+import LiveChat from "./pages/LiveChat";
+import AdminChat from "./pages/AdminChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,8 +47,10 @@ function App() {
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/favorites" element={<Favorites />} />
                     <Route path="/subscriptions" element={<UserSubscriptions />} />
+                    <Route path="/chat" element={<LiveChat />} />
                     <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/chat" element={<AdminChat />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>

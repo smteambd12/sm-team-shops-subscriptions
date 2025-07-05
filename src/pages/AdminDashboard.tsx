@@ -124,6 +124,17 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/chat')}>
+          <CardContent className="p-4 text-center">
+            <MessageSquare className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+            <h3 className="font-medium">চ্যাট সাপোর্ট</h3>
+            <p className="text-sm text-gray-600">ইউজার চ্যাট পরিচালনা</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Tabs defaultValue="stats" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 lg:grid-cols-8">
           <TabsTrigger value="stats" className="flex items-center gap-2">
