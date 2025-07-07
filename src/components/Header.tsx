@@ -26,14 +26,19 @@ const Header = () => {
 
   const cartItemsCount = getCartItemsCount();
 
-  return (
-    <header className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            এসএম টিম স্টোর
-          </Link>
+return (
+  <header className="bg-white shadow-lg sticky top-0 z-50">
+    <div className="container mx-auto px-4">
+      <div className="flex items-center justify-between h-16">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2">
+          {/* Green box with SM inside */}
+          <div className="w-8 h-8 rounded-md bg-gradient-to-r from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm">
+            SM
+          </div>
+          {/* Text beside box */}
+          <span className="text-2xl font-bold text-gray-800">SM SHOPS</span>
+        </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
