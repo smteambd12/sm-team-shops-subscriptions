@@ -90,7 +90,7 @@ const Footer = () => {
               <li><Link to="/categories/web" className="text-gray-400 hover:text-white transition-colors">ওয়েব সাবস্ক্রিপশন</Link></li>
               <li><Link to="/categories/mobile" className="text-gray-400 hover:text-white transition-colors">মোবাইল অ্যাপস</Link></li>
               <li><Link to="/categories/tutorial" className="text-gray-400 hover:text-white transition-colors">টিউটোরিয়াল</Link></li>
-              <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">যোগাযোগ</Link></li>
+              <li><Link to="/team-support" className="text-gray-400 hover:text-white transition-colors">যোগাযোগ</Link></li>
             </ul>
           </div>
 
@@ -101,7 +101,7 @@ const Footer = () => {
               <li><Link to="/orders" className="text-gray-400 hover:text-white transition-colors">অর্ডার ট্র্যাক করুন</Link></li>
               <li><Link to="/profile" className="text-gray-400 hover:text-white transition-colors">আমার অ্যাকাউন্ট</Link></li>
               <li><Link to="/favorites" className="text-gray-400 hover:text-white transition-colors">প্রিয় তালিকা</Link></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">সাহায্য ও সহায়তা</a></li>
+              <li><a href="/team-support" className="text-gray-400 hover:text-white transition-colors">সাহায্য ও সহায়তা</a></li>
             </ul>
           </div>
 
@@ -109,8 +109,8 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">যোগাযোগের তথ্য</h4>
             <div className="space-y-2 text-gray-400">
-              <p>📞 {settings.phone_number || '+৮৮০ ১৭১২৩৪৫৬৭৮'}</p>
-              <p>📧 {settings.email || 'support@smteamshops.com'}</p>
+              <p>📞 {settings.phone_number || '+৮৮০১৬২৪-৭১২৮৫১'}</p>
+              <p>📧 {settings.email || 'smteambdofficial@gmail.com'}</p>
               <p>📍 {settings.address || 'ঢাকা, বাংলাদেশ'}</p>
               <p>🕐 {settings.working_hours || 'সকাল ৯টা - রাত ৯টা'}</p>
             </div>
