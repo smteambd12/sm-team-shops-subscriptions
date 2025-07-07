@@ -1,5 +1,3 @@
-// Auth.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,7 +29,7 @@ const Auth = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -54,6 +52,7 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
@@ -61,13 +60,19 @@ const Auth = () => {
       });
 
       if (error) {
-        toast({
-          title: "লগইন ব্যর্থ",
-          description: error.message.includes("Invalid login credentials")
-            ? "ইমেইল বা পাসওয়ার্ড ভুল। আবার চেষ্টা করুন।"
-            : error.message,
-          variant: "destructive",
-        });
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "লগইন ব্যর্থ",
+            description: "ইমেইল বা পাসওয়ার্ড ভুল। আবার চেষ্টা করুন।",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "লগইন ব্যর্থ",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "সফলভাবে লগইন হয়েছে",
@@ -91,6 +96,7 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
+
       const { error } = await supabase.auth.signUp({
         email: registerEmail,
         password: registerPassword,
@@ -104,13 +110,19 @@ const Auth = () => {
       });
 
       if (error) {
-        toast({
-          title: "রেজিস্ট্রেশন ব্যর্থ",
-          description: error.message.includes("User already registered")
-            ? "এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট রয়েছে। লগইন করুন।"
-            : error.message,
-          variant: "destructive",
-        });
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: "অ্যাকাউন্ট বিদ্যমান",
+            description: "এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট রয়েছে। লগইন করুন।",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "রেজিস্ট্রেশন ব্যর্থ",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "রেজিস্ট্রেশন সফল",
@@ -129,38 +141,43 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 px-4 sm:px-6">
-      <div className="w-full max-w-md">
-        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-md rounded-2xl overflow-hidden">
-          <CardHeader className="text-center pt-8 pb-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 p-3 sm:p-4">
+      <div className="w-full max-w-sm sm:max-w-md">
+        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="text-center pb-6 pt-8">
             <div className="mx-auto mb-4 p-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full w-fit">
               <Smartphone className="h-8 w-8 text-white" />
             </div>
             <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               SM TEAM SHOPS
             </CardTitle>
-            <CardDescription className="text-gray-600 mt-2 text-sm sm:text-base">
+            <CardDescription className="text-gray-600 mt-2">
               আপনার অ্যাকাউন্টে প্রবেশ করুন বা নতুন অ্যাকাউন্ট তৈরি করুন
             </CardDescription>
           </CardHeader>
 
           <CardContent className="px-6 pb-8">
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg mb-6">
-                <TabsTrigger value="login" className="rounded-md py-2.5 text-sm font-medium">
+              {/* ✅ FIXED TABS UI FOR MOBILE */}
+              <TabsList className="w-full grid grid-cols-2 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="login" 
+                  className="w-full py-2.5 text-sm font-medium text-center rounded-md"
+                >
                   লগইন
                 </TabsTrigger>
-                <TabsTrigger value="register" className="rounded-md py-2.5 text-sm font-medium">
+                <TabsTrigger 
+                  value="register" 
+                  className="w-full py-2.5 text-sm font-medium text-center rounded-md"
+                >
                   রেজিস্টার
                 </TabsTrigger>
               </TabsList>
 
-              {/* Login Tab */}
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-5">
-                  {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="loginEmail" className="flex gap-2 items-center text-gray-700 font-medium">
+                    <Label htmlFor="loginEmail" className="flex items-center gap-2 text-gray-700 font-medium">
                       <Mail className="h-4 w-4 text-purple-500" />
                       ইমেইল
                     </Label>
@@ -170,14 +187,13 @@ const Auth = () => {
                       placeholder="আপনার ইমেইল"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="h-12 text-base"
+                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
                       required
                     />
                   </div>
 
-                  {/* Password */}
                   <div className="space-y-2">
-                    <Label htmlFor="loginPassword" className="flex gap-2 items-center text-gray-700 font-medium">
+                    <Label htmlFor="loginPassword" className="flex items-center gap-2 text-gray-700 font-medium">
                       <Lock className="h-4 w-4 text-purple-500" />
                       পাসওয়ার্ড
                     </Label>
@@ -188,25 +204,28 @@ const Auth = () => {
                         placeholder="আপনার পাসওয়ার্ড"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="h-12 text-base pr-12"
+                        className="h-12 text-base pr-12 border-gray-300 focus:border-purple-500 focus:ring-purple-200"
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1 h-10 w-10"
+                        className="absolute right-1 top-1 h-10 w-10 hover:bg-gray-100 rounded-lg"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
                       >
-                        {showLoginPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showLoginPassword ? (
+                          <EyeOff className="h-5 w-5 text-gray-500" />
+                        ) : (
+                          <Eye className="h-5 w-5 text-gray-500" />
+                        )}
                       </Button>
                     </div>
                   </div>
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105 transition-transform"
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -224,11 +243,10 @@ const Auth = () => {
                 </form>
               </TabsContent>
 
-              {/* Register Tab */}
               <TabsContent value="register">
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="registerName" className="flex gap-2 items-center text-gray-700 font-medium">
+                    <Label htmlFor="registerName" className="flex items-center gap-2 text-gray-700 font-medium">
                       <UserIcon className="h-4 w-4 text-purple-500" />
                       পূর্ণ নাম
                     </Label>
@@ -238,13 +256,13 @@ const Auth = () => {
                       placeholder="আপনার পূর্ণ নাম"
                       value={registerName}
                       onChange={(e) => setRegisterName(e.target.value)}
-                      className="h-12 text-base"
+                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="registerPhone" className="flex gap-2 items-center text-gray-700 font-medium">
+                    <Label htmlFor="registerPhone" className="flex items-center gap-2 text-gray-700 font-medium">
                       <Phone className="h-4 w-4 text-purple-500" />
                       ফোন নম্বর
                     </Label>
@@ -254,13 +272,13 @@ const Auth = () => {
                       placeholder="আপনার ফোন নম্বর"
                       value={registerPhone}
                       onChange={(e) => setRegisterPhone(e.target.value)}
-                      className="h-12 text-base"
+                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="registerEmail" className="flex gap-2 items-center text-gray-700 font-medium">
+                    <Label htmlFor="registerEmail" className="flex items-center gap-2 text-gray-700 font-medium">
                       <Mail className="h-4 w-4 text-purple-500" />
                       ইমেইল
                     </Label>
@@ -270,13 +288,13 @@ const Auth = () => {
                       placeholder="আপনার ইমেইল"
                       value={registerEmail}
                       onChange={(e) => setRegisterEmail(e.target.value)}
-                      className="h-12 text-base"
+                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="registerPassword" className="flex gap-2 items-center text-gray-700 font-medium">
+                    <Label htmlFor="registerPassword" className="flex items-center gap-2 text-gray-700 font-medium">
                       <Lock className="h-4 w-4 text-purple-500" />
                       পাসওয়ার্ড
                     </Label>
@@ -287,24 +305,28 @@ const Auth = () => {
                         placeholder="আপনার পাসওয়ার্ড"
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
-                        className="h-12 text-base pr-12"
+                        className="h-12 text-base pr-12 border-gray-300 focus:border-purple-500 focus:ring-purple-200"
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1 h-10 w-10"
+                        className="absolute right-1 top-1 h-10 w-10 hover:bg-gray-100 rounded-lg"
                         onClick={() => setShowRegisterPassword(!showRegisterPassword)}
                       >
-                        {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showRegisterPassword ? (
+                          <EyeOff className="h-5 w-5 text-gray-500" />
+                        ) : (
+                          <Eye className="h-5 w-5 text-gray-500" />
+                        )}
                       </Button>
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105 transition-transform"
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -324,7 +346,10 @@ const Auth = () => {
             </Tabs>
 
             <div className="text-center mt-6">
-              <a href="/" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <a 
+                href="/" 
+                className="text-gray-600 hover:text-purple-600 transition-colors text-sm"
+              >
                 ← হোমে ফিরুন
               </a>
             </div>
