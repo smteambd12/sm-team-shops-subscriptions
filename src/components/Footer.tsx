@@ -101,7 +101,7 @@ const Footer = () => {
               <li><Link to="/orders" className="text-gray-400 hover:text-white transition-colors">অর্ডার ট্র্যাক করুন</Link></li>
               <li><Link to="/profile" className="text-gray-400 hover:text-white transition-colors">আমার অ্যাকাউন্ট</Link></li>
               <li><Link to="/favorites" className="text-gray-400 hover:text-white transition-colors">প্রিয় তালিকা</Link></li>
-              <li><a href="/team-support" className="text-gray-400 hover:text-white transition-colors">সাহায্য ও সহায়তা</a></li>
+              <li><a href="/#/team-support" className="text-gray-400 hover:text-white transition-colors">সাহায্য ও সহায়তা</a></li>
             </ul>
           </div>
 
@@ -119,7 +119,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            {settings.copyright_text || `© ২০২৪ ${settings.company_name || 'SM TEAM SHOPS'}. সকল অধিকার সংরক্ষিত।`} | 
+            {settings.copyright_text || `© ২০২৪ ${settings.company_name || 'SM TEAM'}. সকল অধিকার সংরক্ষিত।`} | 
             <Link 
               to={settings.privacy_policy_url || "/privacy"} 
               className="hover:text-white ml-2"
