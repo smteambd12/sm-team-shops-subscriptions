@@ -8,7 +8,10 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
-import { Eye, EyeOff, LogIn, UserPlus, Mail, Lock, User as UserIcon, Phone, Smartphone } from 'lucide-react';
+import {
+  Eye, EyeOff, LogIn, UserPlus, Mail,
+  Lock, User as UserIcon, Phone, Smartphone
+} from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,15 +31,13 @@ const Auth = () => {
   const [registerPhone, setRegisterPhone] = useState('');
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          navigate('/');
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        navigate('/');
       }
-    );
+    });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -52,7 +53,6 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
@@ -79,7 +79,7 @@ const Auth = () => {
           description: "স্বাগতম!",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "ত্রুটি",
         description: "কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।",
@@ -129,7 +129,7 @@ const Auth = () => {
           description: "আপনার ইমেইল চেক করুন এবং অ্যাকাউন্ট যাচাই করুন।",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "ত্রুটি",
         description: "কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।",
@@ -141,7 +141,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 p-3 sm:p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 p-3 sm:p-4 overflow-auto">
       <div className="w-full max-w-sm sm:max-w-md">
         <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
           <CardHeader className="text-center pb-6 pt-8">
@@ -158,87 +158,56 @@ const Auth = () => {
 
           <CardContent className="px-6 pb-8">
             <Tabs defaultValue="login" className="w-full">
-              {/* ✅ FIXED TABS UI FOR MOBILE */}
-              <TabsList className="w-full grid grid-cols-2 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
-                <TabsTrigger 
-                  value="login" 
-                  className="w-full py-2.5 text-sm font-medium text-center rounded-md"
-                >
-                  লগইন
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="register" 
-                  className="w-full py-2.5 text-sm font-medium text-center rounded-md"
-                >
-                  রেজিস্টার
-                </TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                <TabsTrigger value="login" className="rounded-md py-2.5 text-sm font-medium">লগইন</TabsTrigger>
+                <TabsTrigger value="register" className="rounded-md py-2.5 text-sm font-medium">রেজিস্টার</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="loginEmail" className="flex items-center gap-2 text-gray-700 font-medium">
-                      <Mail className="h-4 w-4 text-purple-500" />
-                      ইমেইল
+                      <Mail className="h-4 w-4 text-purple-500" /> ইমেইল
                     </Label>
                     <Input
                       id="loginEmail"
                       type="email"
-                      placeholder="আপনার ইমেইল"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
+                      className="h-12 text-base"
                       required
+                      placeholder="আপনার ইমেইল"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="loginPassword" className="flex items-center gap-2 text-gray-700 font-medium">
-                      <Lock className="h-4 w-4 text-purple-500" />
-                      পাসওয়ার্ড
+                      <Lock className="h-4 w-4 text-purple-500" /> পাসওয়ার্ড
                     </Label>
                     <div className="relative">
                       <Input
                         id="loginPassword"
                         type={showLoginPassword ? "text" : "password"}
-                        placeholder="আপনার পাসওয়ার্ড"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="h-12 text-base pr-12 border-gray-300 focus:border-purple-500 focus:ring-purple-200"
+                        className="h-12 text-base pr-12"
                         required
+                        placeholder="আপনার পাসওয়ার্ড"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1 h-10 w-10 hover:bg-gray-100 rounded-lg"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-1 top-1 h-10 w-10"
                       >
-                        {showLoginPassword ? (
-                          <EyeOff className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <Eye className="h-5 w-5 text-gray-500" />
-                        )}
+                        {showLoginPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </Button>
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        লগইন হচ্ছে...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <LogIn className="h-5 w-5" />
-                        লগইন করুন
-                      </div>
-                    )}
+                  <Button type="submit" className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105" disabled={isLoading}>
+                    {isLoading ? <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> লগইন হচ্ছে...</span> : <><LogIn className="h-5 w-5" /> লগইন করুন</>}
                   </Button>
                 </form>
               </TabsContent>
@@ -247,111 +216,46 @@ const Auth = () => {
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="registerName" className="flex items-center gap-2 text-gray-700 font-medium">
-                      <UserIcon className="h-4 w-4 text-purple-500" />
-                      পূর্ণ নাম
+                      <UserIcon className="h-4 w-4 text-purple-500" /> পূর্ণ নাম
                     </Label>
-                    <Input
-                      id="registerName"
-                      type="text"
-                      placeholder="আপনার পূর্ণ নাম"
-                      value={registerName}
-                      onChange={(e) => setRegisterName(e.target.value)}
-                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
-                      required
-                    />
+                    <Input id="registerName" type="text" value={registerName} onChange={(e) => setRegisterName(e.target.value)} className="h-12 text-base" required placeholder="আপনার নাম" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="registerPhone" className="flex items-center gap-2 text-gray-700 font-medium">
-                      <Phone className="h-4 w-4 text-purple-500" />
-                      ফোন নম্বর
+                      <Phone className="h-4 w-4 text-purple-500" /> ফোন নম্বর
                     </Label>
-                    <Input
-                      id="registerPhone"
-                      type="tel"
-                      placeholder="আপনার ফোন নম্বর"
-                      value={registerPhone}
-                      onChange={(e) => setRegisterPhone(e.target.value)}
-                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
-                      required
-                    />
+                    <Input id="registerPhone" type="tel" value={registerPhone} onChange={(e) => setRegisterPhone(e.target.value)} className="h-12 text-base" required placeholder="ফোন নম্বর" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="registerEmail" className="flex items-center gap-2 text-gray-700 font-medium">
-                      <Mail className="h-4 w-4 text-purple-500" />
-                      ইমেইল
+                      <Mail className="h-4 w-4 text-purple-500" /> ইমেইল
                     </Label>
-                    <Input
-                      id="registerEmail"
-                      type="email"
-                      placeholder="আপনার ইমেইল"
-                      value={registerEmail}
-                      onChange={(e) => setRegisterEmail(e.target.value)}
-                      className="h-12 text-base border-gray-300 focus:border-purple-500 focus:ring-purple-200"
-                      required
-                    />
+                    <Input id="registerEmail" type="email" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} className="h-12 text-base" required placeholder="আপনার ইমেইল" />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="registerPassword" className="flex items-center gap-2 text-gray-700 font-medium">
-                      <Lock className="h-4 w-4 text-purple-500" />
-                      পাসওয়ার্ড
+                      <Lock className="h-4 w-4 text-purple-500" /> পাসওয়ার্ড
                     </Label>
                     <div className="relative">
-                      <Input
-                        id="registerPassword"
-                        type={showRegisterPassword ? "text" : "password"}
-                        placeholder="আপনার পাসওয়ার্ড"
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                        className="h-12 text-base pr-12 border-gray-300 focus:border-purple-500 focus:ring-purple-200"
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-1 top-1 h-10 w-10 hover:bg-gray-100 rounded-lg"
-                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                      >
-                        {showRegisterPassword ? (
-                          <EyeOff className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <Eye className="h-5 w-5 text-gray-500" />
-                        )}
+                      <Input id="registerPassword" type={showRegisterPassword ? "text" : "password"} value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} className="h-12 text-base pr-12" required placeholder="আপনার পাসওয়ার্ড" />
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setShowRegisterPassword(!showRegisterPassword)} className="absolute right-1 top-1 h-10 w-10">
+                        {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </Button>
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        রেজিস্টার হচ্ছে...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <UserPlus className="h-5 w-5" />
-                        রেজিস্টার করুন
-                      </div>
-                    )}
+                  <Button type="submit" className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105" disabled={isLoading}>
+                    {isLoading ? <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> রেজিস্টার হচ্ছে...</span> : <><UserPlus className="h-5 w-5" /> রেজিস্টার করুন</>}
                   </Button>
                 </form>
               </TabsContent>
             </Tabs>
 
             <div className="text-center mt-6">
-              <a 
-                href="/" 
-                className="text-gray-600 hover:text-purple-600 transition-colors text-sm"
-              >
-                ← হোমে ফিরুন
-              </a>
+              <a href="/" className="text-gray-600 hover:text-purple-600 transition-colors text-sm">← হোমে ফিরুন</a>
             </div>
           </CardContent>
         </Card>
