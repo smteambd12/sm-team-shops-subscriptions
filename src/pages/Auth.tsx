@@ -163,16 +163,24 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="px-6 pb-8">
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 p-1 rounded-lg">
-                <TabsTrigger value="login" className="rounded-md py-2.5 text-sm font-medium">
-                  লগইন
-                </TabsTrigger>
-                <TabsTrigger value="register" className="rounded-md py-2.5 text-sm font-medium">
-                  রেজিস্টার
-                </TabsTrigger>
-              </TabsList>
+<CardContent className="px-4 pb-8">
+  <Tabs defaultValue="login" className="w-full">
+    <TabsList className="grid w-full grid-cols-2 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
+      <TabsTrigger
+        value="login"
+        className="rounded-md py-3 text-sm font-medium transition-all focus:outline-none data-[state=active]:bg-white data-[state=active]:shadow"
+      >
+        লগইন
+      </TabsTrigger>
+      <TabsTrigger
+        value="register"
+        className="rounded-md py-3 text-sm font-medium transition-all focus:outline-none data-[state=active]:bg-white data-[state=active]:shadow"
+      >
+        রেজিস্টার
+      </TabsTrigger>
+    </TabsList>
+  </Tabs>
+</CardContent>
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-5">
