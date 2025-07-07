@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { CreditCard, Phone, Wallet, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CreditCard, Phone, Wallet, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PaymentMethodFormProps {
@@ -35,7 +39,7 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
     if (number) {
       navigator.clipboard.writeText(number).then(() => {
         setCopied(true);
-        toast.success('নাম্বার কপি হয়েছে ✅');
+        toast.success('🥳 নাম্বার সফলভাবে কপি হয়েছে!');
         setTimeout(() => setCopied(false), 2000);
       });
     }
@@ -45,74 +49,71 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
   const paymentName = getPaymentMethodName();
 
   return (
-    <Card className="w-full">
+    <Card className="bg-gradient-to-br from-white via-blue-50 to-pink-50 shadow-xl rounded-2xl border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl text-blue-700">
+        <CardTitle className="text-xl font-bold flex items-center gap-2 text-primary">
           <CreditCard className="h-5 w-5" />
-          পেমেন্ট মাধ্যম
+          পেমেন্ট পদ্ধতি নির্বাচন করুন
         </CardTitle>
-        <CardDescription className="text-gray-600">
-          অনুগ্রহ করে একটি পেমেন্ট মাধ্যম নির্বাচন করুন
+        <CardDescription className="text-sm text-muted-foreground">
+          নিচে থেকে একটি পেমেন্ট মাধ্যম নির্বাচন করুন এবং প্রদর্শিত নাম্বারে সেন্ড মানি করুন।
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <RadioGroup
-          value={paymentMethod}
-          onValueChange={onPaymentMethodChange}
-          className="space-y-3"
-        >
+        <RadioGroup value={paymentMethod} onValueChange={onPaymentMethodChange}>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="bkash" id="bkash" />
-            <Label htmlFor="bkash" className="flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-pink-600" />
-              <span className="text-pink-600 font-semibold">bKash</span>
+            <Label htmlFor="bkash" className="flex items-center gap-2 text-pink-600 font-medium">
+              <Wallet className="h-4 w-4" />
+              bKash
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="nagad" id="nagad" />
-            <Label htmlFor="nagad" className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-orange-500" />
-              <span className="text-orange-500 font-semibold">Nagad</span>
+            <Label htmlFor="nagad" className="flex items-center gap-2 text-orange-600 font-medium">
+              <Phone className="h-4 w-4" />
+              Nagad
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="rocket" id="rocket" />
-            <Label htmlFor="rocket" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-purple-600" />
-              <span className="text-purple-600 font-semibold">Rocket</span>
+            <Label htmlFor="rocket" className="flex items-center gap-2 text-purple-600 font-medium">
+              <CreditCard className="h-4 w-4" />
+              Rocket
             </Label>
           </div>
         </RadioGroup>
 
-        {/* ✅ Number + Copy Box (Mobile Friendly & Visible After Selection) */}
         {paymentNumber && (
-          <div className="bg-gray-100 border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <p className="text-sm text-gray-600">পেমেন্ট প্রাপক {paymentName} নাম্বার:</p>
-              <p className="text-lg font-bold text-primary">{paymentNumber}</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleCopy} className="w-full sm:w-auto">
+          <div className="bg-white p-4 rounded-lg shadow border border-dashed border-primary/30 mt-4 space-y-2">
+            <p className="text-base font-semibold text-primary">
+              📱 {paymentName} নাম্বার: <span className="text-black">{paymentNumber}</span>
+            </p>
+            <p className="text-sm text-gray-600">
+              অনুগ্রহ করে এই নাম্বারে <span className="font-semibold text-primary">৳{finalTotal.toLocaleString()}</span> টাকা সেন্ড মানি করুন।
+            </p>
+            <Button variant="outline" size="sm" onClick={handleCopy} className="mt-2">
               <Copy className="h-4 w-4 mr-1" />
-              {copied ? '✅ কপি হয়েছে' : 'কপি করুন'}
+              {copied ? '✅ কপি হয়েছে' : '📋 নাম্বার কপি করুন'}
             </Button>
           </div>
         )}
 
-        {/* ✅ Transaction ID Input */}
         <div>
-          <Label htmlFor="transactionId">ট্রানজেকশন ID *</Label>
+          <Label htmlFor="transactionId" className="font-semibold">
+            🔁 ট্রানজেকশন ID দিন *
+          </Label>
           <Input
             id="transactionId"
             value={transactionId}
             onChange={(e) => onTransactionIdChange(e.target.value)}
-            placeholder="টাকা পাঠানোর পর আপনার ট্রানজেকশন ID দিন"
+            placeholder="এখানে ট্রানজেকশন ID লিখুন"
             required
+            className="mt-1"
           />
-          <p className="text-sm text-gray-600 mt-1">
-            {paymentNumber
-              ? `এই নাম্বারে ৳${finalTotal.toLocaleString()} পাঠিয়ে ট্রানজেকশন ID দিন।`
-              : 'নিচে ট্রানজেকশন ID দিন।'}
+          <p className="text-sm text-gray-500 mt-1">
+            পেমেন্ট করার পর আপনি যে ID পাবেন, সেটাই এখানে লিখবেন।
           </p>
         </div>
       </CardContent>
