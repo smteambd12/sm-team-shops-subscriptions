@@ -37,7 +37,7 @@ return (
             SM
           </div>
           {/* Text beside box */}
-          <span className="text-2xl font-bold text-gray-800">SM SHOPS</span>
+          <span className="text-2xl font-bold text-gray-800">TEAM SHOPS</span>
         </Link>
 
           {/* Desktop Navigation */}
