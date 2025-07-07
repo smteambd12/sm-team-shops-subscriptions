@@ -226,7 +226,7 @@
 @media (max-width: 640px) {
   /* Ensure cards don't get too small */
   .grid-cols-2 > * {
-    min-height: 280px;
+    min-height: 0px;
   }
   
   /* Better mobile form styling */
