@@ -90,12 +90,14 @@ const Register = () => {
       navigate('/login');
     } catch (error: any) {
       console.error('Registration error:', error);
+      const errorMsg =
+        error.message === 'User already registered'
+          ? 'এই ইমেইল দিয়ে ইতিমধ্যেই একটি অ্যাকাউন্ট খোলা হয়েছে ভাই। অনুগ্রহ করে লগইন করুন।'
+          : 'রেজিস্ট্রেশন করতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।';
+
       toast({
-        title: 'রেজিস্ট্রেশন ত্রুটি',
-        description:
-          error.message === 'User already registered'
-            ? 'এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট আছে।'
-            : 'রেজিস্ট্রেশন করতে সমস্যা হয়েছে।',
+        title: 'ওহ না!',
+        description: errorMsg,
         variant: 'destructive'
       });
     } finally {
