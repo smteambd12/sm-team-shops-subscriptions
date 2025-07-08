@@ -58,7 +58,7 @@ const Register = () => {
       });
 
       if (error) {
-        if (error.message.includes("User already registered")) {
+        if (error.message.toLowerCase().includes("user already registered") || error.message.toLowerCase().includes("email")) {
           setErrorDialogOpen(true);
         } else {
           alert("রেজিস্ট্রেশন করতে সমস্যা হয়েছে।");
