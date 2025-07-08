@@ -1,26 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Eye,
-  EyeOff,
-  UserPlus,
-  Mail,
-  Lock,
-  User,
-  Phone
-} from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Mail, Lock, User, Phone } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -30,11 +16,12 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,20 +35,12 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: 'পাসওয়ার্ড মিল নেই',
-        description: 'পাসওয়ার্ড এবং নিশ্চিত পাসওয়ার্ড একই হতে হবে।',
-        variant: 'destructive'
-      });
+      alert('পাসওয়ার্ড এবং নিশ্চিত পাসওয়ার্ড একই হতে হবে।');
       return;
     }
 
     if (formData.password.length < 6) {
-      toast({
-        title: 'পাসওয়ার্ড দুর্বল',
-        description: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
-        variant: 'destructive'
-      });
+      alert('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।');
       return;
     }
 
@@ -79,27 +58,18 @@ const Register = () => {
       });
 
       if (error) {
-        throw error;
+        if (error.message.includes("User already registered")) {
+          setErrorDialogOpen(true);
+        } else {
+          alert("রেজিস্ট্রেশন করতে সমস্যা হয়েছে।");
+        }
+        return;
       }
 
-      toast({
-        title: 'সফল রেজিস্ট্রেশন',
-        description: 'আপনি সফলভাবে রেজিস্টার করেছেন। এখন লগইন করুন।'
-      });
-
-      navigate('/login');
+      setSuccessDialogOpen(true);
     } catch (error: any) {
       console.error('Registration error:', error);
-      const errorMsg =
-        error.message === 'User already registered'
-          ? 'এই ইমেইল দিয়ে ইতিমধ্যেই একটি অ্যাকাউন্ট খোলা হয়েছে ভাই। অনুগ্রহ করে লগইন করুন।'
-          : 'রেজিস্ট্রেশন করতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।';
-
-      toast({
-        title: 'ওহ না!',
-        description: errorMsg,
-        variant: 'destructive'
-      });
+      alert("রেজিস্ট্রেশন করতে সমস্যা হয়েছে।");
     } finally {
       setLoading(false);
     }
@@ -113,11 +83,12 @@ const Register = () => {
             <UserPlus className="h-6 w-6" />
             রেজিস্টার
           </CardTitle>
-          <CardDescription>নতুন অ্যাকাউন্ট তৈরি করুন</CardDescription>
+          <CardDescription>
+            নতুন অ্যাকাউন্ট তৈরি করুন
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
-            {/* Full Name */}
             <div>
               <Label htmlFor="fullName" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -133,7 +104,6 @@ const Register = () => {
               />
             </div>
 
-            {/* Email */}
             <div>
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
@@ -150,7 +120,6 @@ const Register = () => {
               />
             </div>
 
-            {/* Phone */}
             <div>
               <Label htmlFor="phone" className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
@@ -166,7 +135,6 @@ const Register = () => {
               />
             </div>
 
-            {/* Password */}
             <div>
               <Label htmlFor="password" className="flex items-center gap-2">
                 <Lock className="h-4 w-4" />
@@ -176,7 +144,7 @@ const Register = () => {
                 <Input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="আপনার পাসওয়ার্ড লিখুন"
@@ -189,16 +157,11 @@ const Register = () => {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
                 </Button>
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div>
               <Label htmlFor="confirmPassword" className="flex items-center gap-2">
                 <Lock className="h-4 w-4" />
@@ -208,7 +171,7 @@ const Register = () => {
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="পাসওয়ার্ড আবার লিখুন"
@@ -221,16 +184,11 @@ const Register = () => {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
                 </Button>
               </div>
             </div>
 
-            {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'রেজিস্টার হচ্ছে...' : 'রেজিস্টার করুন'}
             </Button>
@@ -246,6 +204,33 @@ const Register = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Success Dialog */}
+      <Dialog open={successDialogOpen} onOpenChange={(open) => {
+        setSuccessDialogOpen(open);
+        if (!open) navigate('/login');
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>🎉 সফল রেজিস্ট্রেশন</DialogTitle>
+            <DialogDescription>
+              আপনি সফলভাবে রেজিস্টার করেছেন। দয়া করে আপনার ইমেইলে গিয়ে ভেরিফিকেশন করুন।
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>⚠️ রেজিস্ট্রেশন ব্যর্থ</DialogTitle>
+            <DialogDescription>
+              এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি হয়েছে।
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
