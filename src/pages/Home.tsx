@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
 import {
@@ -18,7 +17,6 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Product Filter Logic
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -30,7 +28,6 @@ const Home = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Category Label Mapping
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
       web: 'ওয়েব সাবস্ক্রিপশন',
@@ -40,13 +37,11 @@ const Home = () => {
     return labels[category] || category;
   };
 
-  // Count products by category
   const categoryStats: Record<string, number> = products.reduce((acc, product) => {
     acc[product.category] = (acc[product.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  // Loading
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -62,7 +57,6 @@ const Home = () => {
     );
   }
 
-  // Error
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8 text-center text-red-600">
@@ -90,18 +84,18 @@ const Home = () => {
               <Badge variant="secondary" className="text-sm px-4 py-2">২৪/৭ সাপোর্ট</Badge>
             </div>
           </div>
+
+          {/* ✅ 3D Image */}
           <div className="w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
-            <Image
+            <img
               src="/hero-character.png"
               alt="Hero Character"
-              width={400}
-              height={400}
               className="w-full h-auto object-contain"
             />
           </div>
         </div>
 
-        {/* Decorative Background Blur */}
+        {/* Background Blur Decorations */}
         <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-300 rounded-full filter blur-3xl opacity-30 z-0" />
         <div className="absolute bottom-0 -right-10 w-72 h-72 bg-purple-400 rounded-full filter blur-3xl opacity-30 z-0" />
       </section>
@@ -142,7 +136,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Filtered Category Header */}
+          {/* Filter Info */}
           {selectedCategory !== 'all' && (
             <div className="mb-4">
               <h2 className="text-xl font-semibold mb-1">
@@ -152,7 +146,7 @@ const Home = () => {
             </div>
           )}
 
-          {/* Product Grid */}
+          {/* Product List */}
           {filteredProducts.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 text-base">কোন পণ্য পাওয়া যায়নি।</p>
