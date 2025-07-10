@@ -1,5 +1,4 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,28 +6,23 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Filter } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 
+// গুড টাইম মেসেজ
 const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return { text: '🌅 Good Morning', color: 'text-yellow-500' };
-  if (hour >= 12 && hour < 17) return { text: '🌞 Good Afternoon', color: 'text-orange-500' };
-  if (hour >= 17 && hour < 21) return { text: '🌇 Good Evening', color: 'text-pink-500' };
-  return { text: '🌙 Good Night', color: 'text-indigo-500' };
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return '☀️ Good Morning';
+  if (h >= 12 && h < 17) return '🌤️ Good Afternoon';
+  if (h >= 17 && h < 21) return '🌇 Good Evening';
+  return '🌙 Good Night';
 };
 
 const Home = () => {
   const { products, loading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [greeting, setGreeting] = useState(getGreeting());
-
-  useEffect(() => {
-    const timer = setInterval(() => setGreeting(getGreeting()), 1000 * 60); // update every 1 min
-    return () => clearInterval(timer);
-  }, []);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -75,29 +69,42 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       {/* Hero Section */}
-      <section className="bg-white pt-6 pb-10 sm:pt-10 sm:pb-12 text-center px-4 sm:px-0">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-lg sm:text-xl font-semibold mb-1">
-            <span className={`animate-pulse font-bold ${greeting.color}`}>{greeting.text}</span>
-          </h1>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-600 to-purple-600 mb-2 leading-tight">
-            SM TEAM SHOPS - <span className="block sm:inline">ডিজিটাল সেবা সহজ করে</span>
-          </h2>
-          <p className="text-gray-700 text-sm sm:text-base leading-relaxed mb-4 sm:mb-6">
-            আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে <span className="font-medium text-indigo-600">বিশ্বাসযোগ্যতা</span>, <span className="font-medium text-pink-600">গতি</span> এবং <span className="font-medium text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-            <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-            <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+      <section className="relative bg-[#f8f9ff] pt-6 pb-10 sm:pt-12 sm:pb-16">
+        <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center">
+          
+          {/* Left Side Text */}
+          <div className="max-w-xl text-center lg:text-left mb-8 lg:mb-0 space-y-2 sm:space-y-4">
+            <p className="text-lg sm:text-2xl font-bold text-indigo-600 animate-pulse">{getGreeting()}</p>
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+              SM TEAM <span className="hidden sm:inline">SHOPS</span> -
+              <span className="block text-xl sm:text-2xl text-blue-700 font-bold mt-1 sm:mt-2 underline decoration-indigo-400 decoration-2">
+                ডিজিটাল সেবা
+              </span>
+            </h1>
+            <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+              বিশ্বাসযোগ্যতা, গতি ও মূল্য – সব এক জায়গায়!
+            </p>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2 mt-2">
+              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
+              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
+              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+            </div>
+          </div>
+
+          {/* Right Side Image */}
+          <div className="relative w-full lg:w-1/2 flex flex-col items-center">
+            <img
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+              alt="Hero Character"
+              className="w-[200px] sm:w-[280px] md:w-[340px] z-10"
+            />
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* Product Section */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
-          {/* Filter/Search */}
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex-1">
               <div className="relative">
@@ -126,7 +133,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Filtered Products */}
           {selectedCategory !== 'all' && (
             <div className="mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">{getCategoryLabel(selectedCategory)}</h2>
