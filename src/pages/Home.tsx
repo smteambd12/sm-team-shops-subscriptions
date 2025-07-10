@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
+import Typewriter from 'typewriter-effect';
 
 const Home = () => {
   const { products, loading, error } = useProducts();
@@ -60,30 +60,60 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-10 sm:py-20">
-        <div className="container mx-auto px-2 sm:px-4 text-center">
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
-            প্রিমিয়াম সাবস্ক্রিপশন
-          </h1>
-          <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90">
-            সবচেয়ে কম দামে পেয়ে যান আপনার পছন্দের সব সেবা
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-              ৫০% পর্যন্ত ছাড়
-            </Badge>
-            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-              তাৎক্ষণিক ডেলিভারি
-            </Badge>
-            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-              ২৪/৭ সাপোর্ট
-            </Badge>
+      
+      {/* ✅ Hero Section with Video + Image */}
+      <section className="bg-gradient-to-r from-indigo-700 via-purple-600 to-pink-600 text-white py-12 px-4 relative overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-pink-500 opacity-30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-indigo-500 opacity-30 rounded-full blur-3xl animate-pulse" />
+
+        <div className="container mx-auto relative z-10 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
+          {/* Left side - Text */}
+          <div className="text-center md:text-left max-w-xl">
+            <h1 className="text-3xl sm:text-5xl font-extrabold mb-4 leading-tight">
+              <Typewriter
+                options={{
+                  strings: ['প্রিমিয়াম সাবস্ক্রিপশন', 'সেরা অফার এখনই', 'ভিডিও বিজ্ঞাপনসহ!'],
+                  autoStart: true,
+                  loop: true,
+                  delay: 60,
+                  deleteSpeed: 30,
+                }}
+              />
+            </h1>
+            <p className="text-lg sm:text-xl mb-6 opacity-90">
+              এখন ভিডিও এবং ছবি সহ বিজ্ঞাপন দিন আপনার সেবার প্রচারে!
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+              <Badge className="bg-white text-indigo-700 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100 transition">
+                🎥 ভিডিও প্রিভিউ
+              </Badge>
+              <Badge className="bg-white text-indigo-700 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100 transition">
+                🖼️ ইমেজ বিজ্ঞাপন
+              </Badge>
+            </div>
+          </div>
+
+          {/* Right side - Media */}
+          <div className="w-full md:w-1/2 flex flex-col items-center gap-6">
+            {/* Video */}
+            <div className="w-full aspect-video rounded-lg overflow-hidden shadow-lg border-4 border-white">
+              <video controls autoPlay loop muted className="w-full h-full object-cover">
+                <source src="/ads/sample-video.mp4" type="video/mp4" />
+                আপনার ব্রাউজার ভিডিও সাপোর্ট করে না।
+              </video>
+            </div>
+
+            {/* Image */}
+            <img
+              src="/ads/sample-banner.jpg"
+              alt="বিজ্ঞাপন ব্যানার"
+              className="w-full rounded-lg shadow-lg border-4 border-white"
+            />
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* ✅ Products Section */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6 sm:mb-8">
