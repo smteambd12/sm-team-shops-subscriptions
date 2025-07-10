@@ -47,14 +47,7 @@ const Home = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
+        <p className="text-center text-gray-500 animate-pulse">লোড হচ্ছে...</p>
       </div>
     );
   }
@@ -69,77 +62,69 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* ✅ Hero Section */}
-      <section className="relative py-12 sm:py-14 bg-gradient-to-r from-purple-100 to-blue-100 text-gray-900 overflow-hidden">
-        <div className="container mx-auto px-4 flex flex-col-reverse lg:flex-row items-center justify-between relative z-10 gap-10">
-          {/* Left Content */}
-          <div className="text-center lg:text-left max-w-xl space-y-4">
-            <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight">
-              SM TEAM SHOPS - <br className="sm:hidden" />
+      {/* ✅ HERO SECTION */}
+      <section className="relative py-12 sm:py-16 md:py-20 bg-gradient-to-r from-[#f6f3ff] to-[#e4efff] overflow-hidden">
+        <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-between gap-8">
+          {/* ✅ Left Text */}
+          <div className="max-w-xl text-center md:text-left space-y-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-gray-900">
+              SM TEAM SHOPS - <br className="hidden sm:block" />
               ডিজিটাল সেবা সহজ করে
             </h1>
             <p className="text-base sm:text-lg text-gray-700">
               আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজন মেটাতে বিশ্বস্ততা, গতি এবং মূল্য সাশ্রয় একসাথে দরকার।
             </p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-              <Badge variant="secondary" className="text-sm px-4 py-2">
-                ৫০% পর্যন্ত ছাড়
-              </Badge>
-              <Badge variant="secondary" className="text-sm px-4 py-2">
-                তাৎক্ষণিক ডেলিভারি
-              </Badge>
-              <Badge variant="secondary" className="text-sm px-4 py-2">
-                ২৪/৭ সাপোর্ট
-              </Badge>
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3">
+              <Badge className="text-sm px-4 py-2">৫০% পর্যন্ত ছাড়</Badge>
+              <Badge className="text-sm px-4 py-2">তাৎক্ষণিক ডেলিভারি</Badge>
+              <Badge className="text-sm px-4 py-2">২৪/৭ সাপোর্ট</Badge>
             </div>
           </div>
 
-          {/* Right Content */}
-          <div className="relative w-[240px] sm:w-[280px] md:w-[340px]">
+          {/* ✅ Right: Image + Cards */}
+          <div className="relative w-[300px] sm:w-[360px] md:w-[420px]">
             <img
               src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
               alt="Hero Character"
-              className="w-full h-auto object-contain relative z-10"
+              className="w-full object-contain animate-fade-in"
             />
 
-            {/* Cards around image */}
-            <div className="absolute -top-4 -left-10 sm:-top-6 sm:-left-12 w-36 sm:w-40">
-              <Card className="bg-white shadow-md">
-                <CardContent className="p-2 text-center">
-                  <p className="text-xs text-gray-600">Customer Success</p>
-                  <p className="text-sm font-bold text-green-600">+8.5%</p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* ✅ Floating Cards */}
+            <Card className="absolute top-2 -left-10 w-36 sm:w-40 bg-white shadow-xl rounded-lg animate-fade-in-up">
+              <CardContent className="p-3">
+                <p className="text-xs text-gray-500">Customer Success</p>
+                <p className="text-lg font-bold text-green-600">+8.5%</p>
+              </CardContent>
+            </Card>
 
-            <div className="absolute -top-4 -right-10 sm:-top-6 sm:-right-12 w-36 sm:w-40">
-              <Card className="bg-white shadow-md">
-                <CardContent className="p-2 text-center">
-                  <p className="text-xs text-gray-600">Growth</p>
-                  <p className="text-sm font-bold text-blue-600">+23%</p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="absolute top-0 right-0 w-36 sm:w-40 bg-white shadow-xl rounded-lg animate-fade-in-up delay-100">
+              <CardContent className="p-3">
+                <p className="text-xs text-gray-500">Growth</p>
+                <p className="text-base font-semibold text-blue-600">+23%</p>
+              </CardContent>
+            </Card>
 
-            <div className="absolute -bottom-4 right-1/2 translate-x-1/2 w-40 sm:w-44">
-              <Card className="bg-white shadow-md">
-                <CardContent className="p-2 text-center">
-                  <p className="text-xs text-gray-600 mb-1">Top Categories</p>
-                  <div className="flex gap-1 items-end h-8">
-                    <div className="w-2 bg-purple-400 rounded-t" style={{ height: '40%' }} />
-                    <div className="w-2 bg-indigo-500 rounded-t" style={{ height: '80%' }} />
-                    <div className="w-2 bg-pink-400 rounded-t" style={{ height: '60%' }} />
-                    <div className="w-2 bg-blue-400 rounded-t" style={{ height: '100%' }} />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="absolute -bottom-2 right-4 w-40 bg-white shadow-lg rounded-lg animate-fade-in-up delay-200">
+              <CardContent className="p-3">
+                <p className="text-xs text-gray-600 mb-1">Top Categories</p>
+                <div className="flex gap-1 items-end h-10">
+                  <div className="w-2 bg-purple-400 rounded-t" style={{ height: '40%' }} />
+                  <div className="w-2 bg-indigo-500 rounded-t" style={{ height: '80%' }} />
+                  <div className="w-2 bg-pink-400 rounded-t" style={{ height: '60%' }} />
+                  <div className="w-2 bg-blue-400 rounded-t" style={{ height: '100%' }} />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
+
+        {/* ✅ Background Decor */}
+        <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-20 z-0" />
+        <div className="absolute bottom-0 -right-10 w-72 h-72 bg-purple-400 rounded-full blur-3xl opacity-20 z-0" />
       </section>
 
-      {/* ✅ Product Filter/Search Section */}
-      <section className="py-10 sm:py-16">
+      {/* ✅ Product Filter Section */}
+      <section className="py-8 sm:py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="flex-1 relative">
@@ -159,15 +144,9 @@ const Home = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">সব ক্যাটেগরি</SelectItem>
-                  <SelectItem value="web">
-                    ওয়েব সাবস্ক্রিপশন ({categoryStats.web || 0})
-                  </SelectItem>
-                  <SelectItem value="mobile">
-                    মোবাইল অ্যাপ ({categoryStats.mobile || 0})
-                  </SelectItem>
-                  <SelectItem value="tutorial">
-                    টিউটোরিয়াল/কোর্স ({categoryStats.tutorial || 0})
-                  </SelectItem>
+                  <SelectItem value="web">ওয়েব সাবস্ক্রিপশন ({categoryStats.web || 0})</SelectItem>
+                  <SelectItem value="mobile">মোবাইল অ্যাপ ({categoryStats.mobile || 0})</SelectItem>
+                  <SelectItem value="tutorial">টিউটোরিয়াল/কোর্স ({categoryStats.tutorial || 0})</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -175,9 +154,7 @@ const Home = () => {
 
           {selectedCategory !== 'all' && (
             <div className="mb-4">
-              <h2 className="text-xl font-semibold mb-1">
-                {getCategoryLabel(selectedCategory)}
-              </h2>
+              <h2 className="text-xl font-semibold mb-1">{getCategoryLabel(selectedCategory)}</h2>
               <p className="text-gray-600 text-sm">
                 {filteredProducts.length} টি পণ্য পাওয়া গেছে
               </p>
