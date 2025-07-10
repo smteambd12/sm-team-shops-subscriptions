@@ -9,11 +9,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, TrendingUp, BarChart3, Users } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent } from '@/components/ui/card';
-
-import heroCharacter from '@/assets/hero-character.png';
 
 const Home = () => {
   const { products, loading, error } = useProducts();
@@ -75,7 +73,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
 
       {/* ✅ Hero Section */}
-      <section className="relative bg-gradient-to-r from-purple-100 to-blue-100 py-12 sm:py-16 text-gray-900 overflow-hidden">
+      <section className="relative bg-gradient-to-r from-purple-100 to-blue-100 py-10 sm:py-16 text-gray-900 overflow-hidden">
         <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-between relative z-10">
           {/* Left Content */}
           <div className="text-center md:text-left max-w-xl space-y-4">
@@ -100,16 +98,16 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Right Content - Image and Floating Cards */}
+          {/* Right Content - Image and Cards */}
           <div className="relative w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
-            {/* Main Image */}
+            {/* ✅ Hero Image */}
             <img
-              src={https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png}
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
               alt="Hero Character"
               className="w-full h-auto object-contain relative z-10"
             />
 
-            {/* Floating Cards */}
+            {/* ✅ Floating Cards */}
             <Card className="absolute top-0 -left-10 w-40 bg-white shadow-lg z-20 animate-fade-in-up">
               <CardContent className="p-3">
                 <p className="text-xs text-gray-600">Customer Success</p>
@@ -138,15 +136,14 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Decorations */}
+        {/* Background Decorations */}
         <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-20 z-0" />
         <div className="absolute bottom-0 -right-10 w-72 h-72 bg-purple-400 rounded-full blur-3xl opacity-20 z-0" />
       </section>
 
-      {/* ✅ Product Filter/Search Section */}
+      {/* ✅ Product Filter Section */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-4">
-          {/* Search + Filter */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -191,7 +188,7 @@ const Home = () => {
             </div>
           )}
 
-          {/* Product List */}
+          {/* Product Cards */}
           {filteredProducts.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 text-base">কোন পণ্য পাওয়া যায়নি।</p>
