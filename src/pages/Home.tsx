@@ -69,57 +69,63 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-
-      {/* ✅ HERO SECTION */}
-      <section className="py-8 md:py-10">
-        <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-between gap-6">
-          {/* LEFT: TEXT */}
-          <div className="max-w-xl text-center md:text-left space-y-4">
+      {/* ✅ Hero Section */}
+      <section className="relative py-12 sm:py-14 bg-gradient-to-r from-purple-100 to-blue-100 text-gray-900 overflow-hidden">
+        <div className="container mx-auto px-4 flex flex-col-reverse lg:flex-row items-center justify-between relative z-10 gap-10">
+          {/* Left Content */}
+          <div className="text-center lg:text-left max-w-xl space-y-4">
             <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight">
               SM TEAM SHOPS - <br className="sm:hidden" />
-              <span className="text-black">ডিজিটাল সেবা সহজ করে</span>
+              ডিজিটাল সেবা সহজ করে
             </h1>
-            <p className="text-base text-gray-700">
-              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজন মেটাতে বিশ্বস্ততা, গতি এবং
-              মূল্য সাশ্রয় একসাথে দরকার।
+            <p className="text-base sm:text-lg text-gray-700">
+              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজন মেটাতে বিশ্বস্ততা, গতি এবং মূল্য সাশ্রয় একসাথে দরকার।
             </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-2">
-              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+              <Badge variant="secondary" className="text-sm px-4 py-2">
+                ৫০% পর্যন্ত ছাড়
+              </Badge>
+              <Badge variant="secondary" className="text-sm px-4 py-2">
+                তাৎক্ষণিক ডেলিভারি
+              </Badge>
+              <Badge variant="secondary" className="text-sm px-4 py-2">
+                ২৪/৭ সাপোর্ট
+              </Badge>
             </div>
           </div>
 
-          {/* RIGHT: IMAGE + CARDS */}
-          <div className="relative w-full max-w-md flex justify-center">
-            <div className="relative z-10">
-              <img
-                src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-                alt="Hero Character"
-                className="w-[250px] sm:w-[300px] object-contain"
-              />
+          {/* Right Content */}
+          <div className="relative w-[240px] sm:w-[280px] md:w-[340px]">
+            <img
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+              alt="Hero Character"
+              className="w-full h-auto object-contain relative z-10"
+            />
+
+            {/* Cards around image */}
+            <div className="absolute -top-4 -left-10 sm:-top-6 sm:-left-12 w-36 sm:w-40">
+              <Card className="bg-white shadow-md">
+                <CardContent className="p-2 text-center">
+                  <p className="text-xs text-gray-600">Customer Success</p>
+                  <p className="text-sm font-bold text-green-600">+8.5%</p>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Floating Cards beside image */}
-            <div className="absolute top-0 -right-20 hidden lg:flex flex-col gap-4 z-20">
-              <Card className="w-40 bg-white shadow-md">
-                <CardContent className="p-3">
-                  <p className="text-xs text-gray-600">Customer Success</p>
-                  <p className="text-lg font-bold text-green-600">+8.5%</p>
-                </CardContent>
-              </Card>
-
-              <Card className="w-40 bg-white shadow-md">
-                <CardContent className="p-3">
+            <div className="absolute -top-4 -right-10 sm:-top-6 sm:-right-12 w-36 sm:w-40">
+              <Card className="bg-white shadow-md">
+                <CardContent className="p-2 text-center">
                   <p className="text-xs text-gray-600">Growth</p>
-                  <p className="text-lg font-bold text-blue-600">+23%</p>
+                  <p className="text-sm font-bold text-blue-600">+23%</p>
                 </CardContent>
               </Card>
+            </div>
 
-              <Card className="w-40 bg-white shadow-md">
-                <CardContent className="p-3">
+            <div className="absolute -bottom-4 right-1/2 translate-x-1/2 w-40 sm:w-44">
+              <Card className="bg-white shadow-md">
+                <CardContent className="p-2 text-center">
                   <p className="text-xs text-gray-600 mb-1">Top Categories</p>
-                  <div className="flex gap-1 items-end h-10">
+                  <div className="flex gap-1 items-end h-8">
                     <div className="w-2 bg-purple-400 rounded-t" style={{ height: '40%' }} />
                     <div className="w-2 bg-indigo-500 rounded-t" style={{ height: '80%' }} />
                     <div className="w-2 bg-pink-400 rounded-t" style={{ height: '60%' }} />
@@ -132,8 +138,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ✅ PRODUCT FILTER SECTION */}
-      <section className="py-8 sm:py-12">
+      {/* ✅ Product Filter/Search Section */}
+      <section className="py-10 sm:py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="flex-1 relative">
@@ -153,9 +159,15 @@ const Home = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">সব ক্যাটেগরি</SelectItem>
-                  <SelectItem value="web">ওয়েব ({categoryStats.web || 0})</SelectItem>
-                  <SelectItem value="mobile">মোবাইল ({categoryStats.mobile || 0})</SelectItem>
-                  <SelectItem value="tutorial">কোর্স ({categoryStats.tutorial || 0})</SelectItem>
+                  <SelectItem value="web">
+                    ওয়েব সাবস্ক্রিপশন ({categoryStats.web || 0})
+                  </SelectItem>
+                  <SelectItem value="mobile">
+                    মোবাইল অ্যাপ ({categoryStats.mobile || 0})
+                  </SelectItem>
+                  <SelectItem value="tutorial">
+                    টিউটোরিয়াল/কোর্স ({categoryStats.tutorial || 0})
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
