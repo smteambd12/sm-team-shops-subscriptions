@@ -90,7 +90,7 @@ const Home = () => {
           {/* Right image with cards */}
           <div className="relative w-full lg:w-1/2 flex justify-center items-center">
             <img
-              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhvAzvNrrhKi-HXvoZCyx3uBPoOd2tc5ujkEJiNcuMdLHRll__i8I6Rf4sb2M_wmw28rDcVRRr0gRz-3OL-Q4X7Y3jqyIsXeTbFLv0dJkQZYXY2AGI9fE8ODTyFbXtdUliF--YGdYBjYxlRRA6LP5hwb8gP1B-X-rmStXVuMh4fZnG47qaC3AAgfjF0T58/s16000/3d-business-boy-sitting-on-chair-and-working-on-laptop-free-png.png"
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
               alt="Hero Character"
               className="w-[280px] sm:w-[340px] md:w-[360px] z-10"
             />
