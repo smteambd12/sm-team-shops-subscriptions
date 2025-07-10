@@ -88,7 +88,7 @@ const Home = () => {
           {/* ✅ 3D Image */}
           <div className="relative w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
             <img
-              src="/hero-character.png"
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
               alt="Hero Character"
               className="w-full h-auto object-contain relative z-10"
             />
