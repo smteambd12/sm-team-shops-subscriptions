@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
@@ -54,9 +52,9 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-6">
-          <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+      <div className="container mx-auto px-2 sm:px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/2 mb-6"></div>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-64 bg-gray-200 rounded"></div>
@@ -69,7 +67,7 @@ const Home = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center text-red-600">
+      <div className="container mx-auto px-2 sm:px-4 py-8 text-center text-red-600">
         <p>পণ্য লোড করতে সমস্যা হয়েছে। পেজ রিফ্রেশ করুন।</p>
       </div>
     );
@@ -77,59 +75,80 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#f8f9ff] py-6 sm:py-12">
-        <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10">
-          {/* Left Text */}
-          <div className="max-w-xl w-full text-center lg:text-left space-y-4">
-            <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 leading-snug">
-              <span className="block text-indigo-600 drop-shadow-lg animate-pulse">
-                {greeting}
-              </span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-500 to-purple-600">
-                SM TEAM SHOPS -
-              </span>
-              <span className="block text-base sm:text-xl text-blue-700 font-bold underline decoration-indigo-400">
-                ডিজিটাল সেবা সহজ করে
-              </span>
-            </h1>
-            <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, <span className="font-semibold text-pink-600">গতি</span> এবং <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
-            </p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
-            </div>
-          </div>
+{/* Hero Section */}
+<section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-6 sm:pt-8 sm:pb-10">
+  <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
+    
+    {/* Left Text */}
+    <div className="max-w-xl text-left mb-10 lg:mb-0 space-y-4 w-full lg:w-1/2">
+      <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-2 text-center lg:text-left">
+        <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
+        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-500 to-purple-600">
+          <span className="block sm:inline">SM TEAM SHOPS -</span>
+        </span>
+        <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
+          ডিজিটাল সেবা সহজ করে
+        </span>
+      </h1>
+      <p className="text-gray-700 text-sm sm:text-base leading-relaxed text-center lg:text-left">
+        আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, <span className="font-semibold text-pink-600">গতি</span> এবং <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
+      </p>
+      <div className="flex flex-wrap justify-center lg:justify-start mt-3 gap-2">
+        <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
+        <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
+        <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+      </div>
+    </div>
 
-          {/* Right Image & Stats */}
-          <div className="relative w-full max-w-sm mx-auto flex flex-col items-center">
-            <img
-              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-              alt="Hero Character"
-              className="w-[220px] sm:w-[300px] md:w-[320px] z-10"
-            />
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 z-20">
-              {statCards.map((card, index) => (
-                <div
-                  key={index}
-                  className="bg-white shadow-sm border rounded-lg px-3 py-2 text-center text-sm font-medium"
-                >
-                  <p className="text-gray-600">{card.title}</p>
-                  <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
-                </div>
-              ))}
-            </div>
-            <div className="absolute w-[250px] h-[250px] border border-dashed border-indigo-300 rounded-full -z-10"></div>
+    {/* Right Image with Stat Cards */}
+    <div className="relative w-full lg:w-1/2 flex justify-center items-center mt-6 lg:mt-0">
+      <div className="relative flex justify-center items-center w-[260px] h-[260px] sm:w-[300px] sm:h-[300px]">
+        <img
+          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+          alt="Hero Character"
+          className="w-[200px] sm:w-[260px] z-10"
+        />
+
+        {/* Stat Cards (responsive) */}
+        {statCards.map((card, index) => (
+          <div
+            key={index}
+            className={`absolute bg-white shadow-md border rounded-lg px-3 py-2 text-xs sm:text-sm font-medium transform transition-all duration-500 hover:scale-105 z-20
+            hidden sm:block
+            ${index === 0 ? 'top-0 left-6' :
+              index === 1 ? 'top-8 right-0' :
+              index === 2 ? 'top-28 left-0' :
+              index === 3 ? 'bottom-28 right-2' :
+              index === 4 ? 'bottom-8 left-14' :
+              index === 5 ? 'bottom-0 right-12' : ''}`}
+          >
+            <p className="text-gray-600">{card.title}</p>
+            <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
           </div>
+        ))}
+
+        {/* Mobile version: stack stat cards below image */}
+        <div className="block sm:hidden mt-6 space-y-2 absolute -bottom-32 w-full text-center">
+          {statCards.map((card, index) => (
+            <div key={index} className="inline-block bg-white shadow-md border rounded-lg px-3 py-2 mx-1 text-xs font-medium">
+              <p className="text-gray-600">{card.title}</p>
+              <p className={`text-sm font-bold ${card.color}`}>{card.value}</p>
+            </div>
+          ))}
         </div>
-      </section>
 
-      {/* Product Section */}
-      <section className="py-8 sm:py-14">
+        {/* Dashed Circle */}
+        <div className="absolute w-[240px] h-[240px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      {/* Product Section Same as Before */}
+      <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          {/* Filter & Search */}
+          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -155,15 +174,13 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Filtered Result Title */}
+          {/* Products */}
           {selectedCategory !== 'all' && (
             <div className="mb-4">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">{getCategoryLabel(selectedCategory)}</h2>
               <p className="text-gray-600">{filteredProducts.length} টি পণ্য পাওয়া গেছে</p>
             </div>
           )}
-
-          {/* Product Cards */}
           {filteredProducts.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">কোন পণ্য পাওয়া যায়নি।</p>
