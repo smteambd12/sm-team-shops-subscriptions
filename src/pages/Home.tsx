@@ -86,12 +86,30 @@ const Home = () => {
           </div>
 
           {/* ✅ 3D Image */}
-          <div className="w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
+          <div className="relative w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
             <img
               src="/hero-character.png"
               alt="Hero Character"
-              className="w-full h-auto object-contain"
+              className="w-full h-auto object-contain relative z-10"
             />
+            {/* Floating Cards */}
+            <div className="absolute top-0 left-0 bg-white/90 p-3 rounded-lg shadow-lg w-32">
+              <p className="text-sm font-medium">Customer Success</p>
+              <p className="text-xl font-bold text-green-600">+8.5%</p>
+            </div>
+            <div className="absolute top-10 right-0 bg-white/90 p-3 rounded-lg shadow-lg w-28">
+              <p className="text-sm font-medium">Growth</p>
+              <p className="text-base font-bold text-blue-600">+23%</p>
+            </div>
+            <div className="absolute bottom-4 right-4 bg-white/90 p-3 rounded-lg shadow-lg w-36">
+              <p className="text-xs text-gray-600">Top Categories</p>
+              <div className="flex gap-1 items-end h-10 mt-1">
+                <div className="w-2 bg-purple-400 rounded-t h-3/6"></div>
+                <div className="w-2 bg-pink-400 rounded-t h-5/6"></div>
+                <div className="w-2 bg-yellow-400 rounded-t h-2/6"></div>
+                <div className="w-2 bg-blue-400 rounded-t h-full"></div>
+              </div>
+            </div>
           </div>
         </div>
 
