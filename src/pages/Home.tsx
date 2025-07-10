@@ -68,56 +68,62 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#f8f9ff] pt-12 pb-16">
-        <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
-          {/* Left text */}
-          <div className="max-w-xl text-left mb-8 lg:mb-0">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-snug">
-              SM TEAM SHOPS - <br />
-              <span className="underline decoration-4 decoration-indigo-500">ডিজিটাল সেবা সহজ করে</span>
-            </h1>
-            <p className="text-gray-700 text-base sm:text-lg">
-              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে বিশ্বাসযোগ্যতা, গতি এবং মূল্য সবকিছু একসাথে দরকার।
-            </p>
-            <div className="flex flex-wrap mt-6 gap-3">
-              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
-            </div>
-          </div>
+{/* Hero Section */}
+<section className="relative overflow-hidden bg-[#f8f9ff] pt-8 pb-12">
+  <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
+    
+    {/* Left text */}
+    <div className="max-w-xl text-left mb-8 lg:mb-0 space-y-3">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-gray-900">
+        <span className="text-indigo-600">SM</span>{' '}
+        <span className="text-pink-600">TEAM</span>{' '}
+        <span className="text-yellow-500">SHOPS</span> <br />
+        <span className="block text-gray-800 mt-2">
+          <span className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-2 py-1 rounded">
+            ডিজিটাল সেবা সহজ করে
+          </span>
+        </span>
+      </h1>
+      <p className="text-gray-700 text-base sm:text-lg">
+        আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে বিশ্বাসযোগ্যতা, গতি এবং মূল্য সবকিছু একসাথে দরকার।
+      </p>
+      <div className="flex flex-wrap mt-4 gap-3">
+        <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
+        <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
+        <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+      </div>
+    </div>
 
-          {/* Right image with cards */}
-          <div className="relative w-full lg:w-1/2 flex justify-center items-center">
-            <img
-              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-              alt="Hero Character"
-              className="w-[280px] sm:w-[340px] md:w-[360px] z-10"
-            />
+    {/* Right image with cards */}
+    <div className="relative w-full lg:w-1/2 flex justify-center items-center">
+      <img
+        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+        alt="Hero Character"
+        className="w-[280px] sm:w-[340px] md:w-[360px] z-10"
+      />
 
-            {/* Stat Cards */}
-            {statCards.map((card, index) => (
-              <div
-                key={index}
-                className={`absolute bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 animate-fade-in-up z-20
-                ${index === 0 ? 'top-0 left-8' :
-                  index === 1 ? 'top-8 right-0' :
-                  index === 2 ? 'top-28 left-0' :
-                  index === 3 ? 'bottom-28 right-2' :
-                  index === 4 ? 'bottom-8 left-20' :
-                  index === 5 ? 'bottom-0 right-12' : ''}`}
-              >
-                <p className="text-gray-600">{card.title}</p>
-                <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
-              </div>
-            ))}
-
-            {/* Center Line */}
-            <div className="absolute w-[300px] h-[300px] border border-dashed border-indigo-300 rounded-full z-0"></div>
-          </div>
+      {/* Stat Cards */}
+      {statCards.map((card, index) => (
+        <div
+          key={index}
+          className={`absolute bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 animate-fade-in-up z-20
+          ${index === 0 ? 'top-0 left-8' :
+            index === 1 ? 'top-8 right-0' :
+            index === 2 ? 'top-28 left-0' :
+            index === 3 ? 'bottom-28 right-2' :
+            index === 4 ? 'bottom-8 left-20' :
+            index === 5 ? 'bottom-0 right-12' : ''}`}
+        >
+          <p className="text-gray-600">{card.title}</p>
+          <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
         </div>
-      </section>
+      ))}
 
+      {/* Circle Outline */}
+      <div className="absolute w-[300px] h-[300px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+    </div>
+  </div>
+</section>
       {/* Products Section */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
