@@ -60,28 +60,45 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-10 sm:py-20">
-        <div className="container mx-auto px-2 sm:px-4 text-center">
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
-            প্রিমিয়াম সাবস্ক্রিপশন
-          </h1>
-          <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90">
-            সবচেয়ে কম দামে পেয়ে যান আপনার পছন্দের সব সেবা
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-              ৫০% পর্যন্ত ছাড়
-            </Badge>
-            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-              তাৎক্ষণিক ডেলিভারি
-            </Badge>
-            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-              ২৪/৭ সাপোর্ট
-            </Badge>
-          </div>
+    <section className="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16 sm:py-24 overflow-hidden">
+      <div className="container mx-auto px-4 text-center relative z-10">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+          SM TEAM SHOPS - আপনার প্রিয় ডিজিটাল সেবা প্ল্যাটফর্ম
+        </h1>
+        <p className="text-lg sm:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
+          বিশ্বস্ততা, গতিশীলতা আর দামের সাশ্রয় — সব একসাথে SM TEAM SHOPS-এ।
+          প্রিমিয়াম সার্ভিস এখন হাতের নাগালে।
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Badge variant="secondary" className="text-base px-4 py-2">
+            ৫০% পর্যন্ত ছাড়
+          </Badge>
+          <Badge variant="secondary" className="text-base px-4 py-2">
+            তাৎক্ষণিক ডেলিভারি
+          </Badge>
+          <Badge variant="secondary" className="text-base px-4 py-2">
+            ২৪/৭ সাপোর্ট
+          </Badge>
         </div>
-      </section>
+      </div>
+
+      {/* Optional 3D Illustration */}
+      <div className="absolute bottom-0 right-0 w-[300px] sm:w-[400px] md:w-[500px] opacity-90">
+        <Image
+          src="/hero-3d-character.png" // replace this with your 3D image path
+          alt="3D Illustration"
+          width={500}
+          height={500}
+          className="object-contain"
+        />
+      </div>
+
+      {/* Background Blur Effect */}
+      <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-400 rounded-full filter blur-3xl opacity-30 z-0"></div>
+      <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-300 rounded-full filter blur-3xl opacity-30 z-0"></div>
+    </section>
+  );
+}
 
       {/* Products Section */}
       <section className="py-8 sm:py-16">
