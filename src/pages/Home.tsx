@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
@@ -12,35 +18,43 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  // Product Filter Logic
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+
+    const matchesCategory =
+      selectedCategory === 'all' || product.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
+  // Category Label Mapping
   const getCategoryLabel = (category: string) => {
-    const labels = {
+    const labels: Record<string, string> = {
       web: 'ওয়েব সাবস্ক্রিপশন',
       mobile: 'মোবাইল অ্যাপ',
       tutorial: 'টিউটোরিয়াল/কোর্স'
     };
-    return labels[category as keyof typeof labels] || category;
+    return labels[category] || category;
   };
 
-  const categoryStats = products.reduce((acc, product) => {
+  // Count products by category
+  const categoryStats: Record<string, number> = products.reduce((acc, product) => {
     acc[product.category] = (acc[product.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
+  // Loading
   if (loading) {
     return (
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-        <div className="animate-pulse">
-          <div className="h-6 sm:h-8 bg-gray-200 rounded w-1/2 sm:w-1/4 mb-4 sm:mb-6"></div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-64 sm:h-96 bg-gray-200 rounded"></div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -48,19 +62,18 @@ const Home = () => {
     );
   }
 
+  // Error
   if (error) {
     return (
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-        <div className="text-center text-red-600">
-          <p className="text-sm sm:text-base">পণ্য লোড করতে সমস্যা হয়েছে। পেজ রিফ্রেশ করুন।</p>
-        </div>
+      <div className="container mx-auto px-4 py-8 text-center text-red-600">
+        পণ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পেজ রিফ্রেশ করুন।
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      
+
       {/* ✅ Hero Section */}
       <section className="relative bg-gradient-to-r from-purple-100 to-blue-100 py-12 sm:py-16 text-gray-900 overflow-hidden">
         <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-between relative z-10">
@@ -77,10 +90,9 @@ const Home = () => {
               <Badge variant="secondary" className="text-sm px-4 py-2">২৪/৭ সাপোর্ট</Badge>
             </div>
           </div>
-
           <div className="w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
             <Image
-              src="/hero-character.png" // ✅ Replace with your actual image
+              src="/hero-character.png"
               alt="Hero Character"
               width={400}
               height={400}
@@ -89,25 +101,24 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Decorative Blobs */}
-        <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-300 rounded-full filter blur-3xl opacity-30 z-0"></div>
-        <div className="absolute bottom-0 -right-10 w-72 h-72 bg-purple-400 rounded-full filter blur-3xl opacity-30 z-0"></div>
+        {/* Decorative Background Blur */}
+        <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-300 rounded-full filter blur-3xl opacity-30 z-0" />
+        <div className="absolute bottom-0 -right-10 w-72 h-72 bg-purple-400 rounded-full filter blur-3xl opacity-30 z-0" />
       </section>
 
       {/* ✅ Products Section */}
       <section className="py-8 sm:py-16">
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6 sm:mb-8">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="পণ্য খুঁজুন..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 text-sm sm:text-base"
-                />
-              </div>
+        <div className="container mx-auto px-4">
+          {/* Search + Filter */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="পণ্য খুঁজুন..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 text-sm sm:text-base"
+              />
             </div>
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-gray-500" />
@@ -131,23 +142,23 @@ const Home = () => {
             </div>
           </div>
 
+          {/* Filtered Category Header */}
           {selectedCategory !== 'all' && (
-            <div className="mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold mb-2">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold mb-1">
                 {getCategoryLabel(selectedCategory)}
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base">
-                {filteredProducts.length} টি পণ্য পাওয়া গেছে
-              </p>
+              <p className="text-gray-600 text-sm">{filteredProducts.length} টি পণ্য পাওয়া গেছে</p>
             </div>
           )}
 
+          {/* Product Grid */}
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-8 sm:py-12">
-              <p className="text-gray-500 text-base sm:text-lg">কোন পণ্য পাওয়া যায়নি।</p>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-base">কোন পণ্য পাওয়া যায়নি।</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
