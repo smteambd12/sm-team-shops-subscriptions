@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,7 +14,7 @@ const Home = () => {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -60,47 +60,41 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-    <section className="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16 sm:py-24 overflow-hidden">
-      <div className="container mx-auto px-4 text-center relative z-10">
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-          SM TEAM SHOPS - আপনার প্রিয় ডিজিটাল সেবা প্ল্যাটফর্ম
-        </h1>
-        <p className="text-lg sm:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
-          বিশ্বস্ততা, গতিশীলতা আর দামের সাশ্রয় — সব একসাথে SM TEAM SHOPS-এ।
-          প্রিমিয়াম সার্ভিস এখন হাতের নাগালে।
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Badge variant="secondary" className="text-base px-4 py-2">
-            ৫০% পর্যন্ত ছাড়
-          </Badge>
-          <Badge variant="secondary" className="text-base px-4 py-2">
-            তাৎক্ষণিক ডেলিভারি
-          </Badge>
-          <Badge variant="secondary" className="text-base px-4 py-2">
-            ২৪/৭ সাপোর্ট
-          </Badge>
+      
+      {/* ✅ Hero Section */}
+      <section className="relative bg-gradient-to-r from-purple-100 to-blue-100 py-12 sm:py-16 text-gray-900 overflow-hidden">
+        <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-between relative z-10">
+          <div className="text-center md:text-left max-w-xl">
+            <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-4">
+              SM TEAM SHOPS - ডিজিটাল সেবা সহজ করে
+            </h1>
+            <p className="text-base sm:text-lg opacity-80 mb-6">
+              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজন মেটাতে বিশ্বস্ততা, গতি এবং মূল্য সাশ্রয় একসাথে দরকার।
+            </p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-2">
+              <Badge variant="secondary" className="text-sm px-4 py-2">৫০% পর্যন্ত ছাড়</Badge>
+              <Badge variant="secondary" className="text-sm px-4 py-2">তাৎক্ষণিক ডেলিভারি</Badge>
+              <Badge variant="secondary" className="text-sm px-4 py-2">২৪/৭ সাপোর্ট</Badge>
+            </div>
+          </div>
+
+          <div className="w-[280px] sm:w-[350px] md:w-[400px] mb-8 md:mb-0">
+            <Image
+              src="/hero-character.png" // ✅ Replace with your actual image
+              alt="Hero Character"
+              width={400}
+              height={400}
+              className="w-full h-auto object-contain"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Optional 3D Illustration */}
-      <div className="absolute bottom-0 right-0 w-[300px] sm:w-[400px] md:w-[500px] opacity-90">
-        <Image
-          src="/hero-3d-character.png" // replace this with your 3D image path
-          alt="3D Illustration"
-          width={500}
-          height={500}
-          className="object-contain"
-        />
-      </div>
+        {/* Decorative Blobs */}
+        <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-300 rounded-full filter blur-3xl opacity-30 z-0"></div>
+        <div className="absolute bottom-0 -right-10 w-72 h-72 bg-purple-400 rounded-full filter blur-3xl opacity-30 z-0"></div>
+      </section>
 
-      {/* Background Blur Effect */}
-      <div className="absolute -top-10 -left-10 w-72 h-72 bg-pink-400 rounded-full filter blur-3xl opacity-30 z-0"></div>
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-300 rounded-full filter blur-3xl opacity-30 z-0"></div>
-    </section>
-  );
-}
-
-      {/* Products Section */}
+      {/* ✅ Products Section */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6 sm:mb-8">
