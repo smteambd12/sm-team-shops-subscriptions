@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,7 @@ const Home = () => {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -59,46 +60,30 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-{/* ✅ Hero Section with Background Video */}
-<section className="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white py-10 sm:py-20 overflow-hidden">
-  {/* 🎥 Background Video */}
-  <video
-    autoPlay
-    loop
-    muted
-    playsInline
-    className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
-  >
-    <source src="/ads/sample-video.mp4" type="video/mp4" />
-    আপনার ব্রাউজার ভিডিও সাপোর্ট করে না।
-  </video>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-10 sm:py-20">
+        <div className="container mx-auto px-2 sm:px-4 text-center">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
+            প্রিমিয়াম সাবস্ক্রিপশন
+          </h1>
+          <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90">
+            সবচেয়ে কম দামে পেয়ে যান আপনার পছন্দের সব সেবা
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
+              ৫০% পর্যন্ত ছাড়
+            </Badge>
+            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
+              তাৎক্ষণিক ডেলিভারি
+            </Badge>
+            <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
+              ২৪/৭ সাপোর্ট
+            </Badge>
+          </div>
+        </div>
+      </section>
 
-  {/* Optional overlay (dark filter) */}
-  <div className="absolute inset-0 bg-black bg-opacity-30 z-0" />
-
-  {/* 🎯 Foreground Text Content */}
-  <div className="relative z-10 container mx-auto px-2 sm:px-4 text-center">
-    <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
-      প্রিমিয়াম সাবস্ক্রিপশন
-    </h1>
-    <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90">
-      সবচেয়ে কম দামে পেয়ে যান আপনার পছন্দের সব সেবা
-    </p>
-    <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-      <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-        ৫০% পর্যন্ত ছাড়
-      </Badge>
-      <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-        তাৎক্ষণিক ডেলিভারি
-      </Badge>
-      <Badge variant="secondary" className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2">
-        ২৪/৭ সাপোর্ট
-      </Badge>
-    </div>
-  </div>
-</section>
-
-      {/* ✅ Products Section */}
+      {/* Products Section */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6 sm:mb-8">
