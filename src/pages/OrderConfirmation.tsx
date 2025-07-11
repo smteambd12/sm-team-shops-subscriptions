@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,7 +41,7 @@ const OrderConfirmation = () => {
       navigate('/auth');
       return;
     }
-    
+
     if (orderId) {
       fetchOrderDetails();
     }
@@ -227,7 +226,7 @@ const OrderConfirmation = () => {
                   গ্রাহকের তথ্য
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 break-words">
                 <div>
                   <p className="font-medium">{order.customer_name}</p>
                   <p className="text-sm text-gray-600">{order.customer_email}</p>
@@ -250,22 +249,22 @@ const OrderConfirmation = () => {
                   পেমেন্ট তথ্য
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
+              <CardContent className="space-y-3 break-words">
+                <div className="flex justify-between flex-wrap">
                   <span>পেমেন্ট মাধ্যম:</span>
-                  <span className="font-medium">{getPaymentMethodName(order.payment_method)}</span>
+                  <span className="font-medium text-right">{getPaymentMethodName(order.payment_method)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between flex-wrap">
                   <span>ট্রানজেকশন ID:</span>
-                  <span className="font-medium">{order.transaction_id}</span>
+                  <span className="font-medium break-all text-right">{order.transaction_id}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between flex-wrap">
                   <span>অর্ডারের সময়:</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-right">
                     {new Date(order.created_at).toLocaleString('bn-BD')}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between flex-wrap">
                   <span>স্ট্যাটাস:</span>
                   <span className={`font-medium px-2 py-1 rounded text-sm ${
                     order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -274,8 +273,8 @@ const OrderConfirmation = () => {
                     'bg-red-100 text-red-800'
                   }`}>
                     {order.status === 'pending' ? 'প্রসেসিং' :
-                     order.status === 'confirmed' ? 'নিশ্চিত' :
-                     order.status === 'delivered' ? 'ডেলিভার' : 'বাতিল'}
+                    order.status === 'confirmed' ? 'নিশ্চিত' :
+                    order.status === 'delivered' ? 'ডেলিভার' : 'বাতিল'}
                   </span>
                 </div>
               </CardContent>
