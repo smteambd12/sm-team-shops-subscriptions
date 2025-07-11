@@ -67,7 +67,7 @@ const OrderConfirmation = () => {
 
       setOrder({
         ...orderData,
-        order_items: itemsData || [],
+        order_items: itemsData || []
       });
     } catch (error) {
       console.error('Error fetching order details:', error);
@@ -152,7 +152,7 @@ const OrderConfirmation = () => {
           </CardContent>
         </Card>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -170,16 +170,23 @@ const OrderConfirmation = () => {
                     />
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product_name}</h4>
-                      <p className="text-sm text-gray-600">{getDurationText(item.package_duration)} × {item.quantity}</p>
+                      <p className="text-sm text-gray-600">
+                        {getDurationText(item.package_duration)} × {item.quantity}
+                      </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="font-semibold text-purple-600">৳{item.price.toLocaleString()}</span>
+                        <span className="font-semibold text-purple-600">
+                          ৳{item.price.toLocaleString()}
+                        </span>
                         {item.original_price > item.price && (
-                          <span className="text-sm text-gray-500 line-through">৳{item.original_price.toLocaleString()}</span>
+                          <span className="text-sm text-gray-500 line-through">
+                            ৳{item.original_price.toLocaleString()}
+                          </span>
                         )}
                       </div>
                     </div>
                   </div>
                 ))}
+
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>সাবটোটাল:</span>
@@ -201,28 +208,65 @@ const OrderConfirmation = () => {
           </div>
 
           <div className="space-y-6">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1 border rounded-md p-4 bg-gray-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="h-4 w-4 text-gray-600" />
-                      <span className="font-semibold">গ্রাহক</span>
-                    </div>
-                    <p className="text-sm font-medium">{order.customer_name}</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" /> গ্রাহকের তথ্য
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p className="font-medium">{order.customer_name}</p>
+                    <p className="text-sm text-gray-600">{order.customer_email}</p>
                     <p className="text-sm text-gray-600">{order.customer_phone}</p>
                   </div>
-                  <div className="flex-1 border rounded-md p-4 bg-gray-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CreditCard className="h-4 w-4 text-gray-600" />
-                      <span className="font-semibold">পেমেন্ট</span>
+                  <div className="border-t pt-3">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                      <p className="text-sm">{order.customer_address}</p>
                     </div>
-                    <p className="text-sm">{getPaymentMethodName(order.payment_method)}</p>
-                    <p className="text-sm font-semibold text-green-600">৳{order.total_amount}</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" /> পেমেন্ট তথ্য
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>পেমেন্ট মাধ্যম:</span>
+                    <span className="font-medium">{getPaymentMethodName(order.payment_method)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>ট্রানজেকশন ID:</span>
+                    <span className="font-medium">{order.transaction_id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>অর্ডারের সময়:</span>
+                    <span className="font-medium">
+                      {new Date(order.created_at).toLocaleString('bn-BD')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>স্ট্যাটাস:</span>
+                    <span className={`font-medium px-2 py-1 rounded text-sm ${
+                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      order.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      order.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {order.status === 'pending' ? 'প্রসেসিং' :
+                      order.status === 'confirmed' ? 'নিশ্চিত' :
+                      order.status === 'delivered' ? 'ডেলিভার' : 'বাতিল'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <Card>
               <CardHeader>
