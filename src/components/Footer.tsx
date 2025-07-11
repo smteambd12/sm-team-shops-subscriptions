@@ -60,7 +60,8 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-[#0f0f1f] via-[#1c1c2e] to-[#0f0f1f] text-white py-10 md:py-14 px-4">
       <div className="container mx-auto max-w-7xl">
-        <div className="rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-xl p-6 md:p-10 grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 text-center md:text-left">
+        <div className="rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-xl p-3 md:p-5 grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 text-center md:text-left">
+
 
           {/* Company */}
           <div>
