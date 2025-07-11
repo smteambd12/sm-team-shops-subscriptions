@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +42,7 @@ const OrderConfirmation = () => {
       navigate('/auth');
       return;
     }
-
+    
     if (orderId) {
       fetchOrderDetails();
     }
@@ -125,6 +126,7 @@ const OrderConfirmation = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button
             variant="outline"
@@ -137,6 +139,7 @@ const OrderConfirmation = () => {
           </Button>
         </div>
 
+        {/* Success Message */}
         <Card className="mb-8 border-green-200 bg-green-50">
           <CardContent className="p-6">
             <div className="flex items-center gap-4 text-center">
@@ -145,19 +148,25 @@ const OrderConfirmation = () => {
                 <h1 className="text-2xl font-bold text-green-800 mb-2">
                   অর্ডার সফল হয়েছে!
                 </h1>
-                <p className="text-green-700">আপনার অর্ডার গ্রহণ করা হয়েছে। শীঘ্রই আমরা যোগাযোগ করব।</p>
-                <p className="text-sm text-green-600 mt-2">অর্ডার ID: {order.id}</p>
+                <p className="text-green-700">
+                  আপনার অর্ডার গ্রহণ করা হয়েছে। শীঘ্রই আমরা যোগাযোগ করব।
+                </p>
+                <p className="text-sm text-green-600 mt-2">
+                  অর্ডার ID: {order.id}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Order Items */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" /> অর্ডার করা পণ্য
+                  <Package className="h-5 w-5" />
+                  অর্ডার করা পণ্য
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -187,6 +196,7 @@ const OrderConfirmation = () => {
                   </div>
                 ))}
 
+                {/* Price Summary */}
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>সাবটোটাল:</span>
@@ -207,81 +217,94 @@ const OrderConfirmation = () => {
             </Card>
           </div>
 
+          {/* Order Details */}
           <div className="space-y-6">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" /> গ্রাহকের তথ্য
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="font-medium">{order.customer_name}</p>
-                    <p className="text-sm text-gray-600">{order.customer_email}</p>
-                    <p className="text-sm text-gray-600">{order.customer_phone}</p>
-                  </div>
-                  <div className="border-t pt-3">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
-                      <p className="text-sm">{order.customer_address}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" /> পেমেন্ট তথ্য
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>পেমেন্ট মাধ্যম:</span>
-                    <span className="font-medium">{getPaymentMethodName(order.payment_method)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>ট্রানজেকশন ID:</span>
-                    <span className="font-medium">{order.transaction_id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>অর্ডারের সময়:</span>
-                    <span className="font-medium">
-                      {new Date(order.created_at).toLocaleString('bn-BD')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>স্ট্যাটাস:</span>
-                    <span className={`font-medium px-2 py-1 rounded text-sm ${
-                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      order.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      order.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {order.status === 'pending' ? 'প্রসেসিং' :
-                      order.status === 'confirmed' ? 'নিশ্চিত' :
-                      order.status === 'delivered' ? 'ডেলিভার' : 'বাতিল'}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
+            {/* Customer Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" /> পরবর্তী ধাপ
+                  <User className="h-5 w-5" />
+                  গ্রাহকের তথ্য
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="font-medium">{order.customer_name}</p>
+                  <p className="text-sm text-gray-600">{order.customer_email}</p>
+                  <p className="text-sm text-gray-600">{order.customer_phone}</p>
+                </div>
+                <div className="border-t pt-3">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                    <p className="text-sm">{order.customer_address}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  পেমেন্ট তথ্য
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span>পেমেন্ট মাধ্যম:</span>
+                  <span className="font-medium">{getPaymentMethodName(order.payment_method)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>ট্রানজেকশন ID:</span>
+                  <span className="font-medium">{order.transaction_id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>অর্ডারের সময়:</span>
+                  <span className="font-medium">
+                    {new Date(order.created_at).toLocaleString('bn-BD')}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>স্ট্যাটাস:</span>
+                  <span className={`font-medium px-2 py-1 rounded text-sm ${
+                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    order.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                    order.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {order.status === 'pending' ? 'প্রসেসিং' :
+                     order.status === 'confirmed' ? 'নিশ্চিত' :
+                     order.status === 'delivered' ? 'ডেলিভার' : 'বাতিল'}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Next Steps */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  পরবর্তী ধাপ
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <p className="text-sm">১. আপনার পেমেন্ট যাচাই চলছে, এটি সম্পন্ন হতে কিছু সময় লাগতে পারে।</p>
-                  <p className="text-sm">২. আমরা ১২ থেকে ২৪ ঘণ্টার মধ্যে আপনার অর্ডারটি যাচাই করে কনফার্ম করব। ধৈর্যের জন্য ধন্যবাদ।</p>
-                  <p className="text-sm">৩. যেকোনো সমস্যা হলে সরাসরি ড্যাশবোর্ড থেকে সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন।</p>
+                  <p className="text-sm">
+                    ১. আপনার পেমেন্ট যাচাই চলছে, এটি সম্পন্ন হতে কিছু সময় লাগতে পারে।
+                  </p>
+                  <p className="text-sm">
+                    ২. আমরা ১২ থেকে ২৪ ঘণ্টার মধ্যে আপনার অর্ডারটি যাচাই করে কনফার্ম করব। ধৈর্যের জন্য ধন্যবাদ।
+                  </p>
+                  <p className="text-sm">
+                    ৩. যেকোনো সমস্যা হলে সরাসরি ড্যাশবোর্ড থেকে সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন।
+                  </p>
                   <div className="pt-3 border-t">
                     <Link to="/dashboard">
-                      <Button className="w-full">ড্যাশবোর্ড দেখুন</Button>
+                      <Button className="w-full">
+                        ড্যাশবোর্ড দেখুন
+                      </Button>
                     </Link>
                   </div>
                 </div>
