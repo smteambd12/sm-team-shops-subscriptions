@@ -83,9 +83,6 @@ const Home = () => {
     <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
       <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
         <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
-        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-500 to-purple-600">
-          SM TEAM SHOPS -
-        </span>
         <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
           ডিজিটাল সেবা সহজ করে
         </span>
