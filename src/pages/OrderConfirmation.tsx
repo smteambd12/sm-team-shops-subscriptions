@@ -301,9 +301,9 @@ const OrderConfirmation = () => {
                     ৩. যেকোনো সমস্যা হলে সরাসরি ড্যাশবোর্ড থেকে সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন।
                   </p>
                   <div className="pt-3 border-t">
-                    <Link to="/#/dashboard">
+                    <Link to="/dashboard">
                       <Button className="w-full">
-                        প্রোফাইল দেখুন
+                        ড্যাশবোর্ড দেখুন
                       </Button>
                     </Link>
                   </div>
