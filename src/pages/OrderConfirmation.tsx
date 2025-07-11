@@ -292,16 +292,16 @@ const OrderConfirmation = () => {
               <CardContent>
                 <div className="space-y-3">
                   <p className="text-sm">
-                    ১. আমরা আপনার পেমেন্ট যাচাই করব
+                    ১. আপনার পেমেন্ট যাচাই চলছে, এটি সম্পন্ন হতে কিছু সময় লাগতে পারে।
                   </p>
                   <p className="text-sm">
-                    ২. ২৪ ঘন্টার মধ্যে আমরা আপনার সাথে যোগাযোগ করব
+                    ২. আমরা ১২ থেকে ২৪ ঘণ্টার মধ্যে আপনার অর্ডারটি যাচাই করে কনফার্ম করব। ধৈর্যের জন্য ধন্যবাদ।
                   </p>
                   <p className="text-sm">
-                    ৩. আপনার অ্যাকাউন্ট অ্যাক্টিভ করা হবে
+                    ৩. যেকোনো সমস্যা হলে সরাসরি ড্যাশবোর্ড থেকে সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন।
                   </p>
                   <div className="pt-3 border-t">
-                    <Link to="/profile">
+                    <Link to="/#/dashboard">
                       <Button className="w-full">
                         প্রোফাইল দেখুন
                       </Button>
