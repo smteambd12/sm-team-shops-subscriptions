@@ -75,91 +75,67 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
-        <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
-          
-          {/* Left Text */}
-          <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide">
-              <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
-              <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
-                ডিজিটাল সেবা সহজ করে
-              </span>
-            </h1>
-            <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
-              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
-              <span className="font-semibold text-indigo-600"> বিশ্বাসযোগ্যতা</span>, 
-              <span className="font-semibold text-pink-600"> গতি</span> এবং 
-              <span className="font-semibold text-green-600"> মূল্য</span> – সবকিছু একসাথে দরকার।
-            </p>
-            <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
-              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
-            </div>
+{/* Hero Section */}
+<section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
+  <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
+    
+    {/* Left Text */}
+    <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
+      <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
+        <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
+        <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
+          ডিজিটাল সেবা সহজ করে
+        </span>
+      </h1>
+      <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
+        আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
+        <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, 
+        <span className="font-semibold text-pink-600">গতি</span> এবং 
+        <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
+      </p>
+      <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
+        <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
+        <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
+        <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+      </div>
+    </div>
+
+    {/* Right Image with Stat Cards */}
+    <div className="relative w-full lg:w-1/2 flex justify-center items-center">
+      <img
+        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+        alt="Hero Character"
+        className="w-[240px] sm:w-[300px] md:w-[340px] z-10"
+      />
+
+      {/* Stat Cards */}
+      {statCards.map((card, index) => {
+        let position = '';
+        if (index === 0) position = 'top-0 left-6';
+        else if (index === 1) position = 'top-2 right-1 sm:top-6 sm:right-2';
+        else if (index === 2) position = 'top-28 left-0';
+        else if (index === 3) position = 'bottom-28 right-2';
+        else if (index === 4) position = 'bottom-0 left-10 sm:bottom-8';
+        else if (index === 5) position = 'bottom-0 right-12';
+
+        return (
+          <div
+            key={index}
+            className={`absolute ${position} bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 animate-fade-in-up z-20`}
+          >
+            <p className="text-gray-600">{card.title}</p>
+            <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
           </div>
+        );
+      })}
 
-          {/* Right Image with Circular Cards */}
-          <div className="relative w-full lg:w-1/2 flex justify-center items-center mt-10 lg:mt-0">
-            {/* Center Dashed Circle */}
-            <div className="absolute w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+      {/* Center Dashed Circle */}
+      <div className="absolute w-[280px] h-[280px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+    </div>
+  </div>
+</section>
 
-            {/* Character Image */}
-            <img
-              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-              alt="Hero Character"
-              className="w-[160px] sm:w-[200px] lg:w-[300px] z-10"
-            />
-
-            {/* Stat Cards in circular positions */}
-            {statCards.map((card, index) => {
-              const mobilePositions = [
-                'top-[-10px] left-1/2 -translate-x-1/2',
-                'top-8 right-2',
-                'top-1/2 left-[-10px] -translate-y-1/2',
-                'bottom-8 right-2',
-                'bottom-[-10px] left-1/3',
-                'bottom-2 left-[65%]',
-              ];
-
-              const desktopPositions = [
-                'top-[-20px] left-1/2 -translate-x-1/2',
-                'top-8 right-4',
-                'top-1/2 left-[-20px] -translate-y-1/2',
-                'bottom-10 right-2',
-                'bottom-[-10px] left-1/3',
-                'bottom-2 left-[65%]',
-              ];
-
-              return (
-                <div
-                  key={index}
-                  className={`
-                    absolute 
-                    ${mobilePositions[index]} 
-                    sm:${mobilePositions[index]} 
-                    lg:${desktopPositions[index]}
-                    bg-white 
-                    border rounded-lg 
-                    px-2 py-1 sm:px-3 sm:py-2 
-                    text-xs sm:text-sm font-medium 
-                    shadow-md 
-                    transform transition-all duration-500 hover:scale-105
-                    z-20
-                    lg:shadow-lg lg:scale-110 lg:rotate-1 lg:bg-gradient-to-br lg:from-white lg:to-blue-50
-                  `}
-                >
-                  <p className="text-gray-600">{card.title}</p>
-                  <p className={`text-base sm:text-lg font-bold ${card.color}`}>{card.value}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Product Section */}
+      {/* Product Section Same as Before */}
       <section className="py-8 sm:py-16">
         <div className="container mx-auto px-2 sm:px-4">
           {/* Filter & Search */}
@@ -189,7 +165,13 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Product Grid */}
+          {/* Products */}
+          {selectedCategory !== 'all' && (
+            <div className="mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">{getCategoryLabel(selectedCategory)}</h2>
+              <p className="text-gray-600">{filteredProducts.length} টি পণ্য পাওয়া গেছে</p>
+            </div>
+          )}
           {filteredProducts.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">কোন পণ্য পাওয়া যায়নি।</p>
