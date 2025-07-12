@@ -75,12 +75,14 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+// ...import অংশ অপরিবর্তিত থাকবে
+
 {/* Hero Section */}
-<section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
+<section className="relative overflow-hidden bg-[#f8f9ff] pt-4 pb-6 sm:pt-8 sm:pb-10">
   <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
-    
+
     {/* Left Text */}
-    <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
+    <div className="max-w-xl text-center lg:text-left mb-6 sm:mb-10 lg:mb-0 space-y-3 sm:space-y-4">
       <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
         <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
         <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
@@ -93,7 +95,7 @@ const Home = () => {
         <span className="font-semibold text-pink-600">গতি</span> এবং 
         <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
       </p>
-      <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
+      <div className="flex flex-wrap mt-2 sm:mt-3 gap-2 justify-center lg:justify-start">
         <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
         <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
         <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
@@ -101,22 +103,23 @@ const Home = () => {
     </div>
 
     {/* Right Image with Stat Cards */}
-    <div className="relative w-full lg:w-1/2 flex justify-center items-center">
+    <div className="relative w-full lg:w-1/2 flex justify-center items-center mt-4 sm:mt-0">
       <img
         src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
         alt="Hero Character"
-        className="w-[240px] sm:w-[300px] md:w-[340px] z-10"
+        className="w-[220px] sm:w-[300px] md:w-[340px] z-10"
       />
 
       {/* Stat Cards */}
       {statCards.map((card, index) => {
         let position = '';
-        if (index === 0) position = 'top-0 left-6';
-        else if (index === 1) position = 'top-2 right-1 sm:top-6 sm:right-2';
+
+        if (index === 0) position = 'top-0 left-4 sm:left-6';
+        else if (index === 1) position = 'top-2 right-2 sm:top-6 sm:right-3'; // ডিজিটাল কোর্স উপরে
         else if (index === 2) position = 'top-28 left-0';
         else if (index === 3) position = 'bottom-28 right-2';
-        else if (index === 4) position = 'bottom-0 left-10 sm:bottom-8';
-        else if (index === 5) position = 'bottom-0 right-12';
+        else if (index === 4) position = 'bottom-2 left-4 sm:bottom-6'; // ট্রাস্ট রেটিং নিচে
+        else if (index === 5) position = 'bottom-0 right-8';
 
         return (
           <div
@@ -130,7 +133,7 @@ const Home = () => {
       })}
 
       {/* Center Dashed Circle */}
-      <div className="absolute w-[280px] h-[280px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+      <div className="absolute w-[260px] h-[260px] border border-dashed border-indigo-300 rounded-full z-0"></div>
     </div>
   </div>
 </section>
