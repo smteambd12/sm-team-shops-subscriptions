@@ -75,121 +75,135 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-
-{/* Hero Section */}
-<section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
-  <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
-    
-    {/* Left Text */}
-    <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
-      <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
-        <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
-        <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
-          ডিজিটাল সেবা সহজ করে
-        </span>
-      </h1>
-      <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
-        আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
-        <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, 
-        <span className="font-semibold text-pink-600">গতি</span> এবং 
-        <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
-      </p>
-      <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
-        <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-        <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-        <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
-      </div>
-    </div>
-
-    {/* Right Image with Stat Cards */}
-    <div className="relative w-full lg:w-1/2 flex justify-center items-center mt-6 sm:mt-0">
-
-      {/* Center Dashed Circle */}
-      <div className="absolute w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] border border-dashed border-indigo-300 rounded-full z-0"></div>
-
-      {/* Hero Image */}
-      <img
-        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-        alt="Hero Character"
-        className="w-[240px] sm:w-[300px] md:w-[340px] z-10"
-      />
-
-      {/* Stat Cards Positioned Circularly */}
-      {statCards.map((card, index) => {
-        const positions = [
-          'top-[0%] left-1/2 -translate-x-1/2 -translate-y-1/2',
-          'top-[25%] left-[90%] -translate-x-1/2 -translate-y-1/2',
-          'top-[75%] left-[90%] -translate-x-1/2 -translate-y-1/2',
-          'top-[100%] left-1/2 -translate-x-1/2 -translate-y-1/2',
-          'top-[75%] left-[10%] -translate-x-1/2 -translate-y-1/2',
-          'top-[25%] left-[10%] -translate-x-1/2 -translate-y-1/2'
-        ];
-        return (
-          <div
-            key={index}
-            className={`absolute ${positions[index]} bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 z-20 w-36 text-center`}
-          >
-            <p className="text-gray-600 whitespace-nowrap">{card.title}</p>
-            <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
+        <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
+          
+          {/* Left Text */}
+          <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide">
+              <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
+              <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
+                ডিজিটাল সেবা সহজ করে
+              </span>
+            </h1>
+            <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
+              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
+              <span className="font-semibold text-indigo-600"> বিশ্বাসযোগ্যতা</span>, 
+              <span className="font-semibold text-pink-600"> গতি</span> এবং 
+              <span className="font-semibold text-green-600"> মূল্য</span> – সবকিছু একসাথে দরকার।
+            </p>
+            <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
+              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
+              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
+              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+            </div>
           </div>
-        );
-      })}
+
+          {/* Right Image with Circular Cards */}
+          <div className="relative w-full lg:w-1/2 flex justify-center items-center mt-10 lg:mt-0">
+            {/* Center Dashed Circle */}
+            <div className="absolute w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+
+            {/* Character Image */}
+            <img
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+              alt="Hero Character"
+              className="w-[160px] sm:w-[200px] lg:w-[300px] z-10"
+            />
+
+            {/* Stat Cards in circular positions */}
+            {statCards.map((card, index) => {
+              const mobilePositions = [
+                'top-[-10px] left-1/2 -translate-x-1/2',
+                'top-8 right-2',
+                'top-1/2 left-[-10px] -translate-y-1/2',
+                'bottom-8 right-2',
+                'bottom-[-10px] left-1/3',
+                'bottom-2 left-[65%]',
+              ];
+
+              const desktopPositions = [
+                'top-[-20px] left-1/2 -translate-x-1/2',
+                'top-8 right-4',
+                'top-1/2 left-[-20px] -translate-y-1/2',
+                'bottom-10 right-2',
+                'bottom-[-10px] left-1/3',
+                'bottom-2 left-[65%]',
+              ];
+
+              return (
+                <div
+                  key={index}
+                  className={`
+                    absolute 
+                    ${mobilePositions[index]} 
+                    sm:${mobilePositions[index]} 
+                    lg:${desktopPositions[index]}
+                    bg-white 
+                    border rounded-lg 
+                    px-2 py-1 sm:px-3 sm:py-2 
+                    text-xs sm:text-sm font-medium 
+                    shadow-md 
+                    transform transition-all duration-500 hover:scale-105
+                    z-20
+                    lg:shadow-lg lg:scale-110 lg:rotate-1 lg:bg-gradient-to-br lg:from-white lg:to-blue-50
+                  `}
+                >
+                  <p className="text-gray-600">{card.title}</p>
+                  <p className={`text-base sm:text-lg font-bold ${card.color}`}>{card.value}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Product Section */}
+      <section className="py-8 sm:py-16">
+        <div className="container mx-auto px-2 sm:px-4">
+          {/* Filter & Search */}
+          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="পণ্য খুঁজুন..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="ক্যাটেগরি নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সব ক্যাটেগরি</SelectItem>
+                  <SelectItem value="web">ওয়েব সাবস্ক্রিপশন ({categoryStats.web || 0})</SelectItem>
+                  <SelectItem value="mobile">মোবাইল অ্যাপ ({categoryStats.mobile || 0})</SelectItem>
+                  <SelectItem value="tutorial">টিউটোরিয়াল/কোর্স ({categoryStats.tutorial || 0})</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">কোন পণ্য পাওয়া যায়নি।</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
-  </div>
-</section>
-
-{/* Product Section */}
-<section className="py-8 sm:py-16">
-  <div className="container mx-auto px-2 sm:px-4">
-    {/* Filter & Search */}
-    <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6">
-      <div className="flex-1 relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="পণ্য খুঁজুন..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <Filter className="h-4 w-4 text-gray-500" />
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="ক্যাটেগরি নির্বাচন করুন" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">সব ক্যাটেগরি</SelectItem>
-            <SelectItem value="web">ওয়েব সাবস্ক্রিপশন ({categoryStats.web || 0})</SelectItem>
-            <SelectItem value="mobile">মোবাইল অ্যাপ ({categoryStats.mobile || 0})</SelectItem>
-            <SelectItem value="tutorial">টিউটোরিয়াল/কোর্স ({categoryStats.tutorial || 0})</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-
-    {/* Product Grid */}
-    {selectedCategory !== 'all' && (
-      <div className="mb-4">
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">{getCategoryLabel(selectedCategory)}</h2>
-        <p className="text-gray-600">{filteredProducts.length} টি পণ্য পাওয়া গেছে</p>
-      </div>
-    )}
-    {filteredProducts.length === 0 ? (
-      <div className="text-center py-8">
-        <p className="text-gray-500">কোন পণ্য পাওয়া যায়নি।</p>
-      </div>
-    ) : (
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-    )}
-  </div>
-</section>
-
-</div>
   );
 };
 
