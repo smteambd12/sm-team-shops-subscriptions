@@ -1,83 +1,39 @@
-import React, { useState } from 'react';
-import ProductCard from '@/components/ProductCard';
-import PopularProductCard from '@/components/PopularProductCard';
-import OfferProductCard from '@/components/OfferProductCard';
-import HorizontalProductSlider from '@/components/HorizontalProductSlider';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Star, Gift, Sparkles, Flame } from 'lucide-react';
-import { useProducts } from '@/hooks/useProducts';
-import { usePopularProducts } from '@/hooks/usePopularProducts';
-import { useOfferProducts } from '@/hooks/useOfferProducts';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
 
-const statCards = [
-  { title: 'সাপোর্ট টিকিট', value: '1,200+', color: 'text-purple-600' },
-  { title: 'ডিজিটাল কোর্স', value: '৫০+ কোর্স', color: 'text-pink-600' },
-  { title: 'ডেলিভারি টাইম', value: 'তাৎক্ষণিক', color: 'text-green-600' },
-  { title: 'অ্যাপ সার্ভিস', value: '৩০+ অ্যাপ', color: 'text-yellow-600' },
-  { title: 'ট্রাস্ট রেটিং', value: '95%', color: 'text-blue-600' },
-  { title: 'ওয়েব সাবস্ক্রিপশন', value: '১০০+', color: 'text-indigo-600' },
-];
-
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return '🌤️ Good Morning';
-  if (hour >= 12 && hour < 17) return '☀️ Good Afternoon';
-  if (hour >= 17 && hour < 21) return '🌆 Good Evening';
-  return '🌙 Good Night';
-};
+import React from 'react';
+import { Gift, TrendingUp, Star, Zap, Heart, Award } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
+import CompactOfferCard from '../components/CompactOfferCard';
+import PopularProductCard from '../components/PopularProductCard';
+import HorizontalProductSlider from '../components/HorizontalProductSlider';
+import { useProducts } from '../hooks/useProducts';
+import { useOfferProducts } from '../hooks/useOfferProducts';
+import { usePopularProducts } from '../hooks/usePopularProducts';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 
 const Home = () => {
-  const { products, loading, error } = useProducts();
+  const { products, loading: productsLoading } = useProducts();
+  const { offerProducts, loading: offersLoading } = useOfferProducts();
   const { popularProducts, loading: popularLoading } = usePopularProducts();
-  const { offerProducts, loading: offerLoading } = useOfferProducts();
   const { settings } = useSiteSettings();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const greeting = getGreeting();
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+  console.log('Home page data:', {
+    products: products.length,
+    offerProducts: offerProducts.length,
+    popularProducts: popularProducts.length
   });
 
-  const getCategoryLabel = (category: string) => {
-    const labels = {
-      web: 'ওয়েব সাবস্ক্রিপশন',
-      mobile: 'মোবাইল অ্যাপ',
-      tutorial: 'টিউটোরিয়াল/কোর্স'
-    };
-    return labels[category as keyof typeof labels] || category;
-  };
-
-  const categoryStats = products.reduce((acc, product) => {
-    acc[product.category] = (acc[product.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  if (loading) {
+  if (productsLoading) {
     return (
-      <div className="container mx-auto px-2 sm:px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/2 mb-6"></div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-2 sm:px-4 py-8 text-center text-red-600">
-        <p>পণ্য লোড করতে সমস্যা হয়েছে। পেজ রিফ্রেশ করুন।</p>
       </div>
     );
   }
@@ -85,181 +41,95 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
-        <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
-          
-          {/* Left Text */}
-          <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
-              <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
-              <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
-                ডিজিটাল সেবা সহজ করে
-              </span>
+      <section className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white py-12 sm:py-20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
+            <Zap className="w-8 h-8 sm:w-12 sm:h-12 mr-2 sm:mr-4 text-yellow-300" />
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold">
+              স্বাগতম
             </h1>
-            <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
-              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
-              <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, 
-              <span className="font-semibold text-pink-600">গতি</span> এবং 
-              <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
-            </p>
-            <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
-              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
-            </div>
           </div>
-
-          {/* Right Image with Stat Cards */}
-          <div className="relative w-full lg:w-1/2 flex justify-center items-center">
-            <img
-              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-              alt="Hero Character"
-              className="w-[240px] sm:w-[300px] md:w-[340px] z-10"
-            />
-
-            {/* Stat Cards */}
-            {statCards.map((card, index) => {
-              let position = '';
-              if (index === 0) position = 'top-0 left-6';
-              else if (index === 1) position = 'top-2 right-1 sm:top-6 sm:right-2';
-              else if (index === 2) position = 'top-28 left-0';
-              else if (index === 3) position = 'bottom-28 right-2';
-              else if (index === 4) position = 'bottom-0 left-10 sm:bottom-8';
-              else if (index === 5) position = 'bottom-0 right-12';
-
-              return (
-                <div
-                  key={index}
-                  className={`absolute ${position} bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 animate-fade-in-up z-20`}
-                >
-                  <p className="text-gray-600">{card.title}</p>
-                  <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
-                </div>
-              );
-            })}
-
-            {/* Center Dashed Circle */}
-            <div className="absolute w-[280px] h-[280px] border border-dashed border-indigo-300 rounded-full z-0"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* Filter & Search Section */}
-      <section className="py-4 bg-white/50 backdrop-blur-sm">
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder={settings.search_placeholder}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+            আমাদের প্রিমিয়াম ডিজিটাল পণ্যের সাথে আপনার ব্যবসা এবং দক্ষতা উন্নত করুন
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+            <div className="flex items-center text-sm sm:text-base">
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-red-300" />
+              ১০০০+ সন্তুষ্ট গ্রাহক
             </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="ক্যাটেগরি নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">সব ক্যাটেগরি</SelectItem>
-                  <SelectItem value="web">ওয়েব সাবস্ক্রিপশন ({categoryStats.web || 0})</SelectItem>
-                  <SelectItem value="mobile">মোবাইল অ্যাপ ({categoryStats.mobile || 0})</SelectItem>
-                  <SelectItem value="tutorial">টিউটোরিয়াল/কোর্স ({categoryStats.tutorial || 0})</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center text-sm sm:text-base">
+              <Award className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-yellow-300" />
+              বিশ্বস্ত সেবা
+            </div>
+            <div className="flex items-center text-sm sm:text-base">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-yellow-300" />
+              ৫★ রেটিং
             </div>
           </div>
         </div>
       </section>
 
-      {/* Popular Products Section - Enhanced with horizontal scrolling */}
-      {settings.popular_products_enabled && !popularLoading && popularProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50">
-          <div className="container mx-auto px-2 sm:px-4">
-            <HorizontalProductSlider
-              title="জনপ্রিয় পণ্য"
-              subtitle="আমাদের সবচেয়ে জনপ্রিয় এবং বেস্টসেলার পণ্যসমূহ"
-              icon={<Sparkles className="h-8 w-8 text-purple-500" />}
-            >
-              {popularProducts.map((product) => (
-                <PopularProductCard key={product.id} product={product} />
-              ))}
-            </HorizontalProductSlider>
-          </div>
-        </section>
-      )}
-
-      {/* Offer Products Section - Enhanced with horizontal scrolling and countdown */}
-      {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50 relative overflow-hidden">
-          {/* Animated background elements */}
-          <div className="absolute top-0 left-0 w-full h-full opacity-10">
-            <div className="absolute top-10 left-10 w-20 h-20 bg-orange-300 rounded-full animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-16 h-16 bg-red-300 rounded-full animate-bounce"></div>
-            <div className="absolute bottom-10 left-1/3 w-12 h-12 bg-yellow-300 rounded-full animate-ping"></div>
-          </div>
-          
-          <div className="container mx-auto px-2 sm:px-4 relative z-10">
+      <div className="container mx-auto px-4 py-8 sm:py-12 space-y-12 sm:space-y-16">
+        {/* Special Offers Section */}
+        {settings.offer_products_enabled && offerProducts.length > 0 && (
+          <section>
             <HorizontalProductSlider
               title="🔥 বিশেষ অফার"
-              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড় এবং অফার - তাড়াতাড়ি করুন!"
-              icon={
-                <div className="relative">
-                  <Flame className="h-8 w-8 text-orange-500 animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                </div>
-              }
+              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড়ে পান"
+              icon={<Gift className="w-8 h-8 text-orange-500" />}
             >
               {offerProducts.map((product) => (
-                <OfferProductCard key={product.id} product={product} />
+                <CompactOfferCard
+                  key={product.id}
+                  product={product}
+                />
               ))}
             </HorizontalProductSlider>
-            
-            <div className="text-center mt-8 space-y-3">
-              <Badge className="bg-red-500 text-white animate-bounce text-lg px-6 py-2 shadow-lg">
-                ⏰ অফার শীঘ্রই শেষ হবে!
-              </Badge>
-              <div className="flex justify-center items-center gap-4 flex-wrap">
-                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
-                  <span className="text-sm font-medium text-gray-700">🎁 বিনামূল্যে ডেলিভারি</span>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
-                  <span className="text-sm font-medium text-gray-700">⚡ তাৎক্ষণিক সেটআপ</span>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
-                  <span className="text-sm font-medium text-gray-700">🛡️ ১০০% নিরাপদ</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {/* Regular Products Section */}
-      <section className="py-8">
-        <div className="container mx-auto px-2 sm:px-4">
-          {selectedCategory !== 'all' && (
-            <div className="mb-4">
-              <h2 className="text-xl sm:text-2xl font-bold mb-2">{getCategoryLabel(selectedCategory)}</h2>
-              <p className="text-gray-600">{filteredProducts.length} টি পণ্য পাওয়া গেছে</p>
-            </div>
-          )}
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">কোন পণ্য পাওয়া যায়নি।</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
+        {/* Popular Products Section */}
+        {settings.popular_products_enabled && popularProducts.length > 0 && (
+          <section>
+            <HorizontalProductSlider
+              title="⭐ জনপ্রিয় পণ্য"
+              subtitle="আমাদের সবচেয়ে পছন্দের পণ্যসমূহ"
+              icon={<TrendingUp className="w-8 h-8 text-purple-500" />}
+            >
+              {popularProducts.map((product) => (
+                <PopularProductCard
+                  key={product.id}
+                  product={product}
+                />
+              ))}
+            </HorizontalProductSlider>
+          </section>
+        )}
+
+        {/* All Products Section */}
+        <section>
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+              আমাদের সকল পণ্য
+            </h2>
+            <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+              উন্নত মানের ডিজিটাল সমাধান যা আপনার প্রয়োজন মেটাবে
+            </p>
+          </div>
+          
+          {products.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+              {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">কোন পণ্য পাওয়া যায়নি</p>
+            </div>
           )}
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };
