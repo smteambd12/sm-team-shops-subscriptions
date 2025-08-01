@@ -18,19 +18,13 @@ const Cart = () => {
 
   const subtotal = getCartTotal();
 
-  console.log('Cart page render:', {
-    cartItems: items,
-    products: products.length,
-    subtotal,
-    loading
-  });
-
   const handleCheckout = () => {
     if (!user) {
       toast.error('চেকআউট করতে প্রথমে লগইন করুন!');
       navigate('/auth');
       return;
     }
+    // Redirect to dedicated checkout page
     navigate('/checkout');
   };
 
@@ -91,58 +85,25 @@ const Cart = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
+          {/* Cart Items */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">আপনার পণ্যসমূহ ({items.length})</h2>
               
               <div className="space-y-4">
                 {items.map((item) => {
-                  console.log('Rendering cart item:', item);
-                  const product = products.find(p => {
-                    console.log('Comparing product ID:', p.id, 'with cart item productId:', item.productId);
-                    return p.id === item.productId;
-                  });
+                  const product = products.find(p => p.id === item.productId);
                   
                   if (!product) {
-                    console.log('Product not found for cart item:', item);
                     return (
                       <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-red-600 font-medium">পণ্য লোড হচ্ছে...</p>
-                            <p className="text-sm text-red-500">পণ্য ID: {item.productId}</p>
-                            <p className="text-sm text-red-500">প্যাকেজ ID: {item.packageId}</p>
-                            <p className="text-sm text-red-500">পরিমাণ: {item.quantity}</p>
-                          </div>
-                          <button
-                            onClick={() => removeFromCart(item.productId, item.packageId)}
-                            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                          >
-                            সরিয়ে দিন
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  const pkg = product.packages.find(p => p.id === item.packageId);
-                  if (!pkg) {
-                    console.log('Package not found for cart item:', item);
-                    return (
-                      <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-red-600 font-medium">প্যাকেজ খুঁজে পাওয়া যায়নি</p>
-                            <p className="text-sm text-red-500">পণ্য: {product.name}</p>
-                            <p className="text-sm text-red-500">প্যাকেজ ID: {item.packageId}</p>
-                          </div>
-                          <button
-                            onClick={() => removeFromCart(item.productId, item.packageId)}
-                            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                          >
-                            সরিয়ে দিন
-                          </button>
-                        </div>
+                        <p className="text-red-600">পণ্য লোড হচ্ছে... (ID: {item.productId})</p>
+                        <button
+                          onClick={() => removeFromCart(item.productId, item.packageId)}
+                          className="mt-2 text-red-500 hover:text-red-700 text-sm"
+                        >
+                          সরিয়ে দিন
+                        </button>
                       </div>
                     );
                   }
@@ -161,6 +122,7 @@ const Cart = () => {
             </div>
           </div>
 
+          {/* Order Summary */}
           <div className="lg:col-span-1">
             <OrderSummary
               subtotal={subtotal}

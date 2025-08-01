@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Share2, ShoppingCart, Clock, Gift } from 'lucide-react';
@@ -8,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { useOfferProducts } from '@/hooks/useOfferProducts';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
-import OfferCountdown from './OfferCountdown';
 
 const OfferDetailsPage = () => {
   const { slug } = useParams();
@@ -31,17 +29,13 @@ const OfferDetailsPage = () => {
     }
 
     try {
-      // Add all offer items to cart with proper string conversion
+      // Add all offer items to cart
       offer.offer_items.forEach(item => {
-        console.log('Adding offer item to cart:', {
-          productId: String(item.product_id),
-          packageId: String(item.package_id)
-        });
-        addToCart(String(item.product_id), String(item.package_id));
+        addToCart(item.product_id, item.package_id);
       });
 
       toast.success(`${offer.title} কার্টে যোগ করা হয়েছে!`);
-      navigate('/cart');
+      navigate('/checkout');
     } catch (error) {
       console.error('Error adding offer to cart:', error);
       toast.error('কার্টে যোগ করতে সমস্যা হয়েছে');
@@ -94,11 +88,6 @@ const OfferDetailsPage = () => {
           <Button onClick={handleShare} variant="outline" size="icon">
             <Share2 className="w-4 h-4" />
           </Button>
-        </div>
-
-        {/* Countdown Timer */}
-        <div className="mb-6">
-          <OfferCountdown className="max-w-md mx-auto" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
