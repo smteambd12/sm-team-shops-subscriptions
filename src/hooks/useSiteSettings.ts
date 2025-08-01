@@ -13,6 +13,9 @@ interface SiteSettings {
   team_support_whatsapp_link: string;
   team_support_phone_number: string;
   team_support_email: string;
+  popular_products_enabled: boolean;
+  offer_products_enabled: boolean;
+  enable_product_sharing: boolean;
 }
 
 export const useSiteSettings = () => {
@@ -27,6 +30,9 @@ export const useSiteSettings = () => {
     team_support_whatsapp_link: '',
     team_support_phone_number: '',
     team_support_email: '',
+    popular_products_enabled: true,
+    offer_products_enabled: true,
+    enable_product_sharing: true,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +57,10 @@ export const useSiteSettings = () => {
           'team_support_whatsapp_number',
           'team_support_whatsapp_link',
           'team_support_phone_number',
-          'team_support_email'
+          'team_support_email',
+          'popular_products_enabled',
+          'offer_products_enabled',
+          'enable_product_sharing'
         ]);
 
       if (error) throw error;
@@ -72,6 +81,9 @@ export const useSiteSettings = () => {
         team_support_whatsapp_link: settingsMap.team_support_whatsapp_link || '',
         team_support_phone_number: settingsMap.team_support_phone_number || '',
         team_support_email: settingsMap.team_support_email || '',
+        popular_products_enabled: settingsMap.popular_products_enabled === 'true',
+        offer_products_enabled: settingsMap.offer_products_enabled === 'true',
+        enable_product_sharing: settingsMap.enable_product_sharing === 'true',
       });
     } catch (error) {
       console.error('Error fetching settings:', error);

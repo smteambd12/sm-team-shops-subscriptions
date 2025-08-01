@@ -9,6 +9,7 @@ import { Search, Filter, Star, Gift } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { usePopularProducts } from '@/hooks/usePopularProducts';
 import { useOfferProducts } from '@/hooks/useOfferProducts';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const statCards = [
   { title: 'সাপোর্ট টিকিট', value: '1,200+', color: 'text-purple-600' },
@@ -31,6 +32,7 @@ const Home = () => {
   const { products, loading, error } = useProducts();
   const { popularProducts, loading: popularLoading } = usePopularProducts();
   const { offerProducts, loading: offerLoading } = useOfferProducts();
+  const { settings } = useSiteSettings();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const greeting = getGreeting();
@@ -148,7 +150,7 @@ const Home = () => {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="পণ্য খুঁজুন..."
+                placeholder={settings.search_placeholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -172,8 +174,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Products Section */}
-      {!popularLoading && popularProducts.length > 0 && (
+      {/* Popular Products Section - Only show if enabled */}
+      {settings.popular_products_enabled && !popularLoading && popularProducts.length > 0 && (
         <section className="py-8">
           <div className="container mx-auto px-2 sm:px-4">
             <div className="flex items-center gap-2 mb-6">
@@ -189,8 +191,8 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section */}
-      {!offerLoading && offerProducts.length > 0 && (
+      {/* Offer Products Section - Only show if enabled */}
+      {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
         <section className="py-8 bg-gradient-to-r from-orange-100 to-yellow-100">
           <div className="container mx-auto px-2 sm:px-4">
             <div className="flex items-center gap-2 mb-6">
