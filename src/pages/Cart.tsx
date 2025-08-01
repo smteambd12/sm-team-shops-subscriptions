@@ -36,6 +36,9 @@ const Cart = () => {
     setAppliedPromo(null);
   };
 
+  console.log('Cart items:', items);
+  console.log('Products:', products);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-6 sm:py-12">
@@ -92,12 +95,14 @@ const Cart = () => {
               
               <div className="space-y-4">
                 {items.map((item) => {
+                  console.log('Processing cart item:', item);
                   const product = products.find(p => p.id === item.productId);
+                  console.log('Found product for cart item:', product);
                   
                   if (!product) {
                     return (
                       <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <p className="text-red-600">পণ্য লোড হচ্ছে... (ID: {item.productId})</p>
+                        <p className="text-red-600">পণ্য লোড হচ্ছে... (ID: {String(item.productId)})</p>
                         <button
                           onClick={() => removeFromCart(item.productId, item.packageId)}
                           className="mt-2 text-red-500 hover:text-red-700 text-sm"
