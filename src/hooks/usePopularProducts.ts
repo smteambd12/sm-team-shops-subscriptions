@@ -33,7 +33,13 @@ export const usePopularProducts = () => {
         throw error;
       }
 
-      setPopularProducts(data || []);
+      // Type assertion to ensure the data conforms to our PopularProduct interface
+      const typedData = (data || []).map(item => ({
+        ...item,
+        media_type: item.media_type as 'image' | 'video'
+      })) as PopularProduct[];
+
+      setPopularProducts(typedData);
     } catch (error) {
       console.error('Error fetching popular products:', error);
       setError('পপুলার পণ্য লোড করতে সমস্যা হয়েছে');
