@@ -192,13 +192,20 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section - Enhanced with horizontal scrolling */}
+      {/* Offer Products Section - Enhanced with horizontal scrolling and countdown */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
-          <div className="container mx-auto px-2 sm:px-4">
+        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50 relative overflow-hidden">
+          {/* Animated background elements */}
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute top-10 left-10 w-20 h-20 bg-orange-300 rounded-full animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-16 h-16 bg-red-300 rounded-full animate-bounce"></div>
+            <div className="absolute bottom-10 left-1/3 w-12 h-12 bg-yellow-300 rounded-full animate-ping"></div>
+          </div>
+          
+          <div className="container mx-auto px-2 sm:px-4 relative z-10">
             <HorizontalProductSlider
-              title="বিশেষ অফার"
-              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড় এবং অফার"
+              title="🔥 বিশেষ অফার"
+              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড় এবং অফার - তাড়াতাড়ি করুন!"
               icon={
                 <div className="relative">
                   <Flame className="h-8 w-8 text-orange-500 animate-pulse" />
@@ -211,10 +218,21 @@ const Home = () => {
               ))}
             </HorizontalProductSlider>
             
-            <div className="text-center mt-6">
-              <Badge className="bg-red-500 text-white animate-bounce text-lg px-6 py-2">
+            <div className="text-center mt-8 space-y-3">
+              <Badge className="bg-red-500 text-white animate-bounce text-lg px-6 py-2 shadow-lg">
                 ⏰ অফার শীঘ্রই শেষ হবে!
               </Badge>
+              <div className="flex justify-center items-center gap-4 flex-wrap">
+                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                  <span className="text-sm font-medium text-gray-700">🎁 বিনামূল্যে ডেলিভারি</span>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                  <span className="text-sm font-medium text-gray-700">⚡ তাৎক্ষণিক সেটআপ</span>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                  <span className="text-sm font-medium text-gray-700">🛡️ ১০০% নিরাপদ</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>

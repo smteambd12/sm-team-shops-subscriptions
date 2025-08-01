@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +8,7 @@ import { OfferProduct } from '@/types/popularProducts';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
+import OfferCountdown from './OfferCountdown';
 
 interface OfferProductCardProps {
   product: OfferProduct;
@@ -35,17 +37,21 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
     }
 
     try {
-      // Add all offer items to cart
+      // Add all offer items to cart with proper string conversion
       product.offer_items.forEach(item => {
-        addToCart(item.product_id, item.package_id);
+        console.log('Adding offer item to cart:', {
+          productId: String(item.product_id),
+          packageId: String(item.package_id)
+        });
+        addToCart(String(item.product_id), String(item.package_id));
       });
 
       toast.success(`${product.title} কার্টে যোগ করা হয়েছে!`);
       
-      // Navigate to checkout after a short delay
+      // Navigate to cart instead of checkout for better UX
       setTimeout(() => {
-        navigate('/checkout');
-      }, 1000);
+        navigate('/cart');
+      }, 500);
     } catch (error) {
       console.error('Error adding offer to cart:', error);
       toast.error('কার্টে যোগ করতে সমস্যা হয়েছে');
@@ -68,27 +74,32 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
 
   return (
     <Card 
-      className="group cursor-pointer hover:shadow-2xl transition-all duration-500 border-2 border-gradient-to-r from-orange-200 via-red-200 to-yellow-200 bg-gradient-to-br from-orange-50 via-red-50/30 to-yellow-50 backdrop-blur-sm min-w-[320px] transform hover:scale-105 relative overflow-hidden"
+      className="group cursor-pointer hover:shadow-2xl transition-all duration-500 border-2 border-gradient-to-r from-orange-200 via-red-200 to-yellow-200 bg-gradient-to-br from-orange-50 via-red-50/30 to-yellow-50 backdrop-blur-sm min-w-[320px] max-w-[350px] transform hover:scale-105 relative overflow-hidden"
       onClick={handleViewOffer}
     >
       {/* Animated background effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       
       <CardContent className="p-0 relative z-10">
-        <div className="relative overflow-hidden rounded-t-lg">
+        {/* Countdown Timer */}
+        <div className="absolute top-0 left-0 right-0 z-20">
+          <OfferCountdown className="rounded-t-lg rounded-b-none" />
+        </div>
+
+        <div className="relative overflow-hidden rounded-t-lg mt-12">
           {product.image_url ? (
             <div className="relative">
               <img
                 src={product.image_url}
                 alt={product.title}
-                className="w-full h-56 object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+                className="w-full h-48 object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
             </div>
           ) : (
-            <div className="w-full h-56 bg-gradient-to-r from-orange-300 via-red-300 to-yellow-300 flex items-center justify-center relative overflow-hidden">
+            <div className="w-full h-48 bg-gradient-to-r from-orange-300 via-red-300 to-yellow-300 flex items-center justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-yellow-400/20 animate-pulse"></div>
-              <Gift className="w-20 h-20 text-orange-600 z-10 animate-bounce" />
+              <Gift className="w-16 h-16 text-orange-600 z-10 animate-bounce" />
             </div>
           )}
           
@@ -120,9 +131,9 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
           </div>
         </div>
         
-        <div className="p-6">
+        <div className="p-5">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="font-bold text-xl text-gray-900 line-clamp-2 leading-tight group-hover:text-orange-700 transition-colors flex-1">
+            <h3 className="font-bold text-lg text-gray-900 line-clamp-2 leading-tight group-hover:text-orange-700 transition-colors flex-1">
               {product.title}
             </h3>
             <div className="flex items-center gap-1 ml-3">
@@ -150,14 +161,14 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
                 </div>
               )}
               {product.offer_price && (
-                <span className="text-2xl font-bold text-green-600">
+                <span className="text-xl font-bold text-green-600">
                   ৳{product.offer_price}
                 </span>
               )}
             </div>
             {discountAmount > 0 && (
               <div className="text-center">
-                <Badge variant="outline" className="text-green-600 border-green-600 mb-1">
+                <Badge variant="outline" className="text-green-600 border-green-600 mb-1 text-xs">
                   ৳{discountAmount} সাশ্রয়
                 </Badge>
               </div>
@@ -169,7 +180,7 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
             <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-blue-700 font-medium">
-                  🎁 এই অফারে {product.offer_items.length} টি পণ্য রয়েছে
+                  🎁 {product.offer_items.length} টি পণ্য রয়েছে
                 </span>
                 <span className="text-blue-600">
                   মোট: {product.offer_items.reduce((sum, item) => sum + item.quantity, 0)} পিস
@@ -179,10 +190,10 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
           )}
           
           <Button 
-            className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 py-6 text-lg font-bold"
+            className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 py-5 text-base font-bold"
             onClick={handleBuyNow}
           >
-            <ShoppingCart className="w-5 h-5 mr-2" />
+            <ShoppingCart className="w-4 h-4 mr-2" />
             এখনই কিনুন
           </Button>
 
