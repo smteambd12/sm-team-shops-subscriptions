@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import PopularProductCard from '@/components/PopularProductCard';
-import OfferProductCard from '@/components/OfferProductCard';
+import SimpleOfferCard from '@/components/SimpleOfferCard';
 import HorizontalProductSlider from '@/components/HorizontalProductSlider';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -193,9 +193,9 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section - Enhanced with countdown timer */}
+      {/* Offer Products Section - Updated to use SimpleOfferCard */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50 border-y-4 border-orange-200">
+        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
             {/* Header with countdown timer */}
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
@@ -209,7 +209,7 @@ const Home = () => {
                     বিশেষ অফার
                   </h2>
                   <p className="text-gray-600 mt-1">
-                    সীমিত সময়ের জন্য বিশেষ ছাড়ে বিগ বান্ডেল
+                    সীমিত সময়ের জন্য বিশেষ ছাড়
                   </p>
                 </div>
               </div>
@@ -218,10 +218,10 @@ const Home = () => {
               <CountdownTimer />
             </div>
 
-            {/* Offer Cards */}
-            <div className="flex overflow-x-auto gap-6 pb-4 scrollbar-hide">
+            {/* Offer Cards - Now using SimpleOfferCard */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {offerProducts.map((product) => (
-                <OfferProductCard key={product.id} product={product} />
+                <SimpleOfferCard key={product.id} product={product} />
               ))}
             </div>
             
