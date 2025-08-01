@@ -11,6 +11,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { usePopularProducts } from '@/hooks/usePopularProducts';
 import { useOfferProducts } from '@/hooks/useOfferProducts';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import CountdownTimer from '@/components/CountdownTimer';
 
 const statCards = [
   { title: 'সাপোর্ট টিকিট', value: '1,200+', color: 'text-purple-600' },
@@ -192,30 +193,47 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section - Enhanced with horizontal scrolling and smaller size */}
+      {/* Offer Products Section - Enhanced with countdown timer */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-6 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
+        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50 border-y-4 border-orange-200">
           <div className="container mx-auto px-2 sm:px-4">
-            <HorizontalProductSlider
-              title="বিশেষ অফার"
-              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড়"
-              isOfferSection={true}
-              icon={
+            {/* Header with countdown timer */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
+              <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Flame className="h-6 w-6 text-orange-500 animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                  <Flame className="h-8 w-8 text-orange-500 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                 </div>
-              }
-            >
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    বিশেষ অফার
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    সীমিত সময়ের জন্য বিশেষ ছাড়ে বিগ বান্ডেল
+                  </p>
+                </div>
+              </div>
+              
+              {/* Countdown Timer */}
+              <CountdownTimer />
+            </div>
+
+            {/* Offer Cards */}
+            <div className="flex overflow-x-auto gap-6 pb-4 scrollbar-hide">
               {offerProducts.map((product) => (
                 <OfferProductCard key={product.id} product={product} />
               ))}
-            </HorizontalProductSlider>
+            </div>
             
-            <div className="text-center mt-4">
-              <Badge className="bg-red-500 text-white animate-bounce px-4 py-1">
-                ⏰ অফার শীঘ্রই শেষ হবে!
-              </Badge>
+            <div className="text-center mt-6">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                <Badge className="bg-red-500 text-white animate-bounce px-6 py-2 text-sm">
+                  ⏰ অফার শীঘ্রই শেষ হবে!
+                </Badge>
+                <Badge className="bg-green-600 text-white px-6 py-2 text-sm">
+                  🚀 ১০০+ কাস্টমার এই অফার নিয়েছেন
+                </Badge>
+              </div>
             </div>
           </div>
         </section>

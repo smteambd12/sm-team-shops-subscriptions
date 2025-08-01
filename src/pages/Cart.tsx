@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft } from 'lucide-react';
@@ -38,6 +37,7 @@ const Cart = () => {
 
   console.log('Cart items:', items);
   console.log('Available products:', products);
+  console.log('Cart total:', subtotal);
 
   if (loading) {
     return (
@@ -97,19 +97,22 @@ const Cart = () => {
                 {items.map((item) => {
                   const product = products.find(p => p.id === item.productId);
                   
-                  console.log('Looking for product:', item.productId);
-                  console.log('Found product:', product);
+                  console.log('Processing cart item:', { 
+                    itemId: `${item.productId}-${item.packageId}`,
+                    productFound: !!product,
+                    productName: product?.name
+                  });
                   
                   if (!product) {
                     return (
                       <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <p className="text-red-600">পণ্য লোড হচ্ছে... (ID: {item.productId})</p>
-                        <p className="text-sm text-gray-600">Package ID: {item.packageId}</p>
+                        <p className="text-red-600 mb-2">পণ্যটি লোড করা যাচ্ছে না (ID: {item.productId})</p>
+                        <p className="text-sm text-gray-600 mb-2">Package ID: {item.packageId}</p>
                         <button
                           onClick={() => removeFromCart(item.productId, item.packageId)}
-                          className="mt-2 text-red-500 hover:text-red-700 text-sm"
+                          className="text-red-500 hover:text-red-700 text-sm bg-white px-3 py-1 rounded border"
                         >
-                          সরিয়ে দিন
+                          কার্ট থেকে সরান
                         </button>
                       </div>
                     );
@@ -117,18 +120,16 @@ const Cart = () => {
 
                   const packageInfo = product.packages.find(pkg => pkg.id === item.packageId);
                   
-                  console.log('Package info:', packageInfo);
-                  
                   if (!packageInfo) {
                     return (
                       <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
-                        <p className="text-yellow-700">প্যাকেজ তথ্য পাওয়া যাচ্ছে না</p>
-                        <p className="text-sm">{product.name} - Package ID: {item.packageId}</p>
+                        <p className="text-yellow-700 mb-2">প্যাকেজ তথ্য পাওয়া যাচ্ছে না</p>
+                        <p className="text-sm mb-2">{product.name} - Package ID: {item.packageId}</p>
                         <button
                           onClick={() => removeFromCart(item.productId, item.packageId)}
-                          className="mt-2 text-red-500 hover:text-red-700 text-sm"
+                          className="text-red-500 hover:text-red-700 text-sm bg-white px-3 py-1 rounded border"
                         >
-                          সরিয়ে দিন
+                          কার্ট থেকে সরান
                         </button>
                       </div>
                     );

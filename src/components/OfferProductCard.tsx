@@ -3,11 +3,10 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, Gift, ShoppingCart, Clock, Star, Play } from 'lucide-react';
+import { ShoppingCart, Gift, Star, Package, Check } from 'lucide-react';
 import { OfferProduct } from '@/types/popularProducts';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
-import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 
 interface OfferProductCardProps {
@@ -16,23 +15,13 @@ interface OfferProductCardProps {
 
 const OfferProductCard = ({ product }: OfferProductCardProps) => {
   const { addToCart } = useCart();
-  const navigate = useNavigate();
   const { products } = useProducts();
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (product.shareable_slug) {
-      const shareUrl = `${window.location.origin}/#/offer/${product.shareable_slug}`;
-      navigator.clipboard.writeText(shareUrl);
-      toast.success('অফার লিঙ্ক কপি হয়েছে!');
-    }
-  };
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     
-    console.log('Offer product clicked:', product);
-    console.log('Offer items:', product.offer_items);
+    console.log('Adding offer to cart:', product);
     
     // Check if offer has items
     if (!product.offer_items || product.offer_items.length === 0) {
@@ -40,12 +29,18 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
       return;
     }
 
-    try {
-      // Add all offer items to cart using proper product and package IDs
-      product.offer_items.forEach(item => {
+    let addedItems = 0;
+    let totalItems = 0;
+
+    // Add all offer items to cart
+    product.offer_items.forEach(item => {
+      totalItems += item.quantity;
+      
+      for (let i = 0; i < item.quantity; i++) {
         console.log('Adding to cart:', {
           productId: item.product_id,
-          packageId: item.package_id
+          packageId: item.package_id,
+          quantity: 1
         });
         
         // Find the actual product to verify it exists
@@ -54,189 +49,182 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
           const actualPackage = actualProduct.packages.find(pkg => pkg.id === item.package_id);
           if (actualPackage) {
             addToCart(item.product_id, item.package_id);
-            console.log('Successfully added to cart:', {
-              productName: actualProduct.name,
-              packageDuration: actualPackage.duration,
-              price: actualPackage.price
-            });
+            addedItems++;
+            console.log(`Added: ${actualProduct.name} - ${actualPackage.duration} - ৳${actualPackage.price}`);
           } else {
             console.error('Package not found:', item.package_id);
-            toast.error(`প্যাকেজ খুঁজে পাওয়া যায়নি: ${item.package_id}`);
+            toast.error(`প্যাকেজ খুঁজে পাওয়া যায়নি`);
           }
         } else {
           console.error('Product not found:', item.product_id);
-          toast.error(`পণ্য খুঁজে পাওয়া যায়নি: ${item.product_id}`);
+          toast.error(`পণ্য খুঁজে পাওয়া যায়নি`);
         }
-      });
+      }
+    });
 
-      toast.success(`${product.title} কার্টে যোগ করা হয়েছে!`);
-      
-      // Navigate to checkout after a short delay
-      setTimeout(() => {
-        navigate('/checkout');
-      }, 1000);
-    } catch (error) {
-      console.error('Error adding offer to cart:', error);
-      toast.error('কার্টে যোগ করতে সমস্যা হয়েছে');
+    if (addedItems > 0) {
+      toast.success(`🎉 ${product.title} কার্টে যোগ করা হয়েছে! (${addedItems} টি পণ্য)`);
     }
   };
 
-  const handleViewOffer = () => {
-    if (product.shareable_slug) {
-      navigate(`/offer/${product.shareable_slug}`);
+  // Calculate what products are included
+  const includedProducts = product.offer_items?.map(item => {
+    const actualProduct = products.find(p => p.id === item.product_id);
+    const actualPackage = actualProduct?.packages.find(pkg => pkg.id === item.package_id);
+    return {
+      name: actualProduct?.name || 'পণ্য',
+      duration: actualPackage?.duration || '',
+      price: actualPackage?.price || 0,
+      originalPrice: actualPackage?.originalPrice || 0,
+      quantity: item.quantity
+    };
+  }) || [];
+
+  const getDurationText = (duration: string) => {
+    switch (duration) {
+      case '1month': return '১ মাস';
+      case '3month': return '৩ মাস';
+      case '6month': return '৬ মাস';
+      case 'lifetime': return 'লাইফটাইম';
+      default: return duration;
     }
   };
 
-  const discountAmount = product.original_price && product.offer_price 
-    ? product.original_price - product.offer_price 
-    : 0;
-
-  const savings = product.original_price && product.offer_price
-    ? Math.round(((product.original_price - product.offer_price) / product.original_price) * 100)
-    : 0;
-
-  // Check if the media URL is a video
-  const isVideo = product.image_url && (
-    product.image_url.includes('.mp4') || 
-    product.image_url.includes('.webm') || 
-    product.image_url.includes('.ogg') ||
-    product.image_url.includes('video')
+  const totalOriginalPrice = includedProducts.reduce((sum, item) => 
+    sum + (item.originalPrice * item.quantity), 0
   );
 
+  const actualOfferPrice = product.offer_price || 0;
+  const savings = totalOriginalPrice - actualOfferPrice;
+
   return (
-    <Card 
-      className="group cursor-pointer hover:shadow-lg transition-all duration-300 border border-orange-200 bg-gradient-to-br from-orange-50/50 to-yellow-50/50 backdrop-blur-sm min-w-[280px] max-w-[280px] transform hover:scale-102 relative overflow-hidden"
-      onClick={handleViewOffer}
-    >
+    <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 border-2 border-orange-300 bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50 backdrop-blur-sm min-w-[320px] max-w-[320px] transform hover:scale-105 relative overflow-hidden">
       <CardContent className="p-0 relative">
-        <div className="relative overflow-hidden rounded-t-lg">
-          {product.image_url ? (
-            <div className="relative">
-              {isVideo ? (
-                <div className="relative w-full h-40">
-                  <video
-                    src={product.image_url}
-                    className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                  <div className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full">
-                    <Play className="w-3 h-3" />
-                  </div>
-                </div>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={product.image_url}
-                    alt={product.title}
-                    className="w-full h-40 object-cover transition-all duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="w-full h-40 bg-gradient-to-r from-orange-300 via-red-300 to-yellow-300 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-yellow-400/20 animate-pulse"></div>
-              <Gift className="w-16 h-16 text-orange-600 z-10" />
-            </div>
-          )}
-          
-          <div className="absolute top-2 left-2 flex gap-1">
-            <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md animate-pulse border-0 text-xs px-2 py-1">
+        {/* Header with discount badge */}
+        <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 p-4">
+          <div className="absolute top-2 left-2">
+            <Badge className="bg-red-600 text-white shadow-lg animate-bounce border-0 text-sm px-3 py-1 font-bold">
               🔥 {product.discount_percentage}% ছাড়
             </Badge>
           </div>
-          
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
-            {product.shareable_slug && (
-              <button
-                onClick={handleShare}
-                className="w-8 h-8 bg-white/95 rounded-full flex items-center justify-center hover:bg-white transition-all duration-300 shadow-md transform hover:scale-110"
-              >
-                <Share2 className="w-3 h-3 text-orange-600" />
-              </button>
-            )}
+          <div className="absolute top-2 right-2">
+            <Badge className="bg-green-600 text-white shadow-lg border-0 text-xs px-2 py-1">
+              বিশেষ অফার
+            </Badge>
           </div>
-
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
-            <Clock className="w-3 h-3" />
-            <span>সীমিত সময়</span>
+          <div className="text-center mt-6 mb-2">
+            <Gift className="w-12 h-12 text-white mx-auto mb-2" />
+            <h3 className="text-xl font-bold text-white drop-shadow-lg">
+              বিগ বান্ডেল অফার
+            </h3>
           </div>
         </div>
-        
-        <div className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-bold text-base text-gray-900 line-clamp-2 leading-tight group-hover:text-orange-700 transition-colors flex-1">
+
+        <div className="p-4 space-y-4">
+          {/* Offer Title */}
+          <div className="text-center">
+            <h4 className="text-lg font-bold text-gray-900 mb-2">
               {product.title}
-            </h3>
-            <div className="flex items-center gap-1 ml-2">
-              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-            </div>
-          </div>
-          
-          {product.description && (
-            <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-              {product.description}
-            </p>
-          )}
-          
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex flex-col">
-              {product.original_price && (
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-gray-500 line-through">
-                    ৳{product.original_price}
-                  </span>
-                  <Badge variant="outline" className="text-red-600 border-red-600 text-xs px-1">
-                    -{product.discount_percentage}%
-                  </Badge>
-                </div>
-              )}
-              {product.offer_price && (
-                <span className="text-lg font-bold text-green-600">
-                  ৳{product.offer_price}
-                </span>
-              )}
-            </div>
-            {discountAmount > 0 && (
-              <div className="text-center">
-                <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
-                  ৳{discountAmount} সাশ্রয়
-                </Badge>
-              </div>
+            </h4>
+            {product.description && (
+              <p className="text-sm text-gray-600">
+                {product.description}
+              </p>
             )}
           </div>
 
-          {/* Offer items count */}
-          {product.offer_items && product.offer_items.length > 0 && (
-            <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-blue-700 font-medium">
-                  🎁 {product.offer_items.length} পণ্য
+          {/* Included Products */}
+          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Package className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-blue-800 text-sm">
+                এই অফারে যা পাবেন:
+              </span>
+            </div>
+            <div className="space-y-2">
+              {includedProducts.map((item, index) => (
+                <div key={index} className="flex items-center justify-between bg-white rounded p-2 border">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3 h-3 text-green-600" />
+                    <div>
+                      <span className="text-sm font-medium text-gray-800">
+                        {item.name}
+                      </span>
+                      <div className="text-xs text-gray-600">
+                        {getDurationText(item.duration)} • {item.quantity} টি
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500 line-through">
+                      ৳{item.originalPrice * item.quantity}
+                    </div>
+                    <div className="text-sm font-bold text-green-600">
+                      এখন ফ্রি!
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pricing */}
+          <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-lg text-gray-500 line-through">
+                  ৳{totalOriginalPrice}
                 </span>
-                <span className="text-blue-600">
-                  {product.offer_items.reduce((sum, item) => sum + item.quantity, 0)} পিস
-                </span>
+                <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
+                  -{product.discount_percentage}%
+                </Badge>
+              </div>
+              <div className="text-3xl font-bold text-green-600">
+                ৳{actualOfferPrice}
+              </div>
+              <div className="text-sm text-gray-600">
+                💰 আপনি সাশ্রয় করবেন: <span className="font-bold text-orange-600">৳{savings}</span>
               </div>
             </div>
-          )}
-          
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-purple-50 rounded-lg p-2 text-center border border-purple-200">
+              <div className="text-lg font-bold text-purple-600">
+                {includedProducts.length}
+              </div>
+              <div className="text-xs text-purple-600">ভিন্ন পণ্য</div>
+            </div>
+            <div className="bg-indigo-50 rounded-lg p-2 text-center border border-indigo-200">
+              <div className="text-lg font-bold text-indigo-600">
+                {includedProducts.reduce((sum, item) => sum + item.quantity, 0)}
+              </div>
+              <div className="text-xs text-indigo-600">মোট পিস</div>
+            </div>
+          </div>
+
+          {/* Buy Button */}
           <Button 
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 py-2 text-sm font-bold"
             onClick={handleBuyNow}
+            className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 py-3 text-base font-bold"
           >
-            <ShoppingCart className="w-4 h-4 mr-1" />
-            এখনই কিনুন
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            কার্টে যোগ করুন - ৳{actualOfferPrice}
           </Button>
 
-          <div className="mt-2 text-center">
-            <p className="text-xs text-gray-500">
-              🚀 তাৎক্ষণিক ডেলিভারি • ✅ নিরাপদ
-            </p>
+          {/* Features */}
+          <div className="text-center bg-gray-50 rounded-lg p-2">
+            <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-500" />
+                <span>তাৎক্ষণিক ডেলিভারি</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Check className="w-3 h-3 text-green-500" />
+                <span>১০০% নিরাপদ</span>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>

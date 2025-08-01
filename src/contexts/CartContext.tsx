@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem } from '../types';
 import { useProducts } from '../hooks/useProducts';
@@ -30,21 +29,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      setItems(JSON.parse(savedCart));
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setItems(parsedCart);
+        console.log('Loaded cart from localStorage:', parsedCart);
+      } catch (error) {
+        console.error('Error parsing saved cart:', error);
+        setItems([]);
+      }
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
+    console.log('Saved cart to localStorage:', items);
   }, [items]);
 
   const addToCart = (productId: string, packageId: string) => {
+    console.log('Adding to cart:', { productId, packageId });
+    
     setItems(prev => {
       const existingItem = prev.find(item => 
         item.productId === productId && item.packageId === packageId
       );
       
       if (existingItem) {
+        console.log('Item already exists, updating quantity');
         return prev.map(item =>
           item.productId === productId && item.packageId === packageId
             ? { ...item, quantity: item.quantity + 1 }
@@ -52,7 +62,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       }
       
-      return [...prev, { productId, packageId, quantity: 1 }];
+      console.log('Adding new item to cart');
+      const newItem = { productId, packageId, quantity: 1 };
+      return [...prev, newItem];
     });
   };
 
@@ -80,11 +92,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const getCartTotal = () => {
-    return items.reduce((total, item) => {
+    const total = items.reduce((sum, item) => {
       const product = products.find(p => p.id === item.productId);
       const pkg = product?.packages.find(p => p.id === item.packageId);
-      return total + (pkg?.price || 0) * item.quantity;
+      const itemTotal = (pkg?.price || 0) * item.quantity;
+      console.log(`Item ${item.productId}-${item.packageId}: ৳${pkg?.price} x ${item.quantity} = ৳${itemTotal}`);
+      return sum + itemTotal;
     }, 0);
+    
+    console.log('Cart total:', total);
+    return total;
   };
 
   const getCartItemsCount = () => {
