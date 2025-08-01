@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
+import PopularProductCard from '@/components/PopularProductCard';
+import OfferProductCard from '@/components/OfferProductCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Star, Gift } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
+import { usePopularProducts } from '@/hooks/usePopularProducts';
+import { useOfferProducts } from '@/hooks/useOfferProducts';
 
 const statCards = [
   { title: 'সাপোর্ট টিকিট', value: '1,200+', color: 'text-purple-600' },
@@ -25,6 +29,8 @@ const getGreeting = () => {
 
 const Home = () => {
   const { products, loading, error } = useProducts();
+  const { popularProducts, loading: popularLoading } = usePopularProducts();
+  const { offerProducts, loading: offerLoading } = useOfferProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const greeting = getGreeting();
@@ -75,71 +81,70 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-{/* Hero Section */}
-<section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
-  <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
-    
-    {/* Left Text */}
-    <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
-      <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
-        <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
-        <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
-          ডিজিটাল সেবা সহজ করে
-        </span>
-      </h1>
-      <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
-        আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
-        <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, 
-        <span className="font-semibold text-pink-600">গতি</span> এবং 
-        <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
-      </p>
-      <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
-        <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
-        <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
-        <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
-      </div>
-    </div>
-
-    {/* Right Image with Stat Cards */}
-    <div className="relative w-full lg:w-1/2 flex justify-center items-center">
-      <img
-        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
-        alt="Hero Character"
-        className="w-[240px] sm:w-[300px] md:w-[340px] z-10"
-      />
-
-      {/* Stat Cards */}
-      {statCards.map((card, index) => {
-        let position = '';
-        if (index === 0) position = 'top-0 left-6';
-        else if (index === 1) position = 'top-2 right-1 sm:top-6 sm:right-2';
-        else if (index === 2) position = 'top-28 left-0';
-        else if (index === 3) position = 'bottom-28 right-2';
-        else if (index === 4) position = 'bottom-0 left-10 sm:bottom-8';
-        else if (index === 5) position = 'bottom-0 right-12';
-
-        return (
-          <div
-            key={index}
-            className={`absolute ${position} bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 animate-fade-in-up z-20`}
-          >
-            <p className="text-gray-600">{card.title}</p>
-            <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-[#f8f9ff] pt-6 pb-8 sm:pt-8 sm:pb-10">
+        <div className="container mx-auto px-4 flex flex-col lg:flex-row justify-between items-center relative z-10">
+          
+          {/* Left Text */}
+          <div className="max-w-xl text-center lg:text-left mb-10 lg:mb-0 space-y-4">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-snug tracking-wide space-y-1 sm:space-y-2">
+              <span className="block text-indigo-600 drop-shadow-lg animate-pulse">{greeting}</span>
+              <span className="block text-xl sm:text-3xl text-blue-700 font-bold underline decoration-indigo-400 decoration-2">
+                ডিজিটাল সেবা সহজ করে
+              </span>
+            </h1>
+            <p className="text-gray-700 text-sm sm:text-base leading-snug sm:leading-relaxed">
+              আমরা বিশ্বাস করি আপনার ডিজিটাল প্রয়োজনে 
+              <span className="font-semibold text-indigo-600">বিশ্বাসযোগ্যতা</span>, 
+              <span className="font-semibold text-pink-600">গতি</span> এবং 
+              <span className="font-semibold text-green-600">মূল্য</span> – সবকিছু একসাথে দরকার।
+            </p>
+            <div className="flex flex-wrap mt-3 gap-2 justify-center lg:justify-start">
+              <Badge variant="secondary">৫০% পর্যন্ত ছাড়</Badge>
+              <Badge variant="secondary">তাৎক্ষণিক ডেলিভারি</Badge>
+              <Badge variant="secondary">২৪/৭ সাপোর্ট</Badge>
+            </div>
           </div>
-        );
-      })}
 
-      {/* Center Dashed Circle */}
-      <div className="absolute w-[280px] h-[280px] border border-dashed border-indigo-300 rounded-full z-0"></div>
-    </div>
-  </div>
-</section>
+          {/* Right Image with Stat Cards */}
+          <div className="relative w-full lg:w-1/2 flex justify-center items-center">
+            <img
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFaskoHaK271IdQpGdmPhPDA1TK7U69kmczdhp-BTugHt5eQPkc5MODaM0rfsIdCnMQ3LyG2zoTJiq_LLJKo6i4soD67m1L9eB4IxyhLlcJ_gBFgMFbWfjYC07WhWjaXrXsPPZLb-x_oPYs8oh6PEp1_4e34Jo_QgGF3hk8Rh4fTCRjSO_pD1_2eaXEljm/s1600/Untitled%20design%20%2830%29.png"
+              alt="Hero Character"
+              className="w-[240px] sm:w-[300px] md:w-[340px] z-10"
+            />
 
-      {/* Product Section Same as Before */}
-      <section className="py-8 sm:py-16">
+            {/* Stat Cards */}
+            {statCards.map((card, index) => {
+              let position = '';
+              if (index === 0) position = 'top-0 left-6';
+              else if (index === 1) position = 'top-2 right-1 sm:top-6 sm:right-2';
+              else if (index === 2) position = 'top-28 left-0';
+              else if (index === 3) position = 'bottom-28 right-2';
+              else if (index === 4) position = 'bottom-0 left-10 sm:bottom-8';
+              else if (index === 5) position = 'bottom-0 right-12';
+
+              return (
+                <div
+                  key={index}
+                  className={`absolute ${position} bg-white shadow-md border rounded-lg px-3 py-2 text-sm font-medium transform transition-all duration-500 hover:scale-105 animate-fade-in-up z-20`}
+                >
+                  <p className="text-gray-600">{card.title}</p>
+                  <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
+                </div>
+              );
+            })}
+
+            {/* Center Dashed Circle */}
+            <div className="absolute w-[280px] h-[280px] border border-dashed border-indigo-300 rounded-full z-0"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Filter & Search Section */}
+      <section className="py-4 bg-white/50 backdrop-blur-sm">
         <div className="container mx-auto px-2 sm:px-4">
-          {/* Filter & Search */}
-          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4 mb-6">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -164,8 +169,47 @@ const Home = () => {
               </Select>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Products */}
+      {/* Popular Products Section */}
+      {!popularLoading && popularProducts.length > 0 && (
+        <section className="py-8">
+          <div className="container mx-auto px-2 sm:px-4">
+            <div className="flex items-center gap-2 mb-6">
+              <Star className="h-6 w-6 text-yellow-500" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">জনপ্রিয় পণ্য</h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {popularProducts.map((product) => (
+                <PopularProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Offer Products Section */}
+      {!offerLoading && offerProducts.length > 0 && (
+        <section className="py-8 bg-gradient-to-r from-orange-100 to-yellow-100">
+          <div className="container mx-auto px-2 sm:px-4">
+            <div className="flex items-center gap-2 mb-6">
+              <Gift className="h-6 w-6 text-orange-500" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">বিশেষ অফার</h2>
+              <Badge className="bg-red-500 text-white animate-pulse">সীমিত সময়</Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {offerProducts.map((product) => (
+                <OfferProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Regular Products Section */}
+      <section className="py-8">
+        <div className="container mx-auto px-2 sm:px-4">
           {selectedCategory !== 'all' && (
             <div className="mb-4">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">{getCategoryLabel(selectedCategory)}</h2>
