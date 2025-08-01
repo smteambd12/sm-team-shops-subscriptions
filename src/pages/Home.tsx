@@ -175,7 +175,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Products Section - Enhanced with horizontal scrolling */}
+      {/* Popular Products Section */}
       {settings.popular_products_enabled && !popularLoading && popularProducts.length > 0 && (
         <section className="py-8 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50">
           <div className="container mx-auto px-2 sm:px-4">
@@ -192,17 +192,18 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section - Enhanced with horizontal scrolling */}
+      {/* Offer Products Section - Enhanced with horizontal scrolling and smaller size */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
+        <section className="py-6 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
             <HorizontalProductSlider
               title="বিশেষ অফার"
-              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড় এবং অফার"
+              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড়"
+              isOfferSection={true}
               icon={
                 <div className="relative">
-                  <Flame className="h-8 w-8 text-orange-500 animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                  <Flame className="h-6 w-6 text-orange-500 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
                 </div>
               }
             >
@@ -211,8 +212,8 @@ const Home = () => {
               ))}
             </HorizontalProductSlider>
             
-            <div className="text-center mt-6">
-              <Badge className="bg-red-500 text-white animate-bounce text-lg px-6 py-2">
+            <div className="text-center mt-4">
+              <Badge className="bg-red-500 text-white animate-bounce px-4 py-1">
                 ⏰ অফার শীঘ্রই শেষ হবে!
               </Badge>
             </div>

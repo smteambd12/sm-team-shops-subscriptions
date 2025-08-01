@@ -1,11 +1,13 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, ShoppingCart, Clock, Gift } from 'lucide-react';
+import { ArrowLeft, Share2, ShoppingCart, Clock, Gift, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useOfferProducts } from '@/hooks/useOfferProducts';
 import { useCart } from '@/contexts/CartContext';
+import { useProducts } from '@/hooks/useProducts';
 import { toast } from 'sonner';
 
 const OfferDetailsPage = () => {
@@ -13,6 +15,7 @@ const OfferDetailsPage = () => {
   const navigate = useNavigate();
   const { offerProducts, loading } = useOfferProducts();
   const { addToCart } = useCart();
+  const { products } = useProducts();
 
   const offer = offerProducts.find(o => o.shareable_slug === slug);
 
@@ -29,9 +32,32 @@ const OfferDetailsPage = () => {
     }
 
     try {
-      // Add all offer items to cart
+      // Add all offer items to cart using proper product and package IDs
       offer.offer_items.forEach(item => {
-        addToCart(item.product_id, item.package_id);
+        console.log('Adding to cart:', {
+          productId: item.product_id,
+          packageId: item.package_id
+        });
+        
+        // Find the actual product to verify it exists
+        const actualProduct = products.find(p => p.id === item.product_id);
+        if (actualProduct) {
+          const actualPackage = actualProduct.packages.find(pkg => pkg.id === item.package_id);
+          if (actualPackage) {
+            addToCart(item.product_id, item.package_id);
+            console.log('Successfully added to cart:', {
+              productName: actualProduct.name,
+              packageDuration: actualPackage.duration,
+              price: actualPackage.price
+            });
+          } else {
+            console.error('Package not found:', item.package_id);
+            toast.error(`প্যাকেজ খুঁজে পাওয়া যায়নি: ${item.package_id}`);
+          }
+        } else {
+          console.error('Product not found:', item.product_id);
+          toast.error(`পণ্য খুঁজে পাওয়া যায়নি: ${item.product_id}`);
+        }
       });
 
       toast.success(`${offer.title} কার্টে যোগ করা হয়েছে!`);
@@ -71,6 +97,14 @@ const OfferDetailsPage = () => {
     ? offer.original_price - offer.offer_price 
     : 0;
 
+  // Check if the media URL is a video
+  const isVideo = offer.image_url && (
+    offer.image_url.includes('.mp4') || 
+    offer.image_url.includes('.webm') || 
+    offer.image_url.includes('.ogg') ||
+    offer.image_url.includes('video')
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
       <div className="container mx-auto px-4 py-8">
@@ -91,17 +125,34 @@ const OfferDetailsPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Offer Image */}
+          {/* Offer Image/Video */}
           <div className="space-y-4">
             <Card className="overflow-hidden border-2 border-orange-200">
               <CardContent className="p-0">
                 {offer.image_url ? (
                   <div className="relative">
-                    <img
-                      src={offer.image_url}
-                      alt={offer.title}
-                      className="w-full h-80 lg:h-96 object-cover"
-                    />
+                    {isVideo ? (
+                      <div className="relative">
+                        <video
+                          src={offer.image_url}
+                          className="w-full h-80 lg:h-96 object-cover"
+                          controls
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                        <div className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full">
+                          <Play className="w-4 h-4" />
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={offer.image_url}
+                        alt={offer.title}
+                        className="w-full h-80 lg:h-96 object-cover"
+                      />
+                    )}
                     <div className="absolute top-4 left-4">
                       <Badge className="bg-red-500 text-white text-lg px-4 py-2 animate-pulse">
                         {offer.discount_percentage}% ছাড়
@@ -180,22 +231,33 @@ const OfferDetailsPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {offer.offer_items.map((item, index) => (
-                      <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <span className="font-medium">প্রোডাক্ট #{index + 1}</span>
-                          <div className="text-sm text-gray-600">
-                            প্রোডাক্ট ID: {item.product_id}
+                    {offer.offer_items.map((item, index) => {
+                      // Find the actual product to show its name
+                      const actualProduct = products.find(p => p.id === item.product_id);
+                      const actualPackage = actualProduct?.packages.find(pkg => pkg.id === item.package_id);
+                      
+                      return (
+                        <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <span className="font-medium">
+                              {actualProduct ? actualProduct.name : `প্রোডাক্ট #${index + 1}`}
+                            </span>
+                            {actualPackage && (
+                              <div className="text-sm text-gray-600">
+                                {actualPackage.duration === '1month' && '১ মাস'}
+                                {actualPackage.duration === '3month' && '৩ মাস'}
+                                {actualPackage.duration === '6month' && '৬ মাস'}
+                                {actualPackage.duration === 'lifetime' && 'লাইফটাইম'}
+                                {' - ৳'}{actualPackage.price}
+                              </div>
+                            )}
                           </div>
-                          <div className="text-sm text-gray-600">
-                            প্যাকেজ ID: {item.package_id}
-                          </div>
+                          <Badge variant="secondary">
+                            {item.quantity} পিস
+                          </Badge>
                         </div>
-                        <Badge variant="secondary">
-                          {item.quantity} পিস
-                        </Badge>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   
                   <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
