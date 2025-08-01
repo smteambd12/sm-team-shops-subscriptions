@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,16 +37,7 @@ const OfferProductCard = ({ product }: OfferProductCardProps) => {
     try {
       // Add all offer items to cart
       product.offer_items.forEach(item => {
-        addToCart({
-          id: item.product_id,
-          name: product.title,
-          price: product.offer_price || 0,
-          originalPrice: product.original_price || undefined,
-          packageId: item.package_id,
-          duration: '1month', // Default duration
-          image: product.image_url || '',
-          features: []
-        }, item.quantity);
+        addToCart(item.product_id, item.package_id);
       });
 
       toast.success(`${product.title} কার্টে যোগ করা হয়েছে!`);

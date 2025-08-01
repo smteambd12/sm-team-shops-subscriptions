@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Share2, ShoppingCart, Clock, Gift } from 'lucide-react';
@@ -32,16 +31,7 @@ const OfferDetailsPage = () => {
     try {
       // Add all offer items to cart
       offer.offer_items.forEach(item => {
-        addToCart({
-          id: item.product_id,
-          name: offer.title,
-          price: offer.offer_price || 0,
-          originalPrice: offer.original_price || undefined,
-          packageId: item.package_id,
-          duration: '1month', // Default duration
-          image: offer.image_url || '',
-          features: []
-        }, item.quantity);
+        addToCart(item.product_id, item.package_id);
       });
 
       toast.success(`${offer.title} কার্টে যোগ করা হয়েছে!`);

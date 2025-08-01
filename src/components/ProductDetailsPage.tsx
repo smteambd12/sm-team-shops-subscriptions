@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Share2, ShoppingCart } from 'lucide-react';
@@ -23,17 +22,9 @@ const ProductDetailsPage = () => {
     toast.success('প্রোডাক্ট লিংক কপি হয়েছে!');
   };
 
-  const handleAddToCart = (packageId: string, price: number) => {
+  const handleAddToCart = (packageId: string) => {
     if (product) {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price,
-        packageId,
-        duration: '1month', // Default
-        image: product.image,
-        features: product.features
-      });
+      addToCart(product.id, packageId);
       toast.success('কার্টে যোগ করা হয়েছে!');
       navigate('/cart');
     }
@@ -157,7 +148,7 @@ const ProductDetailsPage = () => {
                           </div>
                         </div>
                         <Button
-                          onClick={() => handleAddToCart(pkg.id, pkg.price)}
+                          onClick={() => handleAddToCart(pkg.id)}
                           className="flex items-center gap-2"
                         >
                           <ShoppingCart className="w-4 h-4" />
