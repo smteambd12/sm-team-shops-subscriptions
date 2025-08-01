@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import PopularProductCard from '@/components/PopularProductCard';
 import OfferProductCard from '@/components/OfferProductCard';
+import HorizontalProductSlider from '@/components/HorizontalProductSlider';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Star, Gift } from 'lucide-react';
+import { Search, Filter, Star, Gift, Sparkles, Flame } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { usePopularProducts } from '@/hooks/usePopularProducts';
 import { useOfferProducts } from '@/hooks/useOfferProducts';
@@ -174,36 +175,46 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Products Section - Only show if enabled */}
+      {/* Popular Products Section - Enhanced with horizontal scrolling */}
       {settings.popular_products_enabled && !popularLoading && popularProducts.length > 0 && (
-        <section className="py-8">
+        <section className="py-8 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50">
           <div className="container mx-auto px-2 sm:px-4">
-            <div className="flex items-center gap-2 mb-6">
-              <Star className="h-6 w-6 text-yellow-500" />
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">জনপ্রিয় পণ্য</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <HorizontalProductSlider
+              title="জনপ্রিয় পণ্য"
+              subtitle="আমাদের সবচেয়ে জনপ্রিয় এবং বেস্টসেলার পণ্যসমূহ"
+              icon={<Sparkles className="h-8 w-8 text-purple-500" />}
+            >
               {popularProducts.map((product) => (
                 <PopularProductCard key={product.id} product={product} />
               ))}
-            </div>
+            </HorizontalProductSlider>
           </div>
         </section>
       )}
 
-      {/* Offer Products Section - Only show if enabled */}
+      {/* Offer Products Section - Enhanced with horizontal scrolling */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-orange-100 to-yellow-100">
+        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
-            <div className="flex items-center gap-2 mb-6">
-              <Gift className="h-6 w-6 text-orange-500" />
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">বিশেষ অফার</h2>
-              <Badge className="bg-red-500 text-white animate-pulse">সীমিত সময়</Badge>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <HorizontalProductSlider
+              title="বিশেষ অফার"
+              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড় এবং অফার"
+              icon={
+                <div className="relative">
+                  <Flame className="h-8 w-8 text-orange-500 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                </div>
+              }
+            >
               {offerProducts.map((product) => (
                 <OfferProductCard key={product.id} product={product} />
               ))}
+            </HorizontalProductSlider>
+            
+            <div className="text-center mt-6">
+              <Badge className="bg-red-500 text-white animate-bounce text-lg px-6 py-2">
+                ⏰ অফার শীঘ্রই শেষ হবে!
+              </Badge>
             </div>
           </div>
         </section>
