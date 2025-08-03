@@ -37,15 +37,37 @@ export const usePromoCode = () => {
         throw error;
       }
 
-      // Parse the JSON response
+      // Handle the case where data might be null or undefined
+      if (!data) {
+        console.error('No data returned from promo validation');
+        return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
+      }
+
+      // Parse the response properly with type checking
       let result: PromoCodeResult;
+      
       if (typeof data === 'string') {
-        result = JSON.parse(data);
+        try {
+          result = JSON.parse(data) as PromoCodeResult;
+        } catch (parseError) {
+          console.error('Error parsing JSON response:', parseError);
+          return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
+        }
+      } else if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+        // If data is already an object, cast it to PromoCodeResult
+        result = data as PromoCodeResult;
       } else {
-        result = data;
+        console.error('Unexpected data type from promo validation:', typeof data, data);
+        return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
       }
       
       console.log('Parsed promo result:', result);
+      
+      // Validate the result structure
+      if (typeof result !== 'object' || result === null || typeof result.valid !== 'boolean') {
+        console.error('Invalid result structure:', result);
+        return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
+      }
       
       if (result.valid) {
         setAppliedPromo({
