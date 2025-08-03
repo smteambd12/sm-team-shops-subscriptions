@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -33,16 +34,15 @@ export const usePromoCode = () => {
 
       if (error) {
         console.error('Promo validation error:', error);
-        throw error;
+        toast({
+          title: "ত্রুটি",
+          description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
+          variant: "destructive",
+        });
+        return null;
       }
 
-      // Handle the case where data might be null or undefined
-      if (!data) {
-        console.error('No data returned from promo validation');
-        return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
-      }
-
-      // Parse the response properly with type checking
+      // Handle the response data
       let result: PromoCodeResult;
       
       if (typeof data === 'string') {
@@ -50,14 +50,23 @@ export const usePromoCode = () => {
           result = JSON.parse(data) as PromoCodeResult;
         } catch (parseError) {
           console.error('Error parsing JSON response:', parseError);
-          return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
+          toast({
+            title: "ত্রুটি",
+            description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
+            variant: "destructive",
+          });
+          return null;
         }
-      } else if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
-        // Cast through unknown first to satisfy TypeScript type checking
-        result = data as unknown as PromoCodeResult;
+      } else if (typeof data === 'object' && data !== null) {
+        result = data as PromoCodeResult;
       } else {
         console.error('Unexpected data type from promo validation:', typeof data, data);
-        return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
+        toast({
+          title: "ত্রুটি",
+          description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
+          variant: "destructive",
+        });
+        return null;
       }
       
       console.log('Parsed promo result:', result);
@@ -65,22 +74,27 @@ export const usePromoCode = () => {
       // Validate the result structure
       if (typeof result !== 'object' || result === null || typeof result.valid !== 'boolean') {
         console.error('Invalid result structure:', result);
-        return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
+        toast({
+          title: "ত্রুটি",
+          description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
+          variant: "destructive",
+        });
+        return null;
       }
       
-      if (result.valid) {
+      if (result.valid && result.discount_amount) {
         setAppliedPromo({
           code: result.code || code,
-          discount_amount: result.discount_amount || 0
+          discount_amount: result.discount_amount
         });
         toast({
-          title: "প্রোমো কোড প্রয়োগ হয়েছে!",
-          description: `৳${result.discount_amount} ছাড় পেয়েছেন।`,
+          title: "সফল!",
+          description: `৳${result.discount_amount} ছাড় প্রয়োগ হয়েছে।`,
         });
       } else {
         toast({
           title: "প্রোমো কোড ত্রুটি",
-          description: result.message || "প্রোমো কোড অবৈধ",
+          description: result.message || "প্রোমো কোড অবৈধ বা মেয়াদ শেষ।",
           variant: "destructive",
         });
       }

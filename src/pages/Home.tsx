@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import PopularProductCard from '@/components/PopularProductCard';
@@ -195,21 +196,28 @@ const Home = () => {
 
       {/* Compact Combo Offer Section */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-6 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
+        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
-            <HorizontalProductSlider
-              title="বিশেষ কম্বো অফার"
-              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড়ে কম্বো প্যাকেজ"
-              icon={<Flame className="h-6 w-6 text-orange-500 animate-pulse" />}
-              isOfferSection={true}
-            >
+            <div className="text-center mb-6">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Flame className="h-6 w-6 text-orange-500 animate-pulse" />
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  বিশেষ কম্বো অফার
+                </h2>
+              </div>
+              <p className="text-gray-600 text-sm">
+                সীমিত সময়ের জন্য বিশেষ ছাড়ে কম্বো প্যাকেজ
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {offerProducts.map((product) => (
                 <CompactComboOfferCard key={product.id} product={product} />
               ))}
-            </HorizontalProductSlider>
+            </div>
             
-            <div className="text-center mt-4">
-              <Badge className="bg-red-500 text-white animate-bounce px-4 py-1 text-xs">
+            <div className="text-center mt-6">
+              <Badge className="bg-red-500 text-white animate-bounce px-4 py-2 text-sm">
                 ⏰ সীমিত সময়ের অফার!
               </Badge>
             </div>
