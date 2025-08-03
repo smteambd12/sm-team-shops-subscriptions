@@ -8,6 +8,7 @@ interface OrderSummaryProps {
   onCheckout: () => void;
   onPromoApplied: (code: string, discount: number) => void;
   onPromoRemoved: () => void;
+  comboSavings?: number;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
@@ -15,7 +16,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   appliedPromo,
   onCheckout,
   onPromoApplied,
-  onPromoRemoved
+  onPromoRemoved,
+  comboSavings = 0
 }) => {
   const promoDiscount = appliedPromo ? appliedPromo.discount : 0;
   const total = Math.max(0, subtotal - promoDiscount);
@@ -40,17 +42,37 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <span>সাবটোটাল:</span>
           <span>৳{subtotal.toLocaleString()}</span>
         </div>
-        {promoDiscount > 0 && (
-          <div className="flex justify-between text-green-600 text-sm sm:text-base">
-            <span>প্রোমো ছাড়:</span>
-            <span>-৳{promoDiscount.toLocaleString()}</span>
+        
+        {/* Combo Savings Display */}
+        {comboSavings > 0 && (
+          <div className="flex justify-between text-purple-600 text-sm sm:text-base bg-purple-50 px-3 py-2 rounded-lg">
+            <span>🎁 কম্বো সাশ্রয়:</span>
+            <span className="font-semibold">-৳{comboSavings.toLocaleString()}</span>
           </div>
         )}
+        
+        {promoDiscount > 0 && (
+          <div className="flex justify-between text-green-600 text-sm sm:text-base bg-green-50 px-3 py-2 rounded-lg">
+            <span>🎫 প্রোমো ছাড়:</span>
+            <span className="font-semibold">-৳{promoDiscount.toLocaleString()}</span>
+          </div>
+        )}
+        
         <div className="border-t pt-3">
           <div className="flex justify-between text-lg sm:text-xl font-bold">
             <span>মোট:</span>
             <span>৳{total.toLocaleString()}</span>
           </div>
+          
+          {/* Total Savings Summary */}
+          {(comboSavings > 0 || promoDiscount > 0) && (
+            <div className="mt-2 text-center bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 border border-green-200">
+              <p className="text-sm text-gray-600 mb-1">🎉 মোট সাশ্রয়</p>
+              <p className="text-lg font-bold text-green-600">
+                ৳{(comboSavings + promoDiscount).toLocaleString()}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

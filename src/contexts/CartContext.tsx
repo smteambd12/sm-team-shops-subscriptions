@@ -1,10 +1,11 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem } from '../types';
 import { useProducts } from '../hooks/useProducts';
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (productId: string, packageId: string) => void;
+  addToCart: (productId: string, packageId: string, isComboItem?: boolean) => void;
   removeFromCart: (productId: string, packageId: string) => void;
   updateQuantity: (productId: string, packageId: string, quantity: number) => void;
   clearCart: () => void;
@@ -45,8 +46,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('Saved cart to localStorage:', items);
   }, [items]);
 
-  const addToCart = (productId: string, packageId: string) => {
-    console.log('Adding to cart:', { productId, packageId });
+  const addToCart = (productId: string, packageId: string, isComboItem: boolean = false) => {
+    console.log('Adding to cart:', { productId, packageId, isComboItem });
     
     setItems(prev => {
       const existingItem = prev.find(item => 
@@ -63,7 +64,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       console.log('Adding new item to cart');
-      const newItem = { productId, packageId, quantity: 1 };
+      const newItem = { 
+        productId, 
+        packageId, 
+        quantity: 1,
+        isComboItem: isComboItem || false
+      };
       return [...prev, newItem];
     });
   };

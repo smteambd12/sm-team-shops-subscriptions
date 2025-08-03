@@ -36,9 +36,33 @@ const Cart = () => {
     setAppliedPromo(null);
   };
 
+  // Calculate combo savings
+  const calculateComboSavings = () => {
+    let totalComboSavings = 0;
+    let comboItemsCount = 0;
+
+    items.forEach(item => {
+      if (item.isComboItem) {
+        const product = products.find(p => p.id === item.productId);
+        const pkg = product?.packages.find(p => p.id === item.packageId);
+        
+        if (pkg && pkg.originalPrice && pkg.originalPrice > pkg.price) {
+          const savings = (pkg.originalPrice - pkg.price) * item.quantity;
+          totalComboSavings += savings;
+          comboItemsCount += item.quantity;
+        }
+      }
+    });
+
+    return { totalComboSavings, comboItemsCount };
+  };
+
+  const { totalComboSavings, comboItemsCount } = calculateComboSavings();
+
   console.log('Cart items:', items);
   console.log('Available products:', products);
   console.log('Cart total:', subtotal);
+  console.log('Combo savings:', { totalComboSavings, comboItemsCount });
 
   if (loading) {
     return (
@@ -88,6 +112,29 @@ const Cart = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">শপিং কার্ট</h1>
         </div>
 
+        {/* Combo Savings Banner */}
+        {totalComboSavings > 0 && (
+          <div className="mb-6 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 border-2 border-green-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="bg-green-500 rounded-full p-2 mr-3">
+                  <ShoppingCart className="text-white w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-green-800">🎉 কম্বো অফার সাশ্রয়!</h3>
+                  <p className="text-sm text-green-700">
+                    আপনি {comboItemsCount} টি কম্বো আইটেমে মোট ৳{totalComboSavings} সাশ্রয় করেছেন!
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-600">৳{totalComboSavings}</div>
+                <div className="text-sm text-green-600">সাশ্রয়</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
@@ -101,26 +148,33 @@ const Cart = () => {
                   console.log('Processing cart item:', { 
                     itemId: `${item.productId}-${item.packageId}`,
                     productFound: !!product,
-                    productName: product?.name
+                    productName: product?.name,
+                    isComboItem: item.isComboItem
                   });
                   
                   if (!product) {
                     return (
                       <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-orange-200 rounded-lg bg-orange-50">
-                        <p className="text-orange-800 mb-2">কম্বো অফার আইটেম</p>
-                        <p className="text-sm text-gray-600 mb-2">Product ID: {item.productId}</p>
-                        <p className="text-sm text-gray-600 mb-2">Package ID: {item.packageId}</p>
-                        <p className="text-sm text-gray-600 mb-2">পরিমাণ: {item.quantity}</p>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">এস্টিমেট মূল্য:</span>
-                          <span className="font-medium">৳{100 * item.quantity}</span>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-orange-800 mb-2">
+                              {item.isComboItem ? '🎁 কম্বো অফার আইটেম' : 'অজানা পণ্য'}
+                            </p>
+                            <p className="text-sm text-gray-600 mb-2">Product ID: {item.productId}</p>
+                            <p className="text-sm text-gray-600 mb-2">Package ID: {item.packageId}</p>
+                            <p className="text-sm text-gray-600 mb-2">পরিমাণ: {item.quantity}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm text-gray-600">এস্টিমেট মূল্য:</span>
+                            <span className="font-medium block">৳{100 * item.quantity}</span>
+                            <button
+                              onClick={() => removeFromCart(item.productId, item.packageId)}
+                              className="text-red-500 hover:text-red-700 text-sm bg-white px-3 py-1 rounded border mt-2"
+                            >
+                              সরান
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => removeFromCart(item.productId, item.packageId)}
-                          className="text-red-500 hover:text-red-700 text-sm bg-white px-3 py-1 rounded border mt-2"
-                        >
-                          কার্ট থেকে সরান
-                        </button>
                       </div>
                     );
                   }
@@ -138,6 +192,43 @@ const Cart = () => {
                         >
                           কার্ট থেকে সরান
                         </button>
+                      </div>
+                    );
+                  }
+
+                  // Enhanced cart item display for combo items
+                  if (item.isComboItem) {
+                    const itemSavings = packageInfo.originalPrice && packageInfo.originalPrice > packageInfo.price 
+                      ? (packageInfo.originalPrice - packageInfo.price) * item.quantity 
+                      : 0;
+
+                    return (
+                      <div key={`${item.productId}-${item.packageId}`} className="relative">
+                        {/* Combo Item Badge */}
+                        <div className="absolute -top-2 -left-2 z-10">
+                          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+                            🎁 কম্বো অফার
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-4">
+                          <CartItem
+                            item={item}
+                            product={product}
+                            onUpdateQuantity={updateQuantity}
+                            onRemoveFromCart={removeFromCart}
+                          />
+                          
+                          {/* Combo Savings Display */}
+                          {itemSavings > 0 && (
+                            <div className="mt-3 bg-green-100 rounded-lg p-3 border border-green-200">
+                              <div className="flex justify-between items-center">
+                                <span className="text-green-800 font-medium">💰 কম্বো সাশ্রয়:</span>
+                                <span className="text-green-600 font-bold">৳{itemSavings}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   }
@@ -164,6 +255,7 @@ const Cart = () => {
               onCheckout={handleCheckout}
               onPromoApplied={handlePromoApplied}
               onPromoRemoved={handlePromoRemoved}
+              comboSavings={totalComboSavings}
             />
           </div>
         </div>

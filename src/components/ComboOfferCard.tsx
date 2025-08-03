@@ -19,16 +19,23 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
   const { products } = useProducts();
   const [selectedPackages, setSelectedPackages] = useState<{[key: string]: string}>({});
 
-  // Initialize default package selections
+  // Initialize default package selections - select the first package by default
   useEffect(() => {
     if (product.offer_items && product.offer_items.length > 0) {
       const defaultSelections: {[key: string]: string} = {};
       product.offer_items.forEach(item => {
-        defaultSelections[item.product_id] = item.package_id;
+        const actualProduct = products.find(p => p.id === item.product_id);
+        if (actualProduct && actualProduct.packages.length > 0) {
+          // Select first package by default instead of the suggested package
+          defaultSelections[item.product_id] = actualProduct.packages[0].id;
+        } else {
+          // Fallback to the suggested package
+          defaultSelections[item.product_id] = item.package_id;
+        }
       });
       setSelectedPackages(defaultSelections);
     }
-  }, [product.offer_items]);
+  }, [product.offer_items, products]);
 
   const handlePackageChange = (productId: string, packageId: string) => {
     setSelectedPackages(prev => ({
@@ -52,7 +59,7 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
       const selectedPackage = selectedPackages[item.product_id] || item.package_id;
       
       for (let i = 0; i < item.quantity; i++) {
-        addToCart(item.product_id, selectedPackage);
+        addToCart(item.product_id, selectedPackage, true); // Mark as combo item
         addedItems++;
       }
     });
@@ -97,7 +104,8 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
         duration: selectedPackage?.duration || '',
         price: currentPrice,
         originalPrice: originalPrice,
-        quantity: item.quantity
+        quantity: item.quantity,
+        productId: item.product_id
       };
     }) || [];
 
@@ -174,43 +182,67 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-2 sm:p-6 pt-0">
-        {/* Package Selection */}
-        <div className="mb-3 bg-blue-50 rounded-lg p-3 border border-blue-200">
-          <h4 className="font-medium text-blue-800 mb-2 text-sm flex items-center">
-            <Package2 size={14} className="mr-1" />
-            প্যাকেজ নির্বাচন করুন:
+        {/* Package Selection Section */}
+        <div className="mb-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <h4 className="font-semibold text-blue-800 mb-3 text-sm flex items-center">
+            <Package2 size={14} className="mr-2" />
+            প্রোডাক্ট ও প্যাকেজ নির্বাচন:
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {packageDetails.map((item, index) => {
-              const productId = product.offer_items?.[index]?.product_id;
+              const productId = item.productId;
               const actualProduct = products.find(p => p.id === productId);
               
               return (
-                <div key={index} className="bg-white rounded p-2 border border-blue-100">
-                  <div className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-                    <Star size={12} className="text-yellow-500 mr-1" />
-                    {item.productName} ({item.quantity} টি)
+                <div key={index} className="bg-white rounded-lg p-3 border border-blue-100">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center">
+                      <Star size={14} className="text-yellow-500 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">{item.productName}</p>
+                        <p className="text-xs text-gray-600">পরিমাণ: {item.quantity} টি</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-green-600">৳{item.price * item.quantity}</p>
+                      {item.originalPrice > item.price && (
+                        <p className="text-xs text-gray-500 line-through">৳{item.originalPrice * item.quantity}</p>
+                      )}
+                    </div>
                   </div>
-                  <Select
-                    value={selectedPackages[productId || ''] || item.packageId}
-                    onValueChange={(value) => productId && handlePackageChange(productId, value)}
-                  >
-                    <SelectTrigger className="h-8 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {actualProduct?.packages.map((pkg) => (
-                        <SelectItem key={pkg.id} value={pkg.id}>
-                          <div className="flex justify-between items-center w-full">
-                            <span>{getDurationText(pkg.duration)}</span>
-                            <span className="ml-2 font-medium">৳{pkg.price}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="text-xs text-gray-600 mt-1">
-                    নির্বাচিত প্যাকেজ: {getDurationText(item.duration)} - ৳{item.price}
+                  
+                  <div className="mb-2">
+                    <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <Clock size={12} className="inline mr-1" />
+                      কতদিনের জন্য নিবেন:
+                    </label>
+                    <Select
+                      value={selectedPackages[productId] || item.packageId}
+                      onValueChange={(value) => handlePackageChange(productId, value)}
+                    >
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {actualProduct?.packages.map((pkg) => (
+                          <SelectItem key={pkg.id} value={pkg.id}>
+                            <div className="flex justify-between items-center w-full min-w-[150px]">
+                              <span>{getDurationText(pkg.duration)}</span>
+                              <div className="text-right ml-4">
+                                <span className="font-medium text-green-600">৳{pkg.price}</span>
+                                {pkg.originalPrice && pkg.originalPrice > pkg.price && (
+                                  <span className="text-xs text-gray-500 line-through ml-2">৳{pkg.originalPrice}</span>
+                                )}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="text-xs text-blue-600 bg-blue-100 rounded px-2 py-1">
+                    নির্বাচিত: {getDurationText(item.duration)} - ৳{item.price}
                   </div>
                 </div>
               );
@@ -219,39 +251,42 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
         </div>
 
         {/* Detailed Pricing Display */}
-        <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-          <div className="text-sm space-y-2">
-            <div className="font-medium text-green-800 border-b border-green-200 pb-1">
-              মূল্য বিবরণ:
+        <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+          <div className="text-sm space-y-3">
+            <div className="font-semibold text-green-800 border-b border-green-200 pb-2">
+              💰 মূল্য বিবরণ:
             </div>
             
             {/* Individual Product Prices */}
-            <div className="space-y-1">
+            <div className="space-y-2">
               {packageDetails.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs bg-white rounded px-2 py-1">
-                  <span className="font-medium">{item.productName}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-500">{getDurationText(item.duration)}</span>
-                    <span className="font-medium">৳{item.price}</span>
+                <div key={idx} className="flex justify-between items-center text-sm bg-white rounded-lg px-3 py-2 border border-green-100">
+                  <div>
+                    <span className="font-medium text-gray-800">{item.productName}</span>
+                    <span className="text-xs text-gray-600 ml-2">({getDurationText(item.duration)})</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-green-600">৳{item.price * item.quantity}</div>
+                    {item.originalPrice > item.price && (
+                      <div className="text-xs text-gray-500 line-through">৳{item.originalPrice * item.quantity}</div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-green-200 pt-2 space-y-1">
-              {totalOriginalPrice > 0 && (
-                <div className="flex justify-between text-gray-500 line-through text-sm">
-                  <span>মোট মূল মূল্য:</span>
-                  <span>৳{totalOriginalPrice}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-green-600 text-lg">
-                <span>কম্বো মূল্য:</span>
+            <div className="border-t border-green-300 pt-3 space-y-2">
+              <div className="flex justify-between text-gray-600">
+                <span>মোট মূল মূল্য:</span>
+                <span className="line-through">৳{totalOriginalPrice}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg text-green-600">
+                <span>🎉 কম্বো অফার মূল্য:</span>
                 <span>৳{comboPrice}</span>
               </div>
               {savings > 0 && (
-                <div className="flex justify-between text-orange-600 font-medium">
-                  <span>💰 সাশ্রয়:</span>
+                <div className="flex justify-between text-orange-600 font-semibold bg-orange-100 rounded px-3 py-2">
+                  <span>💸 আপনার সাশ্রয়:</span>
                   <span>৳{savings}</span>
                 </div>
               )}
@@ -260,26 +295,26 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="bg-purple-50 rounded-lg p-2 text-center border border-purple-200">
-            <div className="text-lg font-bold text-purple-600">{packageDetails.length}</div>
-            <div className="text-xs text-purple-600">ভিন্ন পণ্য</div>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-purple-100 rounded-lg p-3 text-center border border-purple-200">
+            <div className="text-xl font-bold text-purple-600">{packageDetails.length}</div>
+            <div className="text-xs text-purple-600 font-medium">ভিন্ন পণ্য</div>
           </div>
-          <div className="bg-indigo-50 rounded-lg p-2 text-center border border-indigo-200">
-            <div className="text-lg font-bold text-indigo-600">
+          <div className="bg-indigo-100 rounded-lg p-3 text-center border border-indigo-200">
+            <div className="text-xl font-bold text-indigo-600">
               {packageDetails.reduce((sum, item) => sum + item.quantity, 0)}
             </div>
-            <div className="text-xs text-indigo-600">মোট পিস</div>
+            <div className="text-xs text-indigo-600 font-medium">মোট পিস</div>
           </div>
         </div>
 
         {/* Add to Cart Button */}
         <Button 
           onClick={handleAddToCart}
-          className="w-full mt-auto bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white font-medium py-3 rounded-lg transition-all duration-200 hover:shadow-lg"
+          className="w-full mt-auto bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 hover:shadow-lg text-base"
         >
-          <ShoppingCart size={16} className="mr-2" />
-          কার্টে যোগ করুন
+          <ShoppingCart size={18} className="mr-2" />
+          ৳{comboPrice} - কার্টে যোগ করুন
         </Button>
       </CardContent>
     </Card>

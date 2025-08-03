@@ -21,6 +21,7 @@ export interface CartItem {
   productId: string;
   packageId: string;
   quantity: number;
+  isComboItem?: boolean;
 }
 
 export interface User {
