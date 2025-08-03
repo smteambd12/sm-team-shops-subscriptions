@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -54,8 +53,8 @@ export const usePromoCode = () => {
           return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
         }
       } else if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
-        // If data is already an object, cast it to PromoCodeResult
-        result = data as PromoCodeResult;
+        // Cast through unknown first to satisfy TypeScript type checking
+        result = data as unknown as PromoCodeResult;
       } else {
         console.error('Unexpected data type from promo validation:', typeof data, data);
         return { valid: false, message: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।" };
