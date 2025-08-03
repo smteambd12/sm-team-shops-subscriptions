@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import PopularProductCard from '@/components/PopularProductCard';
-import ComboOfferCard from '@/components/ComboOfferCard';
+import CompactComboOfferCard from '@/components/CompactComboOfferCard';
 import HorizontalProductSlider from '@/components/HorizontalProductSlider';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -193,47 +193,25 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section - Updated to use ComboOfferCard */}
+      {/* Compact Combo Offer Section */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
-        <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
+        <section className="py-6 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
-            {/* Header with countdown timer */}
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Flame className="h-8 w-8 text-orange-500 animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                </div>
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    কম্বো অফার প্যাকেজ
-                  </h2>
-                  <p className="text-gray-600 mt-1">
-                    একসাথে কিনুন, বেশি সাশ্রয় করুন
-                  </p>
-                </div>
-              </div>
-              
-              {/* Countdown Timer */}
-              <CountdownTimer />
-            </div>
-
-            {/* Combo Offer Cards - Now using ComboOfferCard */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <HorizontalProductSlider
+              title="বিশেষ কম্বো অফার"
+              subtitle="সীমিত সময়ের জন্য বিশেষ ছাড়ে কম্বো প্যাকেজ"
+              icon={<Flame className="h-6 w-6 text-orange-500 animate-pulse" />}
+              isOfferSection={true}
+            >
               {offerProducts.map((product) => (
-                <ComboOfferCard key={product.id} product={product} />
+                <CompactComboOfferCard key={product.id} product={product} />
               ))}
-            </div>
+            </HorizontalProductSlider>
             
-            <div className="text-center mt-6">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-                <Badge className="bg-red-500 text-white animate-bounce px-6 py-2 text-sm">
-                  ⏰ কম্বো অফার শীঘ্রই শেষ হবে!
-                </Badge>
-                <Badge className="bg-green-600 text-white px-6 py-2 text-sm">
-                  🎁 ১০০+ কাস্টমার এই কম্বো অফার নিয়েছেন
-                </Badge>
-              </div>
+            <div className="text-center mt-4">
+              <Badge className="bg-red-500 text-white animate-bounce px-4 py-1 text-xs">
+                ⏰ সীমিত সময়ের অফার!
+              </Badge>
             </div>
           </div>
         </section>
