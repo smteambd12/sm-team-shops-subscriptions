@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ShoppingCart, Gift, Clock } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ShoppingCart, Gift, Clock, Package2, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useProducts } from '@/hooks/useProducts';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ interface CompactComboOfferCardProps {
 const CompactComboOfferCard = ({ product }: CompactComboOfferCardProps) => {
   const { addToCart } = useCart();
   const { products } = useProducts();
+  const [selectedPackages, setSelectedPackages] = useState<{[key: string]: string}>({});
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
     minutes: 0,
@@ -43,6 +45,24 @@ const CompactComboOfferCard = ({ product }: CompactComboOfferCardProps) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Initialize default package selections
+  useEffect(() => {
+    if (product.offer_items && product.offer_items.length > 0) {
+      const defaultSelections: {[key: string]: string} = {};
+      product.offer_items.forEach(item => {
+        defaultSelections[item.product_id] = item.package_id;
+      });
+      setSelectedPackages(defaultSelections);
+    }
+  }, [product.offer_items]);
+
+  const handlePackageChange = (productId: string, packageId: string) => {
+    setSelectedPackages(prev => ({
+      ...prev,
+      [productId]: packageId
+    }));
+  };
+
   const handleAddToCart = () => {
     console.log('Adding combo offer to cart:', product);
     
@@ -53,50 +73,75 @@ const CompactComboOfferCard = ({ product }: CompactComboOfferCardProps) => {
 
     let addedItems = 0;
     
+    // Add items with selected packages
     product.offer_items.forEach(item => {
-      const actualProduct = products.find(p => p.id === item.product_id);
-      if (actualProduct) {
-        const actualPackage = actualProduct.packages.find(pkg => pkg.id === item.package_id);
-        if (actualPackage) {
-          for (let i = 0; i < item.quantity; i++) {
-            addToCart(item.product_id, item.package_id);
-            addedItems++;
-          }
-        }
+      const selectedPackage = selectedPackages[item.product_id] || item.package_id;
+      
+      for (let i = 0; i < item.quantity; i++) {
+        addToCart(item.product_id, selectedPackage);
+        addedItems++;
       }
     });
 
     if (addedItems > 0) {
-      toast.success(`${product.title} কার্টে যোগ করা হয়েছে!`);
+      toast.success(`${product.title} কার্টে যোগ করা হয়েছে! (${addedItems}টি আইটেম)`);
     } else {
       toast.error('পণ্যটি কার্টে যোগ করা যায়নি');
     }
   };
 
-  // Calculate pricing
-  const includedProducts = product.offer_items?.map(item => {
-    const actualProduct = products.find(p => p.id === item.product_id);
-    const actualPackage = actualProduct?.packages.find(pkg => pkg.id === item.package_id);
+  const getDurationText = (duration: string) => {
+    switch (duration) {
+      case '1month': return '১ মাস';
+      case '2month': return '২ মাস';
+      case '3month': return '৩ মাস';
+      case '6month': return '৬ মাস';
+      case 'lifetime': return 'লাইফটাইম';
+      default: return duration;
+    }
+  };
+
+  // Calculate pricing with selected packages
+  const calculatePricing = () => {
+    let totalOriginalPrice = 0;
+    let totalSelectedPrice = 0;
+    
+    const packageDetails = product.offer_items?.map(item => {
+      const actualProduct = products.find(p => p.id === item.product_id);
+      const selectedPackageId = selectedPackages[item.product_id] || item.package_id;
+      const selectedPackage = actualProduct?.packages.find(pkg => pkg.id === selectedPackageId);
+      
+      const originalPrice = selectedPackage?.originalPrice || selectedPackage?.price || 0;
+      const currentPrice = selectedPackage?.price || 0;
+      
+      totalOriginalPrice += originalPrice * item.quantity;
+      totalSelectedPrice += currentPrice * item.quantity;
+      
+      return {
+        productName: actualProduct?.name || 'পণ্য',
+        packageId: selectedPackageId,
+        duration: selectedPackage?.duration || '',
+        price: currentPrice,
+        originalPrice: originalPrice,
+        quantity: item.quantity
+      };
+    }) || [];
+
     return {
-      name: actualProduct?.name || 'পণ্য',
-      price: actualPackage?.price || 0,
-      originalPrice: actualPackage?.originalPrice || 0,
-      quantity: item.quantity
+      packageDetails,
+      totalOriginalPrice,
+      totalSelectedPrice,
+      comboPrice: product.offer_price || 0,
+      savings: Math.max(0, totalOriginalPrice - (product.offer_price || 0))
     };
-  }) || [];
+  };
 
-  const totalOriginalPrice = includedProducts.reduce((sum, item) => 
-    sum + (item.originalPrice * item.quantity), 0
-  );
-  
-  const actualOfferPrice = product.offer_price || 0;
-  const savings = totalOriginalPrice - actualOfferPrice;
-
+  const { packageDetails, totalOriginalPrice, comboPrice, savings } = calculatePricing();
   const isVideo = product.image_url?.includes('.mp4') || product.image_url?.includes('.webm');
 
   return (
-    <Card className="min-w-[200px] max-w-[200px] h-[300px] flex flex-col hover:shadow-lg transition-all duration-300 border border-orange-200 bg-gradient-to-br from-orange-50 to-red-50">
-      <CardContent className="p-2 flex flex-col h-full">
+    <Card className="min-w-[220px] max-w-[220px] h-[420px] flex flex-col hover:shadow-lg transition-all duration-300 border border-orange-200 bg-gradient-to-br from-orange-50 to-red-50">
+      <CardContent className="p-3 flex flex-col h-full">
         {/* Media */}
         <div className="aspect-square relative mb-2 overflow-hidden rounded-lg">
           {product.image_url ? (
@@ -149,26 +194,79 @@ const CompactComboOfferCard = ({ product }: CompactComboOfferCardProps) => {
             </div>
           </div>
 
-          {/* Pricing */}
+          {/* Package Selection */}
           <div className="mb-2">
-            {totalOriginalPrice > 0 && (
-              <div className="text-xs text-gray-500 line-through text-center">
-                মূল মূল্য: ৳{totalOriginalPrice}
-              </div>
-            )}
-            <div className="text-sm font-bold text-green-600 text-center">
-              কম্বো মূল্য: ৳{actualOfferPrice}
+            <div className="text-xs font-medium text-gray-700 mb-1 flex items-center">
+              <Package2 size={10} className="mr-1" />
+              প্যাকেজ নির্বাচন:
             </div>
-            {savings > 0 && (
-              <div className="text-xs text-orange-600 text-center">
-                সাশ্রয়: ৳{savings}
-              </div>
-            )}
+            <div className="space-y-1">
+              {packageDetails.slice(0, 2).map((item, index) => {
+                const productId = product.offer_items?.[index]?.product_id;
+                const actualProduct = products.find(p => p.id === productId);
+                
+                return (
+                  <div key={index} className="bg-white rounded p-1">
+                    <div className="text-xs text-gray-600 mb-1">{item.productName}</div>
+                    <Select
+                      value={selectedPackages[productId || ''] || item.packageId}
+                      onValueChange={(value) => productId && handlePackageChange(productId, value)}
+                    >
+                      <SelectTrigger className="h-6 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {actualProduct?.packages.map((pkg) => (
+                          <SelectItem key={pkg.id} value={pkg.id}>
+                            {getDurationText(pkg.duration)} - ৳{pkg.price}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })}
+              {packageDetails.length > 2 && (
+                <div className="text-xs text-blue-600 text-center">
+                  +{packageDetails.length - 2} টি আরো পণ্য
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Products Count */}
-          <div className="text-xs text-center text-gray-600 mb-2">
-            {includedProducts.length} টি পণ্য • {includedProducts.reduce((sum, item) => sum + item.quantity, 0)} পিস
+          {/* Pricing Display */}
+          <div className="mb-2 bg-green-50 rounded p-2 border border-green-200">
+            <div className="text-xs space-y-1">
+              {/* Individual Product Prices */}
+              <div className="text-gray-600">
+                <div className="font-medium">পণ্যের মূল্য:</div>
+                {packageDetails.slice(0, 2).map((item, idx) => (
+                  <div key={idx} className="flex justify-between">
+                    <span className="truncate">{getDurationText(item.duration)}</span>
+                    <span>৳{item.price}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="border-t pt-1">
+                {totalOriginalPrice > 0 && (
+                  <div className="flex justify-between text-gray-500 line-through">
+                    <span>মূল মূল্য:</span>
+                    <span>৳{totalOriginalPrice}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-green-600">
+                  <span>কম্বো মূল্য:</span>
+                  <span>৳{comboPrice}</span>
+                </div>
+                {savings > 0 && (
+                  <div className="flex justify-between text-orange-600 text-xs">
+                    <span>সাশ্রয়:</span>
+                    <span>৳{savings}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Add to Cart Button */}

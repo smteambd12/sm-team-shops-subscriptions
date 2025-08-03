@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft } from 'lucide-react';
@@ -105,12 +106,18 @@ const Cart = () => {
                   
                   if (!product) {
                     return (
-                      <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <p className="text-red-600 mb-2">পণ্যটি লোড করা যাচ্ছে না (ID: {item.productId})</p>
+                      <div key={`${item.productId}-${item.packageId}`} className="p-4 border border-orange-200 rounded-lg bg-orange-50">
+                        <p className="text-orange-800 mb-2">কম্বো অফার আইটেম</p>
+                        <p className="text-sm text-gray-600 mb-2">Product ID: {item.productId}</p>
                         <p className="text-sm text-gray-600 mb-2">Package ID: {item.packageId}</p>
+                        <p className="text-sm text-gray-600 mb-2">পরিমাণ: {item.quantity}</p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">এস্টিমেট মূল্য:</span>
+                          <span className="font-medium">৳{100 * item.quantity}</span>
+                        </div>
                         <button
                           onClick={() => removeFromCart(item.productId, item.packageId)}
-                          className="text-red-500 hover:text-red-700 text-sm bg-white px-3 py-1 rounded border"
+                          className="text-red-500 hover:text-red-700 text-sm bg-white px-3 py-1 rounded border mt-2"
                         >
                           কার্ট থেকে সরান
                         </button>

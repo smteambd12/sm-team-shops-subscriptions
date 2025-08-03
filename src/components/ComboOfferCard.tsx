@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star, ShoppingCart, Heart, Package, Gift } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Star, ShoppingCart, Heart, Package, Gift, Package2, Clock } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useProducts } from '@/hooks/useProducts';
 import { toast } from 'sonner';
@@ -16,6 +17,25 @@ interface ComboOfferCardProps {
 const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
   const { addToCart } = useCart();
   const { products } = useProducts();
+  const [selectedPackages, setSelectedPackages] = useState<{[key: string]: string}>({});
+
+  // Initialize default package selections
+  useEffect(() => {
+    if (product.offer_items && product.offer_items.length > 0) {
+      const defaultSelections: {[key: string]: string} = {};
+      product.offer_items.forEach(item => {
+        defaultSelections[item.product_id] = item.package_id;
+      });
+      setSelectedPackages(defaultSelections);
+    }
+  }, [product.offer_items]);
+
+  const handlePackageChange = (productId: string, packageId: string) => {
+    setSelectedPackages(prev => ({
+      ...prev,
+      [productId]: packageId
+    }));
+  };
 
   const handleAddToCart = () => {
     console.log('Adding combo offer to cart:', product);
@@ -26,25 +46,19 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
     }
 
     let addedItems = 0;
-    let totalItems = 0;
 
+    // Add items with selected packages
     product.offer_items.forEach(item => {
-      totalItems += item.quantity;
+      const selectedPackage = selectedPackages[item.product_id] || item.package_id;
       
-      const actualProduct = products.find(p => p.id === item.product_id);
-      if (actualProduct) {
-        const actualPackage = actualProduct.packages.find(pkg => pkg.id === item.package_id);
-        if (actualPackage) {
-          for (let i = 0; i < item.quantity; i++) {
-            addToCart(item.product_id, item.package_id);
-            addedItems++;
-          }
-        }
+      for (let i = 0; i < item.quantity; i++) {
+        addToCart(item.product_id, selectedPackage);
+        addedItems++;
       }
     });
 
     if (addedItems > 0) {
-      toast.success(`${product.title} কার্টে যোগ করা হয়েছে!`);
+      toast.success(`${product.title} কার্টে যোগ করা হয়েছে! (${addedItems}টি আইটেম)`);
     } else {
       toast.error('পণ্যটি কার্টে যোগ করা যায়নি');
     }
@@ -61,26 +75,42 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
     }
   };
 
-  // Calculate what products are included
-  const includedProducts = product.offer_items?.map(item => {
-    const actualProduct = products.find(p => p.id === item.product_id);
-    const actualPackage = actualProduct?.packages.find(pkg => pkg.id === item.package_id);
+  // Calculate pricing with selected packages
+  const calculatePricing = () => {
+    let totalOriginalPrice = 0;
+    let totalSelectedPrice = 0;
+    
+    const packageDetails = product.offer_items?.map(item => {
+      const actualProduct = products.find(p => p.id === item.product_id);
+      const selectedPackageId = selectedPackages[item.product_id] || item.package_id;
+      const selectedPackage = actualProduct?.packages.find(pkg => pkg.id === selectedPackageId);
+      
+      const originalPrice = selectedPackage?.originalPrice || selectedPackage?.price || 0;
+      const currentPrice = selectedPackage?.price || 0;
+      
+      totalOriginalPrice += originalPrice * item.quantity;
+      totalSelectedPrice += currentPrice * item.quantity;
+      
+      return {
+        productName: actualProduct?.name || 'পণ্য',
+        packageId: selectedPackageId,
+        duration: selectedPackage?.duration || '',
+        price: currentPrice,
+        originalPrice: originalPrice,
+        quantity: item.quantity
+      };
+    }) || [];
+
     return {
-      name: actualProduct?.name || 'পণ্য',
-      duration: actualPackage?.duration || '',
-      price: actualPackage?.price || 0,
-      originalPrice: actualPackage?.originalPrice || 0,
-      quantity: item.quantity
+      packageDetails,
+      totalOriginalPrice,
+      totalSelectedPrice,
+      comboPrice: product.offer_price || 0,
+      savings: Math.max(0, totalOriginalPrice - (product.offer_price || 0))
     };
-  }) || [];
+  };
 
-  const totalOriginalPrice = includedProducts.reduce((sum, item) => 
-    sum + (item.originalPrice * item.quantity), 0
-  );
-
-  const actualOfferPrice = product.offer_price || 0;
-  const savings = totalOriginalPrice - actualOfferPrice;
-
+  const { packageDetails, totalOriginalPrice, comboPrice, savings } = calculatePricing();
   const isVideo = product.image_url?.includes('.mp4') || product.image_url?.includes('.webm');
 
   return (
@@ -139,65 +169,105 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
         </div>
         
         <CardDescription className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2 hidden sm:block">
-          {product.description || `${includedProducts.length} টি পণ্যের কম্বো প্যাকেজ`}
+          {product.description || `${packageDetails.length} টি পণ্যের কম্বো প্যাকেজ`}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-2 sm:p-6 pt-0">
-        {/* Included Products */}
-        <div className="mb-2 sm:mb-4 bg-blue-50 rounded-lg p-2 sm:p-3 border border-blue-200">
-          <h4 className="font-medium text-blue-800 mb-2 text-xs sm:text-sm flex items-center">
-            <Package size={14} className="mr-1" />
-            এই প্যাকেজে যা পাবেন:
+        {/* Package Selection */}
+        <div className="mb-3 bg-blue-50 rounded-lg p-3 border border-blue-200">
+          <h4 className="font-medium text-blue-800 mb-2 text-sm flex items-center">
+            <Package2 size={14} className="mr-1" />
+            প্যাকেজ নির্বাচন করুন:
           </h4>
-          <div className="space-y-1">
-            {includedProducts.slice(0, 2).map((item, index) => (
-              <div key={index} className="flex items-center text-xs sm:text-sm text-gray-700 bg-white rounded px-2 py-1">
-                <Star size={10} className="text-yellow-500 mr-1 flex-shrink-0" />
-                <span className="line-clamp-1 flex-1">
-                  {item.name} - {getDurationText(item.duration)} ({item.quantity} টি)
-                </span>
-              </div>
-            ))}
-            {includedProducts.length > 2 && (
-              <div className="text-xs text-blue-600 font-medium">
-                +{includedProducts.length - 2} টি আরো পণ্য
-              </div>
-            )}
+          <div className="space-y-2">
+            {packageDetails.map((item, index) => {
+              const productId = product.offer_items?.[index]?.product_id;
+              const actualProduct = products.find(p => p.id === productId);
+              
+              return (
+                <div key={index} className="bg-white rounded p-2 border border-blue-100">
+                  <div className="text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <Star size={12} className="text-yellow-500 mr-1" />
+                    {item.productName} ({item.quantity} টি)
+                  </div>
+                  <Select
+                    value={selectedPackages[productId || ''] || item.packageId}
+                    onValueChange={(value) => productId && handlePackageChange(productId, value)}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {actualProduct?.packages.map((pkg) => (
+                        <SelectItem key={pkg.id} value={pkg.id}>
+                          <div className="flex justify-between items-center w-full">
+                            <span>{getDurationText(pkg.duration)}</span>
+                            <span className="ml-2 font-medium">৳{pkg.price}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="text-xs text-gray-600 mt-1">
+                    নির্বাচিত প্যাকেজ: {getDurationText(item.duration)} - ৳{item.price}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Price Display */}
-        <div className="mb-2 sm:mb-4 p-2 sm:p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs sm:text-sm text-gray-600">কম্বো মূল্য:</span>
-            <div className="text-right">
-              <span className="text-lg sm:text-2xl font-bold text-green-600">৳{actualOfferPrice}</span>
+        {/* Detailed Pricing Display */}
+        <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+          <div className="text-sm space-y-2">
+            <div className="font-medium text-green-800 border-b border-green-200 pb-1">
+              মূল্য বিবরণ:
+            </div>
+            
+            {/* Individual Product Prices */}
+            <div className="space-y-1">
+              {packageDetails.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center text-xs bg-white rounded px-2 py-1">
+                  <span className="font-medium">{item.productName}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-500">{getDurationText(item.duration)}</span>
+                    <span className="font-medium">৳{item.price}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-green-200 pt-2 space-y-1">
               {totalOriginalPrice > 0 && (
-                <div className="text-xs sm:text-sm text-gray-500 line-through">
-                  ৳{totalOriginalPrice}
+                <div className="flex justify-between text-gray-500 line-through text-sm">
+                  <span>মোট মূল মূল্য:</span>
+                  <span>৳{totalOriginalPrice}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-green-600 text-lg">
+                <span>কম্বো মূল্য:</span>
+                <span>৳{comboPrice}</span>
+              </div>
+              {savings > 0 && (
+                <div className="flex justify-between text-orange-600 font-medium">
+                  <span>💰 সাশ্রয়:</span>
+                  <span>৳{savings}</span>
                 </div>
               )}
             </div>
           </div>
-          {savings > 0 && (
-            <div className="text-xs sm:text-sm text-green-600 font-medium mt-1 text-center">
-              💰 সাশ্রয়: ৳{savings}
-            </div>
-          )}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2 mb-2 sm:mb-4">
-          <div className="bg-purple-50 rounded-lg p-1 sm:p-2 text-center border border-purple-200">
-            <div className="text-sm sm:text-lg font-bold text-purple-600">
-              {includedProducts.length}
-            </div>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="bg-purple-50 rounded-lg p-2 text-center border border-purple-200">
+            <div className="text-lg font-bold text-purple-600">{packageDetails.length}</div>
             <div className="text-xs text-purple-600">ভিন্ন পণ্য</div>
           </div>
-          <div className="bg-indigo-50 rounded-lg p-1 sm:p-2 text-center border border-indigo-200">
-            <div className="text-sm sm:text-lg font-bold text-indigo-600">
-              {includedProducts.reduce((sum, item) => sum + item.quantity, 0)}
+          <div className="bg-indigo-50 rounded-lg p-2 text-center border border-indigo-200">
+            <div className="text-lg font-bold text-indigo-600">
+              {packageDetails.reduce((sum, item) => sum + item.quantity, 0)}
             </div>
             <div className="text-xs text-indigo-600">মোট পিস</div>
           </div>
@@ -206,11 +276,10 @@ const ComboOfferCard = ({ product }: ComboOfferCardProps) => {
         {/* Add to Cart Button */}
         <Button 
           onClick={handleAddToCart}
-          className="w-full mt-auto bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white font-medium py-2 sm:py-3 rounded-lg transition-all duration-200 hover:shadow-lg text-xs sm:text-sm"
+          className="w-full mt-auto bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 hover:from-orange-600 hover:via-red-600 hover:to-yellow-600 text-white font-medium py-3 rounded-lg transition-all duration-200 hover:shadow-lg"
         >
-          <ShoppingCart size={14} className="mr-1 sm:mr-2 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline">কার্টে যোগ করুন</span>
-          <span className="sm:hidden">কার্ট</span>
+          <ShoppingCart size={16} className="mr-2" />
+          কার্টে যোগ করুন
         </Button>
       </CardContent>
     </Card>
