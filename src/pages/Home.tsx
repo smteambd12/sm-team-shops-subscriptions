@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import PopularProductCard from '@/components/PopularProductCard';
-import SimpleOfferCard from '@/components/SimpleOfferCard';
+import ComboOfferCard from '@/components/ComboOfferCard';
 import HorizontalProductSlider from '@/components/HorizontalProductSlider';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -193,7 +193,7 @@ const Home = () => {
         </section>
       )}
 
-      {/* Offer Products Section - Updated to use SimpleOfferCard */}
+      {/* Offer Products Section - Updated to use ComboOfferCard */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
         <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
@@ -206,10 +206,10 @@ const Home = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    বিশেষ অফার
+                    কম্বো অফার প্যাকেজ
                   </h2>
                   <p className="text-gray-600 mt-1">
-                    সীমিত সময়ের জন্য বিশেষ ছাড়
+                    একসাথে কিনুন, বেশি সাশ্রয় করুন
                   </p>
                 </div>
               </div>
@@ -218,20 +218,20 @@ const Home = () => {
               <CountdownTimer />
             </div>
 
-            {/* Offer Cards - Now using SimpleOfferCard */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Combo Offer Cards - Now using ComboOfferCard */}
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {offerProducts.map((product) => (
-                <SimpleOfferCard key={product.id} product={product} />
+                <ComboOfferCard key={product.id} product={product} />
               ))}
             </div>
             
             <div className="text-center mt-6">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
                 <Badge className="bg-red-500 text-white animate-bounce px-6 py-2 text-sm">
-                  ⏰ অফার শীঘ্রই শেষ হবে!
+                  ⏰ কম্বো অফার শীঘ্রই শেষ হবে!
                 </Badge>
                 <Badge className="bg-green-600 text-white px-6 py-2 text-sm">
-                  🚀 ১০০+ কাস্টমার এই অফার নিয়েছেন
+                  🎁 ১০০+ কাস্টমার এই কম্বো অফার নিয়েছেন
                 </Badge>
               </div>
             </div>
