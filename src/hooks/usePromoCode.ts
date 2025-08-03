@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface PromoCodeResult {
   valid: boolean;
@@ -16,10 +16,12 @@ export const usePromoCode = () => {
     code: string;
     discount_amount: number;
   } | null>(null);
-  const { toast } = useToast();
 
   const validatePromoCode = async (code: string, orderAmount: number): Promise<PromoCodeResult | null> => {
-    if (!code.trim()) return null;
+    if (!code.trim()) {
+      toast.error('প্রোমো কোড খালি থাকতে পারে না');
+      return null;
+    }
 
     try {
       setLoading(true);
@@ -34,15 +36,11 @@ export const usePromoCode = () => {
 
       if (error) {
         console.error('Promo validation error:', error);
-        toast({
-          title: "ত্রুটি",
-          description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
-          variant: "destructive",
-        });
+        toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
         return null;
       }
 
-      // Handle the response data with proper type checking
+      // Handle different types of responses
       let result: PromoCodeResult;
       
       if (typeof data === 'string') {
@@ -51,23 +49,14 @@ export const usePromoCode = () => {
           result = parsed as PromoCodeResult;
         } catch (parseError) {
           console.error('Error parsing JSON response:', parseError);
-          toast({
-            title: "ত্রুটি",
-            description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
-            variant: "destructive",
-          });
+          toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
           return null;
         }
       } else if (data && typeof data === 'object' && !Array.isArray(data)) {
-        // Cast through unknown to handle Supabase Json type
         result = data as unknown as PromoCodeResult;
       } else {
         console.error('Unexpected data type from promo validation:', typeof data, data);
-        toast({
-          title: "ত্রুটি",
-          description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
-          variant: "destructive",
-        });
+        toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
         return null;
       }
       
@@ -76,39 +65,24 @@ export const usePromoCode = () => {
       // Validate the result structure
       if (!result || typeof result !== 'object' || typeof result.valid !== 'boolean') {
         console.error('Invalid result structure:', result);
-        toast({
-          title: "ত্রুটি",
-          description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
-          variant: "destructive",
-        });
+        toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
         return null;
       }
       
-      if (result.valid && result.discount_amount) {
+      if (result.valid && result.discount_amount && result.discount_amount > 0) {
         setAppliedPromo({
           code: result.code || code,
           discount_amount: result.discount_amount
         });
-        toast({
-          title: "সফল!",
-          description: `৳${result.discount_amount} ছাড় প্রয়োগ হয়েছে।`,
-        });
+        toast.success(`🎉 অভিনন্দন! ৳${result.discount_amount} ছাড় প্রয়োগ হয়েছে।`);
       } else {
-        toast({
-          title: "প্রোমো কোড ত্রুটি",
-          description: result.message || "প্রোমো কোড অবৈধ বা মেয়াদ শেষ।",
-          variant: "destructive",
-        });
+        toast.error(result.message || 'প্রোমো কোড অবৈধ বা মেয়াদ শেষ।');
       }
 
       return result;
     } catch (error) {
       console.error('Error validating promo code:', error);
-      toast({
-        title: "ত্রুটি",
-        description: "প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।",
-        variant: "destructive",
-      });
+      toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
       return null;
     } finally {
       setLoading(false);
@@ -117,10 +91,7 @@ export const usePromoCode = () => {
 
   const removePromoCode = () => {
     setAppliedPromo(null);
-    toast({
-      title: "প্রোমো কোড সরানো হয়েছে",
-      description: "প্রোমো কোড বাতিল করা হয়েছে।",
-    });
+    toast.success('প্রোমো কোড সরানো হয়েছে।');
   };
 
   const incrementPromoUsage = async (code: string) => {

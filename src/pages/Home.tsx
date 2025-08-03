@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import PopularProductCard from '@/components/PopularProductCard';
@@ -66,9 +65,9 @@ const Home = () => {
       <div className="container mx-auto px-2 sm:px-4 py-8">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/2 mb-6"></div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-80 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -194,7 +193,7 @@ const Home = () => {
         </section>
       )}
 
-      {/* Compact Combo Offer Section */}
+      {/* Improved Compact Combo Offer Section */}
       {settings.offer_products_enabled && !offerLoading && offerProducts.length > 0 && (
         <section className="py-8 bg-gradient-to-r from-orange-50 via-red-50 to-yellow-50">
           <div className="container mx-auto px-2 sm:px-4">
@@ -202,7 +201,7 @@ const Home = () => {
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Flame className="h-6 w-6 text-orange-500 animate-pulse" />
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  বিশেষ কম্বো অফার
+                  🔥 বিশেষ কম্বো অফার
                 </h2>
               </div>
               <p className="text-gray-600 text-sm">
@@ -210,7 +209,7 @@ const Home = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
               {offerProducts.map((product) => (
                 <CompactComboOfferCard key={product.id} product={product} />
               ))}
@@ -218,7 +217,7 @@ const Home = () => {
             
             <div className="text-center mt-6">
               <Badge className="bg-red-500 text-white animate-bounce px-4 py-2 text-sm">
-                ⏰ সীমিত সময়ের অফার!
+                ⏰ সীমিত সময়ের অফার - তাড়াতাড়ি করুন!
               </Badge>
             </div>
           </div>
