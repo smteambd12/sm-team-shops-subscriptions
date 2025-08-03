@@ -26,11 +26,13 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
   const handleApplyPromo = async () => {
     if (!promoInput.trim()) return;
     
+    console.log('Applying promo code:', promoInput, 'for amount:', orderAmount);
+    
     const result = await validatePromoCode(promoInput, orderAmount);
     console.log('Promo validation result:', result);
     
-    if (result?.valid) {
-      onPromoApplied(result.code || promoInput, result.discount_amount || 0);
+    if (result?.valid && result.discount_amount) {
+      onPromoApplied(result.code || promoInput, result.discount_amount);
       setPromoInput('');
     }
   };
@@ -72,7 +74,8 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
                 placeholder="প্রোমো কোড লিখুন"
                 value={promoInput}
                 onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                onKeyPress={(e) => e.key === 'Enter' && handleApplyPromo()}
+                onKeyPress={(e) => e.key === 'Enter' && !loading && handleApplyPromo()}
+                disabled={loading}
               />
               <Button
                 onClick={handleApplyPromo}

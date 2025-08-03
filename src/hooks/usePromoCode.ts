@@ -23,16 +23,29 @@ export const usePromoCode = () => {
 
     try {
       setLoading(true);
+      console.log('Validating promo code:', { code: code.trim().toUpperCase(), orderAmount });
       
       const { data, error } = await supabase.rpc('validate_promo_code', {
         code_text: code.trim().toUpperCase(),
         order_amount: orderAmount
       });
 
-      if (error) throw error;
+      console.log('Promo validation response:', { data, error });
 
-      // Properly cast the response to PromoCodeResult
-      const result = data as unknown as PromoCodeResult;
+      if (error) {
+        console.error('Promo validation error:', error);
+        throw error;
+      }
+
+      // Parse the JSON response
+      let result: PromoCodeResult;
+      if (typeof data === 'string') {
+        result = JSON.parse(data);
+      } else {
+        result = data;
+      }
+      
+      console.log('Parsed promo result:', result);
       
       if (result.valid) {
         setAppliedPromo({
@@ -75,11 +88,17 @@ export const usePromoCode = () => {
 
   const incrementPromoUsage = async (code: string) => {
     try {
+      console.log('Incrementing promo usage for code:', code);
       const { error } = await supabase.rpc('increment_promo_usage', {
         promo_code: code
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error incrementing promo usage:', error);
+        throw error;
+      }
+      
+      console.log('Promo usage incremented successfully');
     } catch (error) {
       console.error('Error incrementing promo usage:', error);
     }
