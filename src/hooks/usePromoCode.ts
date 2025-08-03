@@ -42,12 +42,13 @@ export const usePromoCode = () => {
         return null;
       }
 
-      // Handle the response data
+      // Handle the response data with proper type checking
       let result: PromoCodeResult;
       
       if (typeof data === 'string') {
         try {
-          result = JSON.parse(data) as PromoCodeResult;
+          const parsed = JSON.parse(data);
+          result = parsed as PromoCodeResult;
         } catch (parseError) {
           console.error('Error parsing JSON response:', parseError);
           toast({
@@ -57,8 +58,9 @@ export const usePromoCode = () => {
           });
           return null;
         }
-      } else if (typeof data === 'object' && data !== null) {
-        result = data as PromoCodeResult;
+      } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+        // Cast through unknown to handle Supabase Json type
+        result = data as unknown as PromoCodeResult;
       } else {
         console.error('Unexpected data type from promo validation:', typeof data, data);
         toast({
@@ -72,7 +74,7 @@ export const usePromoCode = () => {
       console.log('Parsed promo result:', result);
       
       // Validate the result structure
-      if (typeof result !== 'object' || result === null || typeof result.valid !== 'boolean') {
+      if (!result || typeof result !== 'object' || typeof result.valid !== 'boolean') {
         console.error('Invalid result structure:', result);
         toast({
           title: "ত্রুটি",
