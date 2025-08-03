@@ -32,11 +32,9 @@ export const useCheckoutForm = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState('bkash');
   const [transactionId, setTransactionId] = useState('');
-  const [promoDiscount, setPromoDiscount] = useState(0);
-  const [appliedPromoCode, setAppliedPromoCode] = useState('');
 
   const subtotal = getCartTotal();
-  const finalTotal = Math.max(0, subtotal - promoDiscount);
+  const finalTotal = subtotal; // No promo discounts in checkout
 
   useEffect(() => {
     if (user) {
@@ -74,18 +72,6 @@ export const useCheckoutForm = () => {
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
-  };
-
-  const handlePromoApplied = (code: string, discountAmount: number) => {
-    console.log('Promo applied in checkout:', { code, discountAmount });
-    setAppliedPromoCode(code);
-    setPromoDiscount(discountAmount);
-  };
-
-  const handlePromoRemoved = () => {
-    console.log('Promo removed in checkout');
-    setAppliedPromoCode('');
-    setPromoDiscount(0);
   };
 
   const getPrimaryProductInfo = () => {
@@ -186,8 +172,7 @@ export const useCheckoutForm = () => {
         total_amount: finalTotal,
         payment_method: paymentMethod,
         transaction_id: transactionId,
-        promo_code: appliedPromoCode || null,
-        discount_amount: promoDiscount,
+        discount_amount: 0, // No discounts from checkout
         status: 'pending',
         ...(primaryProductInfo && {
           product_name: primaryProductInfo.product_name,
@@ -231,12 +216,6 @@ export const useCheckoutForm = () => {
 
       if (itemsError) throw itemsError;
 
-      if (appliedPromoCode) {
-        await supabase.rpc('increment_promo_usage', {
-          promo_code: appliedPromoCode
-        });
-      }
-
       toast({
         title: "অর্ডার সফল!",
         description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে।",
@@ -265,12 +244,8 @@ export const useCheckoutForm = () => {
     setPaymentMethod,
     transactionId,
     setTransactionId,
-    promoDiscount,
-    appliedPromoCode,
     subtotal,
     finalTotal,
-    handlePromoApplied,
-    handlePromoRemoved,
     getPaymentNumber,
     getPaymentMethodName,
     handleSubmit,

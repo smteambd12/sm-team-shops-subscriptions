@@ -65,6 +65,36 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          source: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          source?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          source?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -627,6 +657,54 @@ export type Database = {
         }
         Relationships: []
       }
+      purchasable_promo_codes: {
+        Row: {
+          code: string
+          coin_cost: number
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          min_order_amount: number | null
+          title: string
+          updated_at: string
+          used_count: number | null
+        }
+        Insert: {
+          code: string
+          coin_cost: number
+          created_at?: string
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          min_order_amount?: number | null
+          title: string
+          updated_at?: string
+          used_count?: number | null
+        }
+        Update: {
+          code?: string
+          coin_cost?: number
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          min_order_amount?: number | null
+          title?: string
+          updated_at?: string
+          used_count?: number | null
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           description: string | null
@@ -682,6 +760,104 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          coins_earned: number | null
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          coins_earned?: number | null
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          coins_earned?: number | null
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_coins: {
+        Row: {
+          created_at: string
+          earned_coins: number
+          id: string
+          spent_coins: number
+          total_coins: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          earned_coins?: number
+          id?: string
+          spent_coins?: number
+          total_coins?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          earned_coins?: number
+          id?: string
+          spent_coins?: number
+          total_coins?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_promo_codes: {
+        Row: {
+          code: string
+          id: string
+          is_used: boolean | null
+          order_id: string | null
+          promo_code_id: string
+          purchased_at: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          id?: string
+          is_used?: boolean | null
+          order_id?: string | null
+          promo_code_id: string
+          purchased_at?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          id?: string
+          is_used?: boolean | null
+          order_id?: string | null
+          promo_code_id?: string
+          purchased_at?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_promo_codes_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "purchasable_promo_codes"
             referencedColumns: ["id"]
           },
         ]
@@ -756,6 +932,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_coins: {
+        Args: {
+          p_user_id: string
+          p_amount: number
+          p_source: string
+          p_description?: string
+        }
+        Returns: undefined
+      }
       confirm_order_and_create_subscriptions: {
         Args: { order_uuid: string }
         Returns: Json
@@ -794,6 +979,19 @@ export type Database = {
       }
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      purchase_promo_code: {
+        Args: { p_user_id: string; p_promo_code_id: string }
+        Returns: Json
+      }
+      spend_coins: {
+        Args: {
+          p_user_id: string
+          p_amount: number
+          p_source: string
+          p_description?: string
+        }
         Returns: boolean
       }
       update_subscription_details: {
