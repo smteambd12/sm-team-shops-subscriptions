@@ -16,7 +16,8 @@ export const useOrders = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      // Cast the data to Order[] to match the expected type
+      setOrders((data as Order[]) || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
