@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,7 +56,14 @@ const CoinsManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPromoCodes(data || []);
+      
+      // Type assertion to ensure discount_type is properly typed
+      const typedData = (data || []).map(item => ({
+        ...item,
+        discount_type: item.discount_type as 'percentage' | 'fixed'
+      })) as PurchasablePromoCode[];
+      
+      setPromoCodes(typedData);
     } catch (error) {
       console.error('Error fetching promo codes:', error);
       toast.error('প্রোমো কোড লোড করতে সমস্যা হয়েছে।');

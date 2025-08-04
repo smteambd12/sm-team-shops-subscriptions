@@ -81,7 +81,14 @@ export const useCoins = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTransactions(data || []);
+      
+      // Type assertion to ensure transaction_type is properly typed
+      const typedData = (data || []).map(item => ({
+        ...item,
+        transaction_type: item.transaction_type as 'earned' | 'spent' | 'admin_added' | 'admin_removed'
+      })) as CoinTransaction[];
+      
+      setTransactions(typedData);
     } catch (error) {
       console.error('Error fetching transactions:', error);
     }
@@ -97,7 +104,14 @@ export const useCoins = () => {
         .order('coin_cost', { ascending: true });
 
       if (error) throw error;
-      setPurchasablePromoCodes(data || []);
+      
+      // Type assertion to ensure discount_type is properly typed
+      const typedData = (data || []).map(item => ({
+        ...item,
+        discount_type: item.discount_type as 'percentage' | 'fixed'
+      })) as PurchasablePromoCode[];
+      
+      setPurchasablePromoCodes(typedData);
     } catch (error) {
       console.error('Error fetching purchasable promo codes:', error);
     }
