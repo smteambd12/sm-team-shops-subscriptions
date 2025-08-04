@@ -30,7 +30,14 @@ import TeamSupport from "./pages/TeamSupport";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
@@ -39,9 +46,9 @@ function App() {
         <CartProvider>
           <TooltipProvider>
             <Router>
-              <div className="min-h-screen bg-background flex flex-col">
+              <div className="w-full min-h-screen bg-background flex flex-col">
                 <Header />
-                <main className="flex-1">
+                <main className="flex-1 w-full">
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<Home />} />

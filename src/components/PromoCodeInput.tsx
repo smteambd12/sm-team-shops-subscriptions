@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { X, Tag, Loader2, CheckCircle, Gift } from 'lucide-react';
-import { usePromoCode } from '@/hooks/usePromoCode';
+import { toast } from 'sonner';
 
 interface PromoCodeInputProps {
   orderAmount: number;
@@ -21,27 +21,65 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
   appliedPromo
 }) => {
   const [promoInput, setPromoInput] = useState('');
-  const { loading, validatePromoCode, removePromoCode } = usePromoCode();
+  const [loading, setLoading] = useState(false);
+
+  // Sample promo codes for testing
+  const promoCodes = [
+    { code: 'SAVE10', type: 'percentage', value: 10, minAmount: 100 },
+    { code: 'MEGA20', type: 'percentage', value: 20, minAmount: 500 },
+    { code: 'SUPER50', type: 'fixed', value: 50, minAmount: 200 },
+    { code: 'DISCOUNT15', type: 'percentage', value: 15, minAmount: 300 }
+  ];
+
+  const validatePromoCode = async (code: string) => {
+    setLoading(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const promoCode = promoCodes.find(p => p.code === code.toUpperCase());
+    
+    if (!promoCode) {
+      toast.error('❌ অবৈধ প্রোমো কোড!');
+      setLoading(false);
+      return null;
+    }
+    
+    if (orderAmount < promoCode.minAmount) {
+      toast.error(`⚠️ এই কোডের জন্য ন্যূনতম অর্ডার ৳${promoCode.minAmount} প্রয়োজন!`);
+      setLoading(false);
+      return null;
+    }
+    
+    let discountAmount = 0;
+    if (promoCode.type === 'percentage') {
+      discountAmount = Math.floor((orderAmount * promoCode.value) / 100);
+    } else {
+      discountAmount = promoCode.value;
+    }
+    
+    setLoading(false);
+    return { code: promoCode.code, discountAmount };
+  };
 
   const handleApplyPromo = async () => {
     if (!promoInput.trim()) {
+      toast.error('প্রোমো কোড লিখুন!');
       return;
     }
     
-    console.log('Applying promo code:', promoInput, 'for amount:', orderAmount);
+    const result = await validatePromoCode(promoInput.trim());
     
-    const result = await validatePromoCode(promoInput.trim().toUpperCase(), orderAmount);
-    console.log('Promo validation result:', result);
-    
-    if (result?.valid && result.discount_amount) {
-      onPromoApplied(result.code || promoInput.trim().toUpperCase(), result.discount_amount);
+    if (result) {
+      onPromoApplied(result.code, result.discountAmount);
+      toast.success(`🎉 ${result.code} কোড সফলভাবে প্রয়োগ হয়েছে! ৳${result.discountAmount} ছাড় পেয়েছেন!`);
       setPromoInput('');
     }
   };
 
   const handleRemovePromo = () => {
-    removePromoCode();
     onPromoRemoved();
+    toast.success('প্রোমো কোড সরানো হয়েছে');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -87,7 +125,7 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
                 <div className="flex-1 relative">
                   <Tag className="absolute left-3 top-3 h-4 w-4 text-purple-500" />
                   <Input
-                    placeholder="প্রোমো কোড লিখুন (যেমন: SAVE20, DISCOUNT50)"
+                    placeholder="প্রোমো কোড লিখুন (যেমন: SAVE10, DISCOUNT50)"
                     value={promoInput}
                     onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                     onKeyPress={handleKeyPress}
@@ -114,9 +152,10 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
                   <div className="text-xs text-purple-700">
                     <p className="font-medium mb-1">🔥 বিশেষ অফার:</p>
                     <ul className="space-y-1">
-                      <li>• SAVE10 - ১০% ছাড় পান</li>
-                      <li>• MEGA20 - ২০% ছাড় পান</li>
-                      <li>• SUPER50 - ৫০ টাকা ছাড়</li>
+                      <li>• SAVE10 - ১০% ছাড় পান (ন্যূনতম ১০০ টাকা)</li>
+                      <li>• MEGA20 - ২০% ছাড় পান (ন্যূনতম ৫০০ টাকা)</li>
+                      <li>• SUPER50 - ৫০ টাকা ছাড় (ন্যূনতম ২০০ টাকা)</li>
+                      <li>• DISCOUNT15 - ১৫% ছাড় পান (ন্যূনতম ৩০০ টাকা)</li>
                     </ul>
                   </div>
                 </div>

@@ -9,7 +9,7 @@ const LiveChatCard = () => {
   const navigate = useNavigate();
 
   const handleChatClick = () => {
-    navigate('/chat');
+    navigate('/live-chat');
   };
 
   const handleTeamSupportClick = () => {
@@ -61,7 +61,7 @@ const LiveChatCard = () => {
               className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-2"
             >
               <Headphones className="h-4 w-4 mr-2" />
-              বিস্তারিত চ্যাট
+              লাইভ চ্যাট
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
