@@ -55,11 +55,13 @@ export const usePromoCode = () => {
             console.error('Error parsing user promo JSON response:', parseError);
             // Fall back to regular promo code validation
           }
+        } else if (userPromoData && typeof userPromoData === 'object' && !Array.isArray(userPromoData)) {
+          result = userPromoData as unknown as PromoCodeResult;
         } else {
-          result = userPromoData as PromoCodeResult;
+          console.log('User promo data is not in expected format, falling back to regular promo validation');
         }
         
-        if (result && result.valid) {
+        if (result! && result.valid) {
           setAppliedPromo({
             code: result.code || code,
             discount_amount: result.discount_amount || 0,
@@ -84,7 +86,7 @@ export const usePromoCode = () => {
         return null;
       }
 
-      // Handle different types of responses
+      // Handle different types of responses with proper type checking
       let result: PromoCodeResult;
       
       if (typeof data === 'string') {
@@ -97,7 +99,15 @@ export const usePromoCode = () => {
           return null;
         }
       } else if (data && typeof data === 'object' && !Array.isArray(data)) {
-        result = data as unknown as PromoCodeResult;
+        // Safe type assertion with validation
+        const potentialResult = data as any;
+        if (typeof potentialResult.valid === 'boolean') {
+          result = potentialResult as PromoCodeResult;
+        } else {
+          console.error('Invalid result structure - missing valid property:', data);
+          toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
+          return null;
+        }
       } else {
         console.error('Unexpected data type from promo validation:', typeof data, data);
         toast.error('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।');
