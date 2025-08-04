@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useProducts } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { usePromoCode } from '@/hooks/usePromoCode';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,6 +22,7 @@ export const useCheckoutForm = () => {
   const { toast } = useToast();
   const { settings } = useSiteSettings();
   const { products } = useProducts();
+  const { appliedPromo, incrementPromoUsage, markUserPromoAsUsed } = usePromoCode();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,8 @@ export const useCheckoutForm = () => {
   const [transactionId, setTransactionId] = useState('');
 
   const subtotal = getCartTotal();
-  const finalTotal = subtotal; // No promo discounts in checkout
+  const discountAmount = appliedPromo?.discount_amount || 0;
+  const finalTotal = Math.max(0, subtotal - discountAmount);
 
   useEffect(() => {
     if (user) {
@@ -172,7 +175,8 @@ export const useCheckoutForm = () => {
         total_amount: finalTotal,
         payment_method: paymentMethod,
         transaction_id: transactionId,
-        discount_amount: 0, // No discounts from checkout
+        promo_code: appliedPromo?.code || null,
+        discount_amount: discountAmount,
         status: 'pending',
         ...(primaryProductInfo && {
           product_name: primaryProductInfo.product_name,
@@ -216,8 +220,16 @@ export const useCheckoutForm = () => {
 
       if (itemsError) throw itemsError;
 
-      // Award coins for placing an order (this will be done when admin confirms)
-      console.log('Order created successfully, coins will be awarded when confirmed by admin');
+      // Handle promo code usage if applied
+      if (appliedPromo) {
+        if (appliedPromo.user_promo_id) {
+          // Mark user promo code as used
+          await markUserPromoAsUsed(appliedPromo.code, createdOrder.id);
+        } else {
+          // Increment regular promo code usage
+          await incrementPromoUsage(appliedPromo.code);
+        }
+      }
 
       toast({
         title: "অর্ডার সফল!",
@@ -225,6 +237,8 @@ export const useCheckoutForm = () => {
       });
 
       clearCart();
+      
+      // Navigate to order confirmation page with the correct route
       navigate(`/order-confirmation/${createdOrder.id}`);
 
     } catch (error: any) {
@@ -248,6 +262,7 @@ export const useCheckoutForm = () => {
     transactionId,
     setTransactionId,
     subtotal,
+    discountAmount,
     finalTotal,
     getPaymentNumber,
     getPaymentMethodName,
