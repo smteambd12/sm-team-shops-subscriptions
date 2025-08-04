@@ -154,7 +154,7 @@ const PromoCodeInput: React.FC<PromoCodeInputProps> = ({
                     <ul className="space-y-1">
                       <li>• SAVE10 - ১০% ছাড় পান (ন্যূনতম ১০০ টাকা)</li>
                       <li>• MEGA20 - ২০% ছাড় পান (ন্যূনতম ৫০০ টাকা)</li>
-                      <li>• SUPER50 - ৫০ টাকা ছাড় (ন্যূনতম ২০০ টাকা)</li>
+                      <li>• MD SOYEB - ৫০ টাকা ছাড় (ন্যূনতম ২০০ টাকা)</li>
                       <li>• DISCOUNT15 - ১৫% ছাড় পান (ন্যূনতম ৩০০ টাকা)</li>
                     </ul>
                   </div>
