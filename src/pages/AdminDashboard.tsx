@@ -1,208 +1,96 @@
-
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Package, 
-  Users, 
-  ShoppingCart, 
-  Settings, 
-  BarChart3, 
-  Gift, 
-  CreditCard,
-  MessageSquare,
-  ArrowLeft,
-  Calendar,
-  Bell,
-  Cog
-} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { useProducts } from '@/hooks/useProducts';
+import { useOrders } from '@/hooks/useOrders';
+import { useUsers } from '@/hooks/useUsers';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import ProductsManagement from '@/components/admin/ProductsManagement';
 import OrdersManagement from '@/components/admin/OrdersManagement';
-import PromoCodes from '@/components/admin/PromoCodes';
-import SiteSettings from '@/components/admin/SiteSettings';
-import SystemSettings from '@/components/admin/SystemSettings';
-import AdminStats from '@/components/admin/AdminStats';
-import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement';
-import NotificationCenter from '@/components/admin/NotificationCenter';
+import UsersManagement from '@/components/admin/UsersManagement';
+import SettingsManagement from '@/components/admin/SettingsManagement';
+import CoinsManagement from '@/components/admin/CoinsManagement';
+import CoinsAnalytics from '@/components/admin/CoinsAnalytics';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('products');
+  const { products, loading: productsLoading, fetchProducts } = useProducts();
+  const { orders, loading: ordersLoading, fetchOrders } = useOrders();
+  const { users, loading: usersLoading, fetchUsers } = useUsers();
+  const { settings, loading: settingsLoading, fetchSettings } = useSiteSettings();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
+    if (!user?.isAdmin) {
       return;
     }
-    
-    checkAdminStatus();
-  }, [user, navigate]);
 
-  const checkAdminStatus = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('role')
-        .eq('user_id', user?.id)
-        .single();
+    fetchProducts();
+    fetchOrders();
+    fetchUsers();
+    fetchSettings();
+  }, [user]);
 
-      if (error) {
-        console.error('Admin check error:', error);
-        toast({
-          title: "অ্যাক্সেস নিষেধ",
-          description: "আপনার অ্যাডমিন অ্যাক্সেস নেই।",
-          variant: "destructive",
-        });
-        navigate('/');
-        return;
-      }
-
-      setIsAdmin(!!data);
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
-  if (!isAdmin) {
+  if (!user.isAdmin) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="text-center py-12">
-            <h3 className="text-lg font-semibold mb-2">অ্যাক্সেস নিষেধ</h3>
-            <p className="text-gray-600 mb-4">আপনার অ্যাডমিন অ্যাক্সেস নেই।</p>
-            <Button onClick={() => navigate('/')}>
-              হোমে ফিরুন
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Access Denied</h1>
+          <p className="text-gray-600">You do not have permission to access this page.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft size={16} />
-          হোমে ফিরুন
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">অ্যাডমিন ড্যাশবোর্ড</h1>
-          <p className="text-gray-600">সাইট পরিচালনা ও নিয়ন্ত্রণ প্যানেল</p>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Admin Dashboard</h1>
         </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-8">
+            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="coins">কয়েন সিস্টেম</TabsTrigger>
+            <TabsTrigger value="coins-analytics">কয়েন অ্যানালিটিক্স</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="products">
+            <ProductsManagement />
+          </TabsContent>
+
+          <TabsContent value="orders">
+            <OrdersManagement />
+          </TabsContent>
+
+          <TabsContent value="users">
+            <UsersManagement />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SettingsManagement />
+          </TabsContent>
+
+          <TabsContent value="coins">
+            <CoinsManagement />
+          </TabsContent>
+
+          <TabsContent value="coins-analytics">
+            <CoinsAnalytics />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/chat')}>
-          <CardContent className="p-4 text-center">
-            <MessageSquare className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <h3 className="font-medium">চ্যাট সাপোর্ট</h3>
-            <p className="text-sm text-gray-600">ইউজার চ্যাট পরিচালনা</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="stats" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-8">
-          <TabsTrigger value="stats" className="flex items-center gap-2">
-            <BarChart3 size={16} />
-            পরিসংখ্যান
-          </TabsTrigger>
-          <TabsTrigger value="products" className="flex items-center gap-2">
-            <Package size={16} />
-            পণ্য পরিচালনা
-          </TabsTrigger>
-          <TabsTrigger value="orders" className="flex items-center gap-2">
-            <ShoppingCart size={16} />
-            অর্ডার পরিচালনা
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-            <Calendar size={16} />
-            সাবস্ক্রিপশন
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell size={16} />
-            নোটিফিকেশন
-          </TabsTrigger>
-          <TabsTrigger value="promo" className="flex items-center gap-2">
-            <Gift size={16} />
-            প্রোমো কোড
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings size={16} />
-            সেটিংস
-          </TabsTrigger>
-          <TabsTrigger value="system" className="flex items-center gap-2">
-            <Cog size={16} />
-            সিস্টেম
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="stats">
-          <AdminStats />
-        </TabsContent>
-
-        <TabsContent value="products">
-          <ProductsManagement />
-        </TabsContent>
-
-        <TabsContent value="orders">
-          <OrdersManagement />
-        </TabsContent>
-
-        <TabsContent value="subscriptions">
-          <SubscriptionsManagement />
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <NotificationCenter />
-        </TabsContent>
-
-        <TabsContent value="promo">
-          <PromoCodes />
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <SiteSettings />
-        </TabsContent>
-
-        <TabsContent value="system">
-          <SystemSettings />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

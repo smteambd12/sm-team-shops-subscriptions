@@ -764,6 +764,42 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_icon: string | null
+          achievement_name: string
+          achievement_type: string
+          created_at: string | null
+          id: string
+          points_earned: number | null
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_icon?: string | null
+          achievement_name: string
+          achievement_type: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number | null
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_icon?: string | null
+          achievement_name?: string
+          achievement_type?: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number | null
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           activity_data: Json | null
@@ -941,6 +977,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      award_coins_for_confirmed_order: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
+      check_and_award_achievements: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       confirm_order_and_create_subscriptions: {
         Args: { order_uuid: string }
         Returns: Json
@@ -981,6 +1025,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      mark_promo_code_used: {
+        Args: { p_code: string; p_user_id: string; p_order_id: string }
+        Returns: undefined
+      }
       purchase_promo_code: {
         Args: { p_user_id: string; p_promo_code_id: string }
         Returns: Json
@@ -1009,6 +1057,10 @@ export type Database = {
         Args:
           | { code_text: string; order_amount: number }
           | { promo_code: string }
+        Returns: Json
+      }
+      validate_user_promo_code: {
+        Args: { p_code: string; p_order_amount: number; p_user_id: string }
         Returns: Json
       }
     }

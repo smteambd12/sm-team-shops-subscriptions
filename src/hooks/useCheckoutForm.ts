@@ -216,6 +216,9 @@ export const useCheckoutForm = () => {
 
       if (itemsError) throw itemsError;
 
+      // Award coins for placing an order (this will be done when admin confirms)
+      console.log('Order created successfully, coins will be awarded when confirmed by admin');
+
       toast({
         title: "অর্ডার সফল!",
         description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে।",

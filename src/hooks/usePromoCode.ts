@@ -2,19 +2,23 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PromoCodeResult {
   valid: boolean;
   discount_amount?: number;
   code?: string;
   message?: string;
+  user_promo_id?: string;
 }
 
 export const usePromoCode = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<{
     code: string;
     discount_amount: number;
+    user_promo_id?: string;
   } | null>(null);
 
   const validatePromoCode = async (code: string, orderAmount: number): Promise<PromoCodeResult | null> => {
@@ -23,16 +27,56 @@ export const usePromoCode = () => {
       return null;
     }
 
+    if (!user) {
+      toast.error('প্রোমো কোড ব্যবহারের জন্য লগইন করুন');
+      return null;
+    }
+
     try {
       setLoading(true);
-      console.log('Validating promo code:', { code: code.trim().toUpperCase(), orderAmount });
+      console.log('Validating user promo code:', { code: code.trim().toUpperCase(), orderAmount });
       
+      // First try to validate user's purchased promo codes
+      const { data: userPromoData, error: userPromoError } = await supabase.rpc('validate_user_promo_code', {
+        p_code: code.trim().toUpperCase(),
+        p_order_amount: orderAmount,
+        p_user_id: user.id
+      });
+
+      console.log('User promo validation response:', { data: userPromoData, error: userPromoError });
+
+      if (!userPromoError && userPromoData) {
+        let result: PromoCodeResult;
+        
+        if (typeof userPromoData === 'string') {
+          try {
+            result = JSON.parse(userPromoData) as PromoCodeResult;
+          } catch (parseError) {
+            console.error('Error parsing user promo JSON response:', parseError);
+            // Fall back to regular promo code validation
+          }
+        } else {
+          result = userPromoData as PromoCodeResult;
+        }
+        
+        if (result && result.valid) {
+          setAppliedPromo({
+            code: result.code || code,
+            discount_amount: result.discount_amount || 0,
+            user_promo_id: result.user_promo_id
+          });
+          toast.success(`🎉 অভিনন্দন! ৳${result.discount_amount} ছাড় প্রয়োগ হয়েছে।`);
+          return result;
+        }
+      }
+
+      // If user promo code validation fails, try regular promo codes
       const { data, error } = await supabase.rpc('validate_promo_code', {
         code_text: code.trim().toUpperCase(),
         order_amount: orderAmount
       });
 
-      console.log('Promo validation response:', { data, error });
+      console.log('Regular promo validation response:', { data, error });
 
       if (error) {
         console.error('Promo validation error:', error);
@@ -112,11 +156,34 @@ export const usePromoCode = () => {
     }
   };
 
+  const markUserPromoAsUsed = async (code: string, orderId: string) => {
+    if (!user || !appliedPromo?.user_promo_id) return;
+
+    try {
+      console.log('Marking user promo code as used:', { code, orderId });
+      const { error } = await supabase.rpc('mark_promo_code_used', {
+        p_code: code,
+        p_user_id: user.id,
+        p_order_id: orderId
+      });
+      
+      if (error) {
+        console.error('Error marking user promo as used:', error);
+        throw error;
+      }
+      
+      console.log('User promo code marked as used successfully');
+    } catch (error) {
+      console.error('Error marking user promo as used:', error);
+    }
+  };
+
   return {
     loading,
     appliedPromo,
     validatePromoCode,
     removePromoCode,
-    incrementPromoUsage
+    incrementPromoUsage,
+    markUserPromoAsUsed
   };
 };

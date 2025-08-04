@@ -6,6 +6,7 @@ import { Navigate } from 'react-router-dom';
 import CoinBalance from '@/components/coins/CoinBalance';
 import PromoCodeShop from '@/components/coins/PromoCodeShop';
 import UserPromoCodes from '@/components/coins/UserPromoCodes';
+import UserAchievements from '@/components/coins/UserAchievements';
 
 const Coins = () => {
   const { user } = useAuth();
@@ -20,7 +21,7 @@ const Coins = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">কয়েন সিস্টেম</h1>
-          <p className="text-gray-600">কয়েন জমা করুন এবং বিশেষ প্রোমো কোড কিনুন</p>
+          <p className="text-gray-600">কয়েন জমা করুন, প্রোমো কোড কিনুন এবং অর্জন আনলক করুন</p>
         </div>
 
         {/* Coin Balance */}
@@ -30,9 +31,10 @@ const Coins = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="shop" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+          <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-8">
             <TabsTrigger value="shop">প্রোমো শপ</TabsTrigger>
             <TabsTrigger value="my-codes">আমার কোড</TabsTrigger>
+            <TabsTrigger value="achievements">অর্জনসমূহ</TabsTrigger>
           </TabsList>
           
           <TabsContent value="shop">
@@ -41,6 +43,10 @@ const Coins = () => {
           
           <TabsContent value="my-codes">
             <UserPromoCodes />
+          </TabsContent>
+          
+          <TabsContent value="achievements">
+            <UserAchievements />
           </TabsContent>
         </Tabs>
       </div>
