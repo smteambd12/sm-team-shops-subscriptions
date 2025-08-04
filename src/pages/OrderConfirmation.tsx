@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Package, CreditCard, User, MapPin, Clock, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Package, CreditCard, User, MapPin, Clock, ArrowLeft, Coins, Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCoins } from '@/hooks/useCoins';
 
 interface OrderDetails {
   id: string;
@@ -34,8 +35,10 @@ const OrderConfirmation = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { awardCoins } = useCoins();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [coinsAwarded, setCoinsAwarded] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -70,6 +73,13 @@ const OrderConfirmation = () => {
         ...orderData,
         order_items: itemsData || []
       });
+
+      // Award coins for order completion (only once)
+      if (orderData && !coinsAwarded) {
+        const coinsToAward = Math.floor(orderData.total_amount / 100); // 1 coin per 100 taka
+        await awardCoins(coinsToAward, 'order_completion', `অর্ডার #${orderData.id} সম্পন্ন হওয়ায় কয়েন পুরস্কার`);
+        setCoinsAwarded(true);
+      }
     } catch (error) {
       console.error('Error fetching order details:', error);
       navigate('/orders');
@@ -97,6 +107,10 @@ const OrderConfirmation = () => {
     }
   };
 
+  const calculateCoinsEarned = (amount: number) => {
+    return Math.floor(amount / 100); // 1 coin per 100 taka
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -122,6 +136,8 @@ const OrderConfirmation = () => {
       </div>
     );
   }
+
+  const coinsEarned = calculateCoinsEarned(order.total_amount);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -154,6 +170,43 @@ const OrderConfirmation = () => {
                 <p className="text-sm text-green-600 mt-2">
                   অর্ডার ID: {order.id}
                 </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Coins Earned Section */}
+        <Card className="mb-8 border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Coins className="h-8 w-8 text-yellow-600" />
+                <h2 className="text-xl font-bold text-yellow-800">
+                  🎉 অভিনন্দন! আপনি কয়েন পেয়েছেন!
+                </h2>
+              </div>
+              <div className="bg-white rounded-lg p-4 border-2 border-yellow-300 mb-4">
+                <div className="text-3xl font-bold text-yellow-600 mb-2">
+                  +{coinsEarned} কয়েন
+                </div>
+                <p className="text-yellow-700">
+                  এই অর্ডারের জন্য আপনি {coinsEarned} কয়েন পেয়েছেন!
+                </p>
+              </div>
+              
+              <div className="space-y-3 text-sm text-yellow-800">
+                <div className="flex items-center justify-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  <span>কয়েন দিয়ে বিশেষ প্রোমো কোড কিনুন</span>
+                </div>
+                <p>প্রতি ১০০ টাকা অর্ডারে ১ কয়েন পান</p>
+                <div className="pt-2">
+                  <Link to="/coins">
+                    <Button variant="outline" size="sm" className="text-yellow-700 border-yellow-300 hover:bg-yellow-100">
+                      কয়েন শপ দেখুন
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -300,6 +353,20 @@ const OrderConfirmation = () => {
                   <p className="text-sm">
                     ৩. যেকোনো সমস্যা হলে সরাসরি ড্যাশবোর্ড থেকে সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন।
                   </p>
+                  
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 mt-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Coins className="h-4 w-4 text-purple-600" />
+                      <span className="font-medium text-purple-800">কয়েন সিস্টেম সম্পর্কে জানুন</span>
+                    </div>
+                    <ul className="text-sm text-purple-700 space-y-1">
+                      <li>• প্রতি অর্ডারে কয়েন পান (১০০ টাকায় ১ কয়েন)</li>
+                      <li>• কয়েন দিয়ে বিশেষ প্রোমো কোড কিনুন</li>
+                      <li>• নতুন অর্জন আনলক করুন</li>
+                      <li>• বিভিন্ন কার্যক্রমে অংশ নিয়ে অতিরিক্ত কয়েন পান</li>
+                    </ul>
+                  </div>
+                  
                   <div className="pt-3 border-t">
                     <Link to="/dashboard">
                       <Button className="w-full">
