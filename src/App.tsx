@@ -20,6 +20,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import Subscriptions from "./pages/Subscriptions";
 import Favorites from "./pages/Favorites";
 import LiveChat from "./pages/LiveChat";
 import AdminChat from "./pages/AdminChat";
@@ -53,6 +54,7 @@ function App() {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+                    <Route path="/subscriptions" element={<Subscriptions />} />
                     <Route path="/favorites" element={<Favorites />} />
                     <Route path="/live-chat" element={<LiveChat />} />
                     <Route path="/admin-chat" element={<AdminChat />} />
